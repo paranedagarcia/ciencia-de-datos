@@ -1,9 +1,10 @@
 # Dependencies
 /node_modules
+/.venv
 
 # Production
 /build
-
+.env
 # Generated files
 .docusaurus
 .cache-loader
