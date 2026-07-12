@@ -1,0 +1,23 @@
+artifact_path: /home/patricioaraneda/Documentos/github/Cienciadedatos/10.Produccion/mlruns/1/models/m-b8ad34cfb7ad41cb8065a4e992b9d1ac/artifacts
+flavors:
+  python_function:
+    env:
+      conda: conda.yaml
+      virtualenv: python_env.yaml
+    loader_module: mlflow.sklearn
+    model_path: model.pkl
+    predict_fn: predict
+    python_version: 3.13.12
+  sklearn:
+    code: null
+    pickled_model: model.pkl
+    serialization_format: cloudpickle
+    sklearn_version: 1.7.2
+    skops_trusted_types: null
+mlflow_version: 3.9.0
+model_id: m-b8ad34cfb7ad41cb8065a4e992b9d1ac
+model_size_bytes: 890
+model_uuid: m-b8ad34cfb7ad41cb8065a4e992b9d1ac
+prompts: null
+run_id: 46011918ec9749b4a09ca6216a080495
+utc_time_created: '2026-02-17 16:32:01.467972'
