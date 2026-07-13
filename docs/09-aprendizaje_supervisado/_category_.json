@@ -1,0 +1,8 @@
+{
+  "label": "Aprendizaje supervisado",
+  "position": 9,
+  "link": {
+    "type": "generated-index",
+    "description": "Conceptos de aprendizaje supervisado, incluyendo técnicas de clasificación y regresión."
+  }
+}

@@ -1,8 +1,0 @@
-{
-  "label": "Aprendizaje profundo",
-  "position": 10,
-  "link": {
-    "type": "generated-index",
-    "description": "Conceptos básicos de aprendizaje profundo, incluyendo redes neuronales y técnicas avanzadas de modelado."
-  }
-}

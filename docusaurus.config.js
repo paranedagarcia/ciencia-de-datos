@@ -5,7 +5,8 @@
 // See: https://docusaurus.io/docs/api/docusaurus-config
 
 import {themes as prismThemes} from 'prism-react-renderer';
-
+import rehypeKatex from 'rehype-katex';
+import remarkMath from 'remark-math';
 // This runs in Node.js - Don't use client-side code here (browser APIs, JSX...)
 
 /** @type {import('@docusaurus/types').Config} */
@@ -48,7 +49,8 @@ const config = {
         docs: {
           sidebarPath: './sidebars.js',
           // Please change this to your repo.
-          
+          rehypePlugins: [rehypeKatex],
+          remarkPlugins: [remarkMath],
         },
         blog: {
           showReadingTime: true,
@@ -75,7 +77,7 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       // Replace with your project's social card
-      image: 'img/docusaurus-social-card.jpg',
+      image: 'img/ODC-isotipo.svg',
       colorMode: {
         respectPrefersColorScheme: true,
       },
@@ -83,7 +85,7 @@ const config = {
         title: 'Ciencia de Datos',
         logo: {
           alt: 'Ciencia de Datos Logo',
-          src: 'img/logo.svg',
+          src: 'img/ODC-isotipo.svg',
         },
         items: [
           {
@@ -107,47 +109,47 @@ const config = {
             title: 'Otros cursos de la serie',
             items: [
               {
-                label: 'Inteligencia Artificial',
-                to: 'https://patricioaraneda.cl/inteligencia-artificial/',
-              },
-              {
-                label: 'Ciencia de Datos',
-                href: 'https://patricioaraneda.cl/ciencia-de-datos/',
-              },
-              {
                 label: 'Programación en Python',
                 href: 'https://patricioaraneda.cl/python/',
               },
               {
                 label: 'Bioestadística',
                 href: 'https://patricioaraneda.cl/bioestadistica/',
-              }
+              },
+              {
+                label: 'Ciencia de Datos',
+                href: 'https://patricioaraneda.cl/ciencia-de-datos/',
+              },
+              {
+                label: 'Inteligencia Artificial',
+                href: 'https://patricioaraneda.cl/inteligencia-artificial/',
+              },
             ],
           },
           {
-            title: 'Community',
+            title: 'Comunidad',
             items: [
               {
-                label: 'Stack Overflow',
-                href: 'https://stackoverflow.com/questions/tagged/docusaurus',
-              },
-              {
-                label: 'Discord',
-                href: 'https://discordapp.com/invite/docusaurus',
+                label: 'LinkedIn',
+                href: 'https://www.linkedin.com/in/paranedagarcia',
               },
               {
                 label: 'X',
-                href: 'https://x.com/docusaurus',
+                href: 'https://x.com/paranedagarcia',
               },
             ],
           },
           {
-            title: 'More',
+            title: 'Más',
             items: [
-             
+              
               {
                 label: 'GitHub',
-                href: 'https://github.com/paranedagarcia/ciencia-de-datos',
+                href: 'https://github.com/paranedagarcia/Python',
+              },
+              {
+                label: 'Rpubs',
+                href: 'https://rpubs.com/paraneda',
               },
             ],
           },
@@ -157,8 +159,18 @@ const config = {
       prism: {
         theme: prismThemes.github,
         darkTheme: prismThemes.dracula,
+        additionalLanguages: ['r', 'python', 'javascript', 'bash'],
       },
     }),
+  stylesheets: [
+    {
+      href: 'https://cdn.jsdelivr.net/npm/katex@0.13.24/dist/katex.min.css',
+      type: 'text/css',
+      integrity:
+        'sha384-odtC+0UGzzFL/6PNoE8rX/SPcQDXBJ+uRepguP4QkPCm2LBxH3FA3y+fKSiJ+AmM',
+      crossorigin: 'anonymous',
+    },
+  ],
 };
 
 export default config;
