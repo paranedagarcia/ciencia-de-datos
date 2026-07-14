@@ -64,7 +64,7 @@ Para eliminar duplicados en Python, especialmente cuando se trabaja con la libre
 *   **Identificación:** `duplicated()` devuelve una serie booleana que indica si cada fila es una copia exacta de una fila anterior.
 *   **Eliminación:** `drop_duplicates()` filtra las filas duplicadas. Se puede especificar un subconjunto de columnas para la comprobación (`subset`) y decidir cuál instancia conservar (`keep='first'`, `'last'` o `False` para eliminar todos los duplicados).
 
-A continuación se detallan los métodos y sus funcionalidades según las fuentes:
+A continuación se detallan los métodos y sus funcionalidades:
 
 #### 1. El método `drop_duplicates()` en pandas
 Es la herramienta principal para limpiar duplicados en `Series` y `DataFrames`.
@@ -213,7 +213,7 @@ Es el proceso de convertir una variable categórica en una matriz de columnas (c
 
 Para crear variables dummy (también conocidas como variables indicadoras o codificación *one-hot*) a partir de categorías en Python, la herramienta principal es la función **`pd.get_dummies`** de la librería pandas. Este proceso consiste en convertir una columna con valores de cadena repetidos en varias columnas numéricas (una por cada categoría), donde un **1** indica la presencia de esa categoría y un **0** su ausencia.
 
-A continuación se detallan las formas de aplicarlo según las fuentes:
+A continuación se detallan las formas de aplicarlo:
 
 #### Uso básico de `pd.get_dummies()`
 Puedes pasarle una `Series` o un `DataFrame` completo. Si pasas un dataframe, pandas identificará automáticamente las columnas de tipo cadena o categóricas para transformarlas.

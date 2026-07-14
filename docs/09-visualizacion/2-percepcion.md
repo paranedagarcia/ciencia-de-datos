@@ -8,7 +8,7 @@ description: "Principios de la percepción humana"
 
 ![](img/visual.webp)
 
-Los **principios de percepción humana** son fundamentales para la visualización de datos, ya que aprovechan la forma en que nuestro cerebro procesa la información visual de manera automática y eficiente. A continuación, se desarrolla este tema de forma exhaustiva basándose en las fuentes:
+Los **principios de percepción humana** son fundamentales para la visualización de datos, ya que aprovechan la forma en que nuestro cerebro procesa la información visual de manera automática y eficiente.
 
 ## El Sistema Visual
 
@@ -36,7 +36,7 @@ Nuestra atención se dirige mediante mecanismos que ocurren antes de que seamos 
 El color es la herramienta más poderosa pero también la más mal utilizada en la comunicación visual.
 *   **Componentes:** Se define por su **tono** (*hue* o el nombre del color), **saturación** (*chroma* o intensidad) y **luminancia** (*brightness*).
 *   **Uso Estratégico:** Debe usarse de forma **parca y consistente** para resaltar un solo punto de dato o serie, evitando "el arcoíris" que impide que algo destaque realmente.
-*   **Paletas:** Las fuentes recomiendan paletas **secuenciales** (un solo color que varía en intensidad) para valores cuantitativos, y paletas **categóricas** (colores distintos) para variables cualitativas sin orden intrínseco.
+*   **Paletas:** Se recomiendan paletas **secuenciales** (un solo color que varía en intensidad) para valores cuantitativos, y paletas **categóricas** (colores distintos) para variables cualitativas sin orden intrínseco.
 *   **Accesibilidad (Daltonismo):** Cerca del 8% de los hombres sufren deficiencia de visión cromática, especialmente entre el **rojo y el verde**. Se recomienda usar paletas de **azul y naranja** para garantizar que todos puedan distinguir los datos.
 
 ![](img/color.png)
@@ -107,7 +107,7 @@ Este fenómeno ocurre en la **memoria icónica**, que es una memoria sensorial d
 ### El efecto "Pop-out" (Salto Visual)
 Ciertos objetos en nuestro campo visual "saltan" a la vista (perceptual pop-out) cuando difieren significativamente de lo que los rodea en una sola propiedad visual. Por ejemplo:
 *   Es mucho más rápido encontrar un círculo azul en un mar de círculos amarillos (canal de **color**) que encontrar un círculo entre una multitud de triángulos (canal de **forma**).
-*   Las fuentes señalan que el canal de color suele ser más fuerte y efectivo para generar este efecto que el canal de forma.
+*   El canal de color suele ser más fuerte y efectivo para generar este efecto que el canal de forma.
 
 ### Atributos Preatentivos Principales
 Los diseñadores de visualizaciones aprovechan una serie de atributos físicos que el cerebro identifica de manera automática:

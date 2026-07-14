@@ -237,7 +237,7 @@ En resumen, los **RDDs** son para control total a bajo nivel, los **DataFrames**
 
 La relación entre **Apache Spark** y **Azure Synapse Analytics** no es de competencia directa, sino de integración, ya que Spark es uno de los componentes fundamentales dentro del ecosistema de Azure Synapse.
 
-A continuación se presenta una comparación detallada basada en las fuentes proporcionadas:
+A continuación se presenta una comparación detallada basada:
 
 ### 1. Definición y Propósito
 *   **Apache Spark:** Es un motor de análisis unificado diseñado para el procesamiento de datos a gran escala. Se centra en la computación en memoria para ofrecer alta velocidad en tareas de datos masivos (Big Data).

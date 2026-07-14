@@ -48,7 +48,7 @@ Para utilizarla, habitualmente se importa el módulo `pyplot` con el alias `plt`
 import matplotlib.pyplot as plt
 import numpy as np
 ```
-### Anatomía de un gráfico
+#### Anatomía de un gráfico
 
 La gran mayoría de gráficos comparten los mismos elementos:
 - Un área de gráficos
@@ -59,7 +59,7 @@ La gran mayoría de gráficos comparten los mismos elementos:
 
 Por lo que el aprendizaje en uno de ellos facilita aprender otro nuevo.
 
-### Principios de Visualización y Estética de Datos con Matplotlib
+#### Principios de Visualización y Estética de Datos con Matplotlib
 
 La librería Matplotlib es el vehículo para transformar conjuntos de números en visiones comprensibles. Un gráfico efectivo requiere componentes que guíen la percepción:
 - **Identificación**: El uso de títulos y etiquetas de ejes (xlabel / ylabel) es obligatorio para que el analista comprenda las variables en juego.
@@ -68,7 +68,7 @@ La librería Matplotlib es el vehículo para transformar conjuntos de números e
 
 - **Enfoque**: La técnica de "explode" en gráficos de pastel permite resaltar información específica (como destacar el tiempo de "comida" frente al resto del día) separando físicamente una porción del resto.
 
-### Estética, Teoría del Color y Estilo
+#### Estética, Teoría del Color y Estilo
 La configuración estética no es solo decorativa; facilita que el cerebro identifique rangos de probabilidad:
 - **Códigos de Color**: Se emplean abreviaturas como m (magenta), c (cian), r (rojo) y k (negro).
 
@@ -78,7 +78,7 @@ La configuración estética no es solo decorativa; facilita que el cerebro ident
 
 Esta estructura estética permite que el cerebro identifique tendencias y anomalías de forma casi instantánea, antes incluso de procesar el dato numérico.
 
-### El Catálogo Visual: Tipos de Gráficos y su Función Perceptiva
+## Tipos de Gráficos y su función perceptiva
 
 Cada elección gráfica debe responder a la pregunta: ¿Para qué sirve esto al analista?
 - **Gráfico de Barras**: Ideal para la comparación visual directa entre categorías discretas. Permite juzgar magnitudes relativas de un vistazo.
@@ -349,6 +349,82 @@ plt.show()
 ```
 ![](img/plt-piemultiple.png)
 
+## Color
+
+https://matplotlib.org/stable/gallery/color/index.html
+
+<details>
+<summary>Colores en Matplotlib ...</summary>
+```python showLineNumbers
+import matplotlib.pyplot as plt
+import numpy as np
+
+cmaps = [('Perceptually Uniform Sequential', [
+            'viridis', 'plasma', 'inferno', 'magma', 'cividis']),
+         ('Sequential', [
+            'Greys', 'Purples', 'Blues', 'Greens', 'Oranges', 'Reds',
+            'YlOrBr', 'YlOrRd', 'OrRd', 'PuRd', 'RdPu', 'BuPu',
+            'GnBu', 'PuBu', 'YlGnBu', 'PuBuGn', 'BuGn', 'YlGn']),
+         ('Sequential (2)', [
+            'gray', 'bone', 'pink', 'spring', 'summer', 'autumn', 'winter',
+            'cool', 'Wistia', 'hot', 'afmhot', 'gist_heat', 'copper']),
+         ('Diverging', [
+            'PiYG', 'PRGn', 'BrBG', 'PuOr', 'RdGy', 'RdBu',
+            'RdYlBu', 'RdYlGn', 'Spectral', 'coolwarm', 'bwr', 'seismic',
+            'berlin', 'managua', 'vanimo']),
+         ('Cyclic', ['twilight', 'twilight_shifted', 'hsv']),
+         ('Qualitative', [
+            'Pastel1', 'Pastel2', 'Paired', 'Accent',
+            'Dark2', 'Set1', 'Set2', 'Set3',
+            'tab10', 'tab20', 'tab20b', 'tab20c']),
+         ('Miscellaneous', [
+            'flag', 'prism', 'ocean', 'gist_earth', 'terrain', 'gist_stern',
+            'gnuplot', 'gnuplot2', 'CMRmap', 'cubehelix', 'brg',
+            'gist_rainbow', 'rainbow', 'jet', 'turbo', 'nipy_spectral',
+            'gist_ncar'])]
+
+gradient = np.linspace(0, 1, 256)
+gradient = np.vstack((gradient, gradient))
+
+
+def plot_color_gradients(cmap_category, cmap_list):
+    # Create figure and adjust figure height to number of colormaps
+    nrows = len(cmap_list)
+    figh = 0.35 + 0.15 + (nrows + (nrows-1)*0.1)*0.22
+    fig, axs = plt.subplots(nrows=nrows, figsize=(6.4, figh))
+    fig.subplots_adjust(top=1-.35/figh, bottom=.15/figh, left=0.2, right=0.99)
+
+    axs[0].set_title(f"{cmap_category} colormaps", fontsize=14)
+
+    for ax, cmap_name in zip(axs, cmap_list):
+        ax.imshow(gradient, aspect='auto', cmap=cmap_name)
+        ax.text(-.01, .5, cmap_name, va='center', ha='right', fontsize=10,
+                transform=ax.transAxes)
+
+    # Turn off *all* ticks & spines, not just the ones with colormaps.
+    for ax in axs:
+        ax.set_axis_off()
+
+
+for cmap_category, cmap_list in cmaps:
+    plot_color_gradients(cmap_category, cmap_list)
+```
+</details>
+
+![](img/color-perceptually.png)
+
+![](img/color-sequential.png)
+
+![](img/color-sequential-2.png)
+
+![](img/color-diverging.png)
+
+![](img/color-cyclic.png)
+
+![](img/color-qualitative.png)
+
+![](img/color-miscellaneous.png)
+
 ## Subplots
 
 ### Figuras
@@ -373,7 +449,7 @@ for ax_name, ax in axs.items():
 ```
 ![](img/plt-figura-3.png)
 
-### Subplots Múltiples Básicos
+#### Subplots Múltiples Básicos
 
 - **Set de datos**: Iris Dataset (Comparación de múltiples variables).
 - **Concepto**: Organizar más de una gráfica en una sola ventana utilizando plt.subplots para comparar diferentes perspectivas de los datos.
@@ -411,7 +487,7 @@ plt.show()
 ```
 ![](img/plt-subplot.png)
 
-### Personalización de gráficos
+## Personalización de gráficos
 
 ![](img/plt-code.webp)
 
@@ -592,7 +668,7 @@ plt.show()
 ![](img/plt-pandas.png)
 
 ### Visualizaciones avanzadas
-Las fuentes también mencionan que Matplotlib puede utilizarse para:
+Matplotlib puede utilizarse para:
 *   **Anotaciones:** Añadir texto y flechas en puntos específicos de interés.
 *   **Subgráficos:** Crear cuadrículas con múltiples gráficos en una sola figura usando `plt.subplots()`.
 *   **Mapas de calor:** Visualizar matrices de datos bidimensionales mediante funciones como `imshow()`.
@@ -602,7 +678,7 @@ Las fuentes también mencionan que Matplotlib puede utilizarse para:
 
 La diferencia principal entre usar **`plt.plot`** y **`ax.plot`** radica en el nivel de control y la estructura del código dentro de la librería Matplotlib. Mientras que el primero es una función de conveniencia de alto nivel, el segundo es un método de un objeto específico que ofrece mayor flexibilidad para visualizaciones complejas.
 
-### Enfoque basado en estados
+#### Enfoque basado en estados
 
 Este método  (`plt.plot`) es el más sencillo y similar a la interfaz de MATLAB. Se utiliza el módulo `pyplot` (alias `plt`) para realizar trazados rápidos de forma implícita sobre la "figura actual" y el "eje actual".
 
@@ -625,7 +701,7 @@ plt.show()
 ```
 ![](img/plt-pyplot.png)
 
-### Enfoque orientado a objetos 
+#### Enfoque orientado a objetos 
 Este es el enfoque (`ax.plot`) **preferido para personalizaciones complejas**. Aquí se crean explícitamente objetos de tipo `Figure` (la ventana completa) y `Axes` (un trazado individual). Esto permite manipular cada gráfico de forma independiente y precisa.
 
 **Ejemplo de uso:**
@@ -648,7 +724,7 @@ ax.legend()
 plt.show()
 ```
 
-### Diferencia clave en subgráficos (Múltiples ejes)
+#### Diferencia clave en subgráficos (Múltiples ejes)
 La mayor ventaja de `ax.plot` se hace evidente al trabajar con varias gráficas en una misma figura. Mientras que con `plt` tendrías que estar cambiando de subgráfico activo constantemente, con el enfoque orientado a objetos tienes un objeto `ax` para cada espacio.
 
 **Ejemplo con múltiples subgráficos:**
@@ -678,7 +754,7 @@ A continuación se detallan las disparidades clave:
 
 #### 1. Nivel de la API y Control
 *   **`plt.plot`**: Es una función del módulo **`pyplot`** (importado habitualmente como `plt`). Se considera una función de **máximo nivel** que actúa sobre el subgráfico que esté activo en ese momento. Es ideal para trazados rápidos y sencillos donde solo hay un gráfico en la figura.
-*   **`ax.plot`**: Es un **método de instancia** de un objeto de tipo **`Axes`** o `AxesSubplot`. Las fuentes indican que es **preferible utilizar métodos de eje** en lugar de funciones de nivel máximo como `plt.plot`, ya que permite personalizar y definir subgráficos de manera directa e independiente dentro de una misma figura.
+*   **`ax.plot`**: Es un **método de instancia** de un objeto de tipo **`Axes`** o `AxesSubplot`. Es **preferible utilizar métodos de eje** en lugar de funciones de nivel máximo como `plt.plot`, ya que permite personalizar y definir subgráficos de manera directa e independiente dentro de una misma figura.
 
 #### 2. Uso en subgráficos (Subplots)
 La diferencia se vuelve evidente cuando se trabaja con múltiples gráficos a la vez:
@@ -707,7 +783,7 @@ Para mostrar la diferencia entre el enfoque basado en estados (`plt.plot`) y el 
 
 ## Anotaciones
 
-Las anotaciones en Matplotlib se utilizan para resaltar puntos de interés, añadir etiquetas explicativas o dibujar formas que mejoren la interpretación de un gráfico. Según las fuentes, existen dos métodos principales para añadir información textual y visual: **`text`** y **`annotate`**.
+Las anotaciones en Matplotlib se utilizan para resaltar puntos de interés, añadir etiquetas explicativas o dibujar formas que mejoren la interpretación de un gráfico. Existen dos métodos principales para añadir información textual y visual: **`text`** y **`annotate`**.
 
 #### 1. El método `text`
 Se utiliza para colocar una cadena de texto en coordenadas específicas $(x, y)$ del subgráfico. 
