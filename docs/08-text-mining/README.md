@@ -1,3 +1,10 @@
+---
+id: text-mining
+title: "SQL"
+sidebar_label: "💻 Text"
+sidebar_position: 1
+description: "Text"
+---
 
 # Text Analysis
 
