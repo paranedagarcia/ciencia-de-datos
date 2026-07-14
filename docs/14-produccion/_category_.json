@@ -1,8 +1,0 @@
-{
-  "label": "Producción",
-  "position": 14,
-  "link": {
-    "type": "generated-index",
-    "description": "Conceptos de producción, incluyendo despliegue y mantenimiento de modelos en entornos de producción."
-  }
-}

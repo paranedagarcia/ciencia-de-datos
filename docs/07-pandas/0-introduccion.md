@@ -1,7 +1,7 @@
 ---
 id: pandas
 title: "Introducción a Pandas"
-sidebar_label: "Introducción"
+sidebar_label: "📚 Introducción"
 sidebar_position: 1
 description: "La herramienta por defecto en análisis de datos"
 ---
