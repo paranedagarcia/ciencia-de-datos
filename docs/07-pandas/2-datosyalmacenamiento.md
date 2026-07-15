@@ -28,19 +28,69 @@ Pandas utiliza librerías internas como `openpyxl` (para .xlsx) o `xlrd` (para .
 
 *   **Escritura:** `df.to_excel()` requiere a menudo el uso de `pd.ExcelWriter` si se desean guardar múltiples hojas en un solo archivo.
 *   **Ejemplo:**
-    ```python showLineNumbers
-    # Leer una hoja específica por nombre o índice
-    df = pd.read_excel("datos.xlsx", sheet_name="Hoja1")
-    # Escribir varias hojas
-    with pd.ExcelWriter("reporte.xlsx") as writer:
-        df1.to_excel(writer, sheet_name="Enero")
-        df2.to_excel(writer, sheet_name="Febrero")
-    ```
+```python showLineNumbers
+import pandas as pd
+
+# Lee la primera hoja esto es por default
+df = pd.read_excel('data.xlsx')
+
+# Lee una hoja determinada, por su nombre
+df_sales = pd.read_excel('data.xlsx', sheet_name='Sales')
+
+# Lee una hoja específica por su índice (0-indexed)
+df_costs = pd.read_excel('data.xlsx', sheet_name=1)
+
+# Carga multiles hojas a la vez (obtiene un diccionario de dataframes)
+all_sheets = pd.read_excel('data.xlsx', sheet_name=['Sales', 'Costs'])
+
+# Leer una hoja específica por nombre o índice
+df = pd.read_excel("datos.xlsx", sheet_name="Hoja1")
+
+# Guardar un dataframe a un archivo excel
+df.to_excel('output.xlsx', index=False)  # index=False evita escribir numeros de filas
+
+
+# Escribir varias hojas
+# guarda multiples dataframes en un archivo excel
+with pd.ExcelWriter("reporte.xlsx") as writer:
+    df1.to_excel(writer, sheet_name="Enero", index=False)
+    df2.to_excel(writer, sheet_name="Febrero", index=False)
+```
+Ajustes comunes duate la importación:
+- **Skip rows:** Usa `skiprows=2` si los actuales datos comienzan en algunas determinadas filas abajo.
+
+- **Select columns:** Utiliza `usecols="A:C"` o `usecols=["Name", "Date"]` para cargar solo los datos necesarios.
+
+- **Handle missing data:** Utiliza `na_values=['NA', 'Missing']` para indicar cómo debe tratar a las celdas en blanco.
+
+**Acciones comparadas Excel / Pandas**
+
+**Filtrar filas**: 
+
+```df[df['Status'] == 'Active']```
+
+**VLOOKUP / XLOOKUP**: 
+
+```pd.merge(df1, df2, on='ID', how='left')```
+
+**Pivot Table:** 
+
+```df.pivot_table(values='Sales', index='Region', columns='Year', aggfunc='sum')```
+
+**Remove Duplicates:**
+
+```df.drop_duplicates(subset=['Email'])```
+
+**Text to Columns:**
+
+```df['Full Name'].str.split(' ', expand=True)```
+
 
 ### Archivos de Texto (Planos o Delimitados)
 Para archivos `.txt` donde el delimitador no es necesariamente una coma, se emplea `pd.read_table()` o `read_csv()` especificando el separador.
 
 *   **Uso de Regex:** Si los espacios son variables, se puede usar una expresión regular como `sep='\s+'`.
+
 *   **Ejemplo:**
     ```python showLineNumbers
     # Leer un archivo separado por tabuladores
