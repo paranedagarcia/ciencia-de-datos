@@ -1,7 +1,7 @@
 ---
 id: pandas-limpieza
 title: "Limpieza y preparación de datos"
-sidebar_label: "Limpieza"
+sidebar_label: "💻 Limpieza"
 sidebar_position: 3
 description: "Proceso de depuración y confianza de datos"
 ---

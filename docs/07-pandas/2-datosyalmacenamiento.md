@@ -1,7 +1,7 @@
 ---
 id: pandas-archivos
 title: "Manejo de datos en Pandas"
-sidebar_label: "Datos en pandas"
+sidebar_label: "💻 Datos en pandas"
 sidebar_position: 2
 ---
 
