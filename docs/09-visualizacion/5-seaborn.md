@@ -5,8 +5,9 @@ sidebar_label: "📈 Seaborn"
 sidebar_position: 5
 ---
 
+<div className="text--center">
 ![](img/seaborn.svg)
-
+</div>
 
 **Seaborn** es una biblioteca de visualización de datos en Python basada en Matplotlib. Proporciona una interfaz de alto nivel para crear gráficos estadísticos atractivos y fáciles de interpretar. Seaborn está diseñado para trabajar bien con estructuras de datos como DataFrames de pandas, lo que facilita la creación de gráficos complejos con pocas líneas de código.
 

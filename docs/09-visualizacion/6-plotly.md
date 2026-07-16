@@ -5,3 +5,7 @@ sidebar_label: "📊 Plotly"
 sidebar_position: 6
 description: "Gráficos interactivos con Plotly"
 ---
+
+<div className="text--center">
+![](img/plotly-logo.png)
+</div>

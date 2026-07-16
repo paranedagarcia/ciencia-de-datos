@@ -1,7 +1,7 @@
 ---
 id: pandas-polars
 title: "Pandas vs Polars"
-sidebar_label: "Pandas vs Polars"
+sidebar_label: "💻 Pandas vs Polars"
 sidebar_position: 5
 description: "Pandas vs Polars"
 ---

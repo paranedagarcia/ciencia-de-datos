@@ -5,7 +5,9 @@ sidebar_label: "📚 Introducción"
 sidebar_position: 1
 description: "La herramienta por defecto en análisis de datos"
 ---
+<div className="text--center">
 ![](img/pandas-logo.png)
+</div>
 
 # Pandas
 

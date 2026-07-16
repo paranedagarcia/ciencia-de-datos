@@ -6,7 +6,10 @@ sidebar_position: 4
 description: "Apache Spark"
 ---
 
+<div className="text--center">
 ![](img/apache_spark.webp)
+</div>
+
 
 
 # Apache Spark

@@ -1,15 +1,15 @@
 ---
 id: pandas-datos
 title: "Manipulación de datos"
-sidebar_label: "Manipulación de datos"
+sidebar_label: "💻 Manipulación de datos"
 sidebar_position: 2
 description: "Manipulación de datos"
 ---
 
 
-
+:::info[Codigo:]
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1K--o6d7H3VNMLnxwrWftPAWLiwTBByAm)
-
+:::
 
 ## Librería de manipulación de datos
 

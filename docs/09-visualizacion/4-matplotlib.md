@@ -5,7 +5,9 @@ sidebar_label: "📊 Matplotlib"
 sidebar_position: 4
 ---
 
+<div className="text--center">
 ![](img/matplotlib.png)
+</div>
 
 :::info
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1ryr52KS0XYHr-Ws6J9tSOFnrpPb3ZVfW)

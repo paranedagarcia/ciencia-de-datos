@@ -6,6 +6,9 @@ sidebar_position: 6
 description: "Streamlit en Ciencia de Datos"
 ---
 
+<div className="text--center">
+![](img/streamlit-logo.webp)
+</div>
 
 ¡Bienvenido al módulo de Streamlit! Aquí aprenderás a crear aplicaciones web interactivas y visualizaciones de datos utilizando la biblioteca Streamlit. Este módulo te guiará a través de los conceptos básicos de Streamlit, desde la instalación hasta la creación de aplicaciones completas que pueden ser compartidas fácilmente con otros. Al finalizar este módulo, estarás equipado con las habilidades necesarias para desarrollar aplicaciones web dinámicas que faciliten la exploración y presentación de datos.
 ## Qué es streamlit
