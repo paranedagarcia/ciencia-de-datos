@@ -28,3 +28,87 @@
   --ifm-color-primary-lightest: #4fddbf;
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
+
+
+.katex {
+    font: normal 1.3em KaTeX_Main, Times New Roman, serif !important;
+}
+
+@media screen and (max-width: 996px) {
+    .heroBanner_qdFl {
+        padding: 1rem !important;
+    }
+}
+
+figure {
+  display: block;
+  margin-block-start: 0em !important;
+  margin-block-end: 0em !important;
+  margin-inline-start: 0px !important;
+  margin-inline-end: 0px !important;
+}
+
+figcaption {
+  display: block;
+  text-align: center;
+  font-size: 0.9rem !important;
+}
+
+.markdown h1:first-child {
+  --ifm-h1-font-size: 2.6rem !important;
+  color: #525f58 !important;
+}
+
+.title_kItE {
+  --ifm-h1-font-size: 2.6rem !important;
+  margin-bottom: calc(1.25 * var(--ifm-leading));
+  color: #525f58 !important;
+}
+
+.tabs__item--active{
+  background-color: rgb(170, 201, 107) !important;
+}
+
+.table-of-contents {
+    font-size: .9rem !important;
+}
+
+.alert {
+  margin-bottom: 2rem !important;
+  margin-top: 2rem !important;
+}
+
+h1 {
+  font-size: 2.6rem !important;
+}
+
+h1:first-child {
+    font-size: 2.6rem !important;
+}
+
+h2 {
+  font-size: 2rem !important;
+}
+
+h3 {
+  font-size: 1.6rem !important;
+}
+h4 {
+  font-size: 1.3rem !important;
+}
+
+h2.anchor.anchorTargetStickyNavbar_Vzrq::before {
+  content: "​▪️ ";
+  margin-left: -0.2em !important;
+}
+
+h3.anchor.anchorTargetStickyNavbar_Vzrq::before {
+  content: "​";
+  margin-left: -0.2em !important;
+}
+
+.table-of-contents {
+    font-size: 0.9rem !important;
+    margin-bottom: 0;
+    padding: var(--ifm-toc-padding-vertical) 0;
+}

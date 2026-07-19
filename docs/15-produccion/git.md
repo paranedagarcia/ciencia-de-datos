@@ -21,31 +21,32 @@ Git fue desarrollado por Linus Torvalds en 2005. Fue creado para gestionar el de
 
 
 ## Instalación de Git
-### instalar en Mac OS
+**instalar en Mac OS**
 ```bash
 brew install git
 ```
-### instalar en Windows
+**instalar en Windows**
 ```bash
 choco install git
 ```
-### instalar en Linux (Debian/Ubuntu)
+**instalar en Linux (Debian/Ubuntu)**
 ```bash
 sudo apt-get install git
 ```
-### instalar en Linux (Fedora)
+**instalar en Linux (Fedora)**
 ```bash
 sudo dnf install git
 ```
-### instalar en Linux (Fedora)
+**instalar en Linux (Fedora)**
 ```bash
 sudo dnf install git
 ```
-### instalar en Linux (Arch)
+**instalar en Linux (Arch)**
 ```bash
 sudo pacman -S git
 ```
-### Verificar instalación de Git
+**Verificar instalación de Git**
+
 Independientemente del sistema operativo, para verificar que Git se haya instalado correctamente, puedes ejecutar el siguiente comando en la terminal:
 ```bash
 git --version
