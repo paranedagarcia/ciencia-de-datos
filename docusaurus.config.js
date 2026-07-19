@@ -121,22 +121,31 @@ const config = {
                 href: 'https://patricioaraneda.cl/ciencia-de-datos/',
               },
               {
+                label: 'Análisis con SQL',
+                href: 'https://patricioaraneda.cl/sql/',
+              },
+              {
                 label: 'Inteligencia Artificial',
                 href: 'https://patricioaraneda.cl/inteligencia-artificial/',
               },
             ],
           },
           {
-            title: 'Comunidad',
-            items: [
+            title: 'Conecta',
+             items: [
               {
-                label: 'LinkedIn',
-                href: 'https://www.linkedin.com/in/paranedagarcia',
+                label: 'Website',
+                href: 'https://patricioaraneda.cl',
               },
               {
-                label: 'X',
-                href: 'https://x.com/paranedagarcia',
+                label: 'Linkedin',
+                href: 'https://www.linkedin.com/in/patricioaraneda',
               },
+              {
+                label: 'Whatsapp',
+                href: 'https://wa.me/56978872845',
+              },
+              
             ],
           },
           {
@@ -145,16 +154,21 @@ const config = {
               
               {
                 label: 'GitHub',
-                href: 'https://github.com/paranedagarcia/Python',
+                href: 'https://github.com/paranedagarcia/ciencia-de-datos',
               },
               {
-                label: 'Rpubs',
-                href: 'https://rpubs.com/paraneda',
+                label: 'ORCID',
+                href: 'https://orcid.org/0000-0001-9677-5959',
               },
+              {
+                label: 'Correo',
+                href: 'mailto:paraneda@ug.uchile.cl',
+              }
             ],
           },
+
         ],
-        copyright: `Copyright © ${new Date().getFullYear()} Ciencia de Datos, Inc. Built with Docusaurus.`,
+        copyright: `Copyright © ${new Date().getFullYear()} Ciencia de Datos, Built with Docusaurus.`,
       },
       prism: {
         theme: prismThemes.github,

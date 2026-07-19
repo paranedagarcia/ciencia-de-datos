@@ -29,6 +29,9 @@
   --docusaurus-highlighted-code-line-bg: rgba(0, 0, 0, 0.3);
 }
 
+.hero--primary {
+  background-color: #3b385d !important;
+}
 
 .katex {
     font: normal 1.3em KaTeX_Main, Times New Roman, serif !important;
@@ -111,4 +114,9 @@ h3.anchor.anchorTargetStickyNavbar_Vzrq::before {
     font-size: 0.9rem !important;
     margin-bottom: 0;
     padding: var(--ifm-toc-padding-vertical) 0;
+}
+
+/* footer */
+a.footer__link-item:hover {
+  color: #2e8555 !important;
 }

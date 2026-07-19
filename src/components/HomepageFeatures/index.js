@@ -1,11 +1,19 @@
 import clsx from 'clsx';
 import Heading from '@theme/Heading';
+import useBaseUrl from '@docusaurus/useBaseUrl';
 import styles from './styles.module.css';
+
+const SUPPORTED_IMAGE_EXTENSIONS = ['png', 'jpg', 'webp', 'svg','gif'];
+
+function hasSupportedImageFormat(imagePath) {
+  const extension = imagePath.split('.').pop()?.toLowerCase();
+  return SUPPORTED_IMAGE_EXTENSIONS.includes(extension);
+}
 
 const FeatureList = [
   {
     title: 'Comprensión de Datos',
-    Svg: require('@site/static/img/undraw_docusaurus_mountain.svg').default,
+    image: '/img/undraw_docusaurus_mountain.svg',
     description: (
       <>
         Comprender los datos es el primer paso para cualquier proyecto de ciencia de datos. Aquí aprenderás a explorar, limpiar y visualizar datos de manera efectiva.
@@ -14,7 +22,7 @@ const FeatureList = [
   },
   {
     title: 'Machine Learning',
-    Svg: require('@site/static/img/undraw_docusaurus_tree.svg').default,
+    image: '/img/undraw_docusaurus_tree.svg',
     description: (
       <>
         El aprendizaje automático permite a las máquinas aprender de los datos y hacer predicciones o decisiones basadas en ellos. Aprenderás los conceptos y técnicas fundamentales de machine learning.
@@ -24,7 +32,7 @@ const FeatureList = [
   },
   {
     title: 'Producción',
-    Svg: require('@site/static/img/undraw_docusaurus_react.svg').default,
+    image: '/img/undraw_docusaurus_react.svg',
     description: (
       <>
         Llevar un proyecto de ciencia de datos a producción implica implementar modelos y soluciones de manera eficiente y escalable. Aprenderás las mejores prácticas para desplegar y mantener tus modelos en un entorno real.
@@ -33,11 +41,17 @@ const FeatureList = [
   },
 ];
 
-function Feature({Svg, title, description}) {
+function Feature({image, title, description}) {
+  if (!hasSupportedImageFormat(image)) {
+    return null;
+  }
+
+  const imageUrl = useBaseUrl(image);
+
   return (
     <div className={clsx('col col--4')}>
       <div className="text--center">
-        <Svg className={styles.featureSvg} role="img" />
+        <img className={styles.featureSvg} src={imageUrl} alt={title} />
       </div>
       <div className="text--center padding-horiz--md">
         <Heading as="h3">{title}</Heading>
