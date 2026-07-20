@@ -16,7 +16,19 @@ const config = {
   title: 'Ciencia de Datos',
   tagline: 'Fundamentos de Ciencia de Datos, de análisis a producción',
   favicon: 'img/favicon.ico',
+  staticDirectories: ['public', 'static'],
 
+  markdown: {
+    mermaid: true,
+    hooks: {
+      // Downgrade to warnings so your staging preview or local build won't fail
+      onBrokenMarkdownImages: 'warn', 
+    },
+    remarkRehypeOptions: {
+      footnoteLabel: 'Notas al pie',
+      footnoteBackLabel: 'Volver a referencia',
+    },
+  },
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
@@ -107,7 +119,7 @@ const config = {
       footer: {
         style: 'dark',
         links: footerLinks,
-        copyright: `Copyright © ${new Date().getFullYear()} Patricio Araneda | Ciencia de Datos, Built with Docusaurus. <br /><img src="img/cc-by-nc-sa.png" alt="CC-BY-SA 4.0" width="120" />`,
+        copyright: `Copyright © ${new Date().getFullYear()} Patricio Araneda G. | Inteligencia Artificial para la Gestión Pública, Built with <a href="https://docusaurus.io/">Docusaurus</a>. <br /><img src="img/cc-by-nc-sa.png" alt="CC-BY-SA 4.0" width="120" />`,
       },
       prism: {
         theme: prismThemes.github,

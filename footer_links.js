@@ -60,4 +60,14 @@ export const links = [
     }
   ],
 },
+{
+  title: 'Licencia',
+  items: [
+    
+    {
+      label: 'CC BY-NC-SA 4.0 – Solo para uso docente y académico. No olvides citar la fuente y respetar la licencia. Deja una estrella en GitHub si te gustó el curso. ¡Gracias!',
+      href: 'https://creativecommons.org/licenses/by-nc-sa/4.0/deed.es',
+    }
+  ],
+}
 ];
