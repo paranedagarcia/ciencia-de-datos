@@ -1,24 +1,3 @@
----
-id: plotly
-title: "Interactividad con Plotly"
-sidebar_label: "📊 Plotly"
-sidebar_position: 6
-description: "Gráficos interactivos con Plotly"
----
-
-<center>
-![](img/plotly-logo.png)
-</center>
-
-:::info
-[![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/17b6VnLYSreRbyP-GJobmivyPX6JKIdS1?usp=sharing)
-
-Información adicional:
-- [Guía de usuario](https://docs.plotly.com/)
-- [Cheat sheet](https://franzdiebold.github.io/plotly-express-cheat-sheet/Plotly_Express_cheat_sheet.pdf)
-- [Cheat sheet Github](https://github.com/prateekralhan/Cheatsheets-for-AI/blob/master/Python%20Plotly%20Cheat%20Sheet.pdf)
-:::
-
 ## Visualización Interactiva con Plotly
 
 **Plotly** es una de las herramientas más potentes en Python para generar gráficos interactivos basados en la web, utilizando tecnologías como **D3.js, HTML y CSS**. A diferencia de las librerías estáticas, Plotly permite una comunicación de hallazgos más profunda al integrar herramientas de exploración directa en el navegador.
@@ -27,7 +6,7 @@ Información adicional:
 Para utilizar Plotly, es común importar su interfaz de alto nivel, `plotly.express`, que permite crear gráficos complejos con muy pocas líneas de código.s
 
 
-```python showLineNumbers
+```python
 import plotly.express as px
 import plotly.graph_objects as go
 import pandas as pd
@@ -44,7 +23,7 @@ Este es uno de los usos más icónicos de Plotly. Permite visualizar tres dimens
 *   **Capacidad Interactiva:** Al pasar el ratón por encima (**hover**), se revelan "detalles bajo demanda" como el nombre del país y valores exactos.
 
 
-```python showLineNumbers
+```python
 # Visualización de PIB per cápita vs Esperanza de Vida (Año 2007)
 # establece tamaño de la figura
 px.defaults.width = 1200
@@ -58,15 +37,13 @@ fig = px.scatter(df_gapminder.query("year==2007"), x="gdpPercap", y="lifeExp",
 fig.show()
 ```
 
-<center>
-![](img/plotly-1.png)
-</center>
+
 
 ## Series Temporales con Zoom Dinámico
 Plotly destaca en el manejo de **series temporales**, permitiendo al usuario realizar zoom en intervalos específicos para identificar tendencias o anomalías sin perder la resolución de los datos.
 
 
-```python showLineNumbers
+```python
 # Ejemplo de evolución de acciones o valores en el tiempo
 # establece tamaño de la figura
 px.defaults.width = 1200
@@ -80,16 +57,14 @@ fig = px.line(df_gapminder.query("country=='Chile'"), x='year', y='gdpPercap',
 fig.update_xaxes(rangeslider_visible=True)
 fig.show()
 ```
-<center>
-![](img/plotly-2.png)
-</center>
+
 
 
 ## Matriz de Dispersión (Pair Plots) Interactiva
 Útil para explorar correlaciones multidimensionales. En la versión de Plotly, cada subgráfico es interactivo, permitiendo aislar especies o grupos mediante la leyenda.
 
 
-```python showLineNumbers
+```python
 # Comparación de múltiples variables del dataset Iris
 # establece tamaño de la figura
 px.defaults.width = 1200
@@ -102,15 +77,13 @@ fig = px.scatter_matrix(df_iris,
 fig.show()
 ```
 
-<center>
-![](img/plotly-3.png)
-</center>
+
 
 ## Conversión de Matplotlib a Plotly
 Una característica fundamental mencionada en las fuentes es la capacidad de **Plotly** para tomar un objeto de figura de **Matplotlib** y convertirlo en una versión interactiva.
 
 
-```python showLineNumbers
+```python
 
 import matplotlib.pyplot as plt
 import plotly.tools as tls
@@ -136,16 +109,10 @@ plotly_fig.data[0].hovertemplate = '<b>%{customdata}</b><br>GDP per Capita: %{x}
 plotly_fig.show()
 ```
 
-<center>
-![](img/plotly-4.png)
-</center>
 
 
-### Funciones Interactivas Clave:
+### Funciones Interactivas Clave Destacadas:
 *   **Detalles bajo demanda:** Los tooltips (cuadros de información al pasar el ratón) evitan saturar el gráfico con etiquetas de texto innecesarias.
-
 *   **Zoom y Panorámica:** Los controles integrados permiten explorar subsecciones de datos masivos sin recargar la página.
-
 *   **Leyendas Activas:** Al hacer clic en un elemento de la leyenda, el usuario puede filtrar y ocultar/mostrar series de datos dinámicamente.
-
 *   **Range Slider:** Ideal para datos cronológicos, facilitando la navegación en series temporales largas.

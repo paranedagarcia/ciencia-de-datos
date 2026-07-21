@@ -116,7 +116,11 @@ h3.anchor.anchorTargetStickyNavbar_Vzrq::before {
     padding: var(--ifm-toc-padding-vertical) 0;
 }
 
+
 /* footer */
+a.footer__link-item:link {
+  color: #ebf1ed !important;
+}
 a.footer__link-item:hover {
-  color: #2e8555 !important;
+  color: #2f8957 !important;
 }

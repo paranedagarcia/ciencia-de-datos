@@ -5,16 +5,17 @@ sidebar_label: "📊 Matplotlib"
 sidebar_position: 4
 ---
 
-<div className="text--center">
+<center>
 ![](img/matplotlib.png)
-</div>
+</center>
 
 :::info
 [![](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/drive/1ryr52KS0XYHr-Ws6J9tSOFnrpPb3ZVfW)
 
 Información adicional:
 - [Guía de usuario](https://matplotlib.org/stable/users/index.html#)
-- [Cheatsheet](https://matplotlib.org/cheatsheets/)
+- [Cheat sheet](https://matplotlib.org/cheatsheets/)
+- [Cheat sheet en Github](https://github.com/jramshur/Coding-Cheat-Sheets/blob/master/Python%20for%20Data%20Science%20-%20Cheat%20Sheet%20-%20Matplotlib.pdf)
 :::
 
 **Matplotlib** es la biblioteca de Python más conocida y utilizada para la creación de gráficos y visualizaciones de datos bidimensionales de alta calidad. Fue diseñada originalmente por John Hunter para ofrecer una interfaz de trazado similar a MATLAB dentro de Python, y permite generar figuras aptas para su publicación en una amplia variedad de formatos (PDF, PNG, SVG, etc.).
