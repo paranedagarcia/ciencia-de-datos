@@ -2,8 +2,9 @@
 id: streamlit
 title: "Streamlit"
 sidebar_label: "💻 Streamlit"
-sidebar_position: 6
+sidebar_position: 1
 description: "Streamlit en Ciencia de Datos"
+slug: /streamlit
 ---
 
 <div className="text--center">
