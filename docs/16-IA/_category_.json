@@ -3,6 +3,7 @@
   "position": 16,
   "link": {
     "type": "generated-index",
-    "description": "Inteligencia Artificial aplicada a la Ciencia de Datos"
+    "description": "Inteligencia Artificial aplicada a la Ciencia de Datos",
+    "slug": "/ia-ciencia-de-datos"
   }
 }

@@ -24,7 +24,6 @@ La visualización de datos es el proceso de representar información de forma gr
 3. [Seaborn](./5-seaborn.md)
 4. Dashboards básicos con Plotly Express
 5. [Storytelling con datos](./3-storytelling.md)
-6. [Streamlit](./Streamlit.md)
 
 
 ### 1. Historia de la Visualización

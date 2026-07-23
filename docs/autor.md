@@ -3,6 +3,7 @@ id: autor
 title:  Autor
 sidebar_label: "🎓 Autor"
 sidebar_position: 18
+slug: /autor
 ---
 
 

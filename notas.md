@@ -46,3 +46,11 @@ Explica cómo gestionar el estado de la sesión en aplicaciones interactivas
 ¿Cómo puedo mostrar mapas interactivos avanzados con st-folium?
 ¿Qué bibliotecas recomiendas para visualización de datos en 3D?
 ¿Cómo se integran las barras de progreso con procesos largos?
+
+¿Cómo se aplican temas personalizados a los gráficos?
+
+¿Cómo se puede implementar un chatbot con st.chat_input?
+
+¿Cómo puedo habilitar la interactividad en un gráfico de Altair?
+¿Qué librerías permiten crear gráficos geoespaciales o mapas 3D?
+¿Cómo se integra una barra de progreso en un bucle?

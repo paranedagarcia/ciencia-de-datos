@@ -7,14 +7,18 @@ description: "Streamlit en Ciencia de Datos"
 slug: /streamlit
 ---
 
-<div className="text--center">
-![](img/streamlit-logo.webp)
-</div>
+<center>
+![](img/streamlit-logo.svg)
+</center>
 
 ¡Bienvenido al módulo de Streamlit! Aquí aprenderás a crear aplicaciones web interactivas y visualizaciones de datos utilizando la biblioteca Streamlit. Este módulo te guiará a través de los conceptos básicos de Streamlit, desde la instalación hasta la creación de aplicaciones completas que pueden ser compartidas fácilmente con otros. Al finalizar este módulo, estarás equipado con las habilidades necesarias para desarrollar aplicaciones web dinámicas que faciliten la exploración y presentación de datos.
+
 ## Qué es streamlit
+
 Streamlit es una biblioteca de Python de código abierto que permite a los desarrolladores crear aplicaciones web interactivas de manera rápida y sencilla. Está especialmente diseñada para científicos de datos y analistas que desean compartir sus análisis y visualizaciones de datos sin necesidad de conocimientos profundos en desarrollo web. Con Streamlit, puedes transformar scripts de Python en aplicaciones web funcionales con solo unas pocas líneas de código.
+
 ## Instalación de Streamlit
+
 Para instalar Streamlit, puedes usar pip, el gestor de paquetes de Python. Abre tu terminal o línea de comandos y ejecuta el siguiente comando:
 ```bash
 pip install streamlit

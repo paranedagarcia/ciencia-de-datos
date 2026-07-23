@@ -4,7 +4,11 @@ title: "Estadística"
 sidebar_label: "💻 Estadística"
 sidebar_position: 4
 description: "Estadística básica y probabilidades"
+slug: /estadistica
 ---
+
+![](img/estadistica.webp)
+
 ## 📊 Fundamentos de Estadística y Probabilidades
 
 :::info

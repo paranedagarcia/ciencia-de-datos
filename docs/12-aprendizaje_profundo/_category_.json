@@ -3,6 +3,7 @@
   "position": 12,
   "link": {
     "type": "generated-index",
-    "description": "Conceptos básicos de aprendizaje profundo, incluyendo redes neuronales y técnicas avanzadas de modelado."
+    "description": "Conceptos básicos de aprendizaje profundo, incluyendo redes neuronales y técnicas avanzadas de modelado.",
+    "slug": "/aprendizaje-profundo"
   }
 }
