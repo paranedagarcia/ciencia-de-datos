@@ -32,7 +32,11 @@ import altair as alt
 Configura el diseño de la aplicación para que utilice todo el ancho de la pantalla, lo cual es ideal para tableros con múltiples gráficos. Luego, añade un título descriptivo.
 
 ```python showLineNumbers showLineNumbers
-st.set_page_config(layout="wide")
+st.set_page_config(
+    page_title="Plan de Compras",
+    layout="wide"
+)
+
 st.title("📊 Tablero de Análisis Simple")
 ```
 
@@ -52,13 +56,21 @@ Para mostrar totales generales de forma atractiva, utiliza **`st.columns`** para
 
 ```python showLineNumbers showLineNumbers
 # Ejemplo calculando métricas basadas en el DataFrame
-total_registros = len(df)
-valor_promedio = df.iloc[:, 1].mean() # Supone que la segunda columna es numérica
+revenue = 12400
+users=1024
+uptime=99.9
 
-col1, col2 = st.columns(2)
-col1.metric("Total de Registros", total_registros)
-col2.metric("Valor Promedio", f"{valor_promedio:.2f}")
+col1, col2, col3 = st.columns(3)
+col1.metric("Revenue", revenue, "+8%")
+col2.metric("Users", users, "+12%")
+col3.metric("Uptime", uptime, "+0.1%")
 ```
+<center>
+<figure>
+![](img/st.metricas.png)
+<figcaption></figcaption>
+</figure>
+</center>
 
 #### Paso 5: Creación de 3 Gráficos con Altair
 Altair utiliza un enfoque **declarativo** donde defines las relaciones entre las columnas de tus datos. Para mostrarlos en Streamlit, usa el comando **`st.altair_chart`** con el parámetro `use_container_width=True` para que se ajusten al diseño.
@@ -272,3 +284,389 @@ with st.sidebar:
 ```
 
 Esta organización mediante el bloque `with` permite agrupar el logo con otros widgets de forma ordenada.
+
+## Aplicacíon completa
+
+<center>
+<figure>
+![](img/st-aplicacion.png)
+<figcaption>Ejemplo completo de una Aplicación en Streamlit.</figcaption>
+</figure>
+</center>
+
+El siguiente ejemplo carga una planilla Excel y realiza algunas transformaciones sobre algunas columnas particulares.
+
+:::info
+**Descarga la planilla acá:** https://patricioaraneda.cl/public/plan_de_compras_2025.xlsx
+
+Plan de compras de MINVU año 2025. Documento público
+:::
+
+### Plan de trabajo
+
+1. carga un dataframe desde la planilla excel
+2. Convierte los titulos de las columnas en lowercase
+
+### Transformaciones
+Realiza las transformaciones solicitadas en el orden indicado:
+
+1. Convierte los titulos de las columnas en lowercase.
+2. Solicitar el ingreso de un 'codigo' de proyecto, y eliminar los registros que en el valor de la columna 'id proyecto' no terminen en el 'codigo' ingresado (evaluado en uppercase).
+3. crea una nueva columna llamada 'anexo' que debe contener los 4 ultimos digitos de la columna 'teléfono responsable' extraidos a partir del segundo guión '-'.
+4. elimina espacios, y todos los guiones ('-') dentro de la columna 'teléfono responsable'. 
+
+### Analisis exploratorio
+
+Realiza un análisis exploratorio para detectar y mostrar:
+
+- Cantidad de valores nulos por columna, en cantidad y mostrar porcentaje de nulos.
+
+- Propone eliminar la columna con los valores nulos mas altos. Para ello espera respuesta (SI/NO) y elimina si responde 'SI'.
+
+### Resumenes
+
+Crea y visualiza las siguientes tablas resumenes:
+- totales de 'monto total íem año 2025' agrupados por 'nombre responsable', ordenados en forma descendente.
+
+- los 10 itemes más caros basados en 'monto unitario ítem', ordenados en forma descendente. incluye 'nombre ítem' y 'nombre responsable'.
+
+- los itemes mas comprados basados en 'nombre ítem' y 'monto unitario ítem´. agrupados por 'nombre ítem'. ordenados en forma descendente.
+
+### Gráficos
+
+Crea un gráfico para cada una de las tablas resumenes solicitadas previamente (graficos en figuras separadas).
+
+
+<details>
+<summary>💻 Código</summary>
+
+```python showLineNumbers
+import streamlit as st
+import streamlit.components.v1 as components
+# accesorios
+from streamlit_extras.metric_cards import style_metric_cards
+from millify import millify
+import numpy as np
+
+import matplotlib.pyplot as plt
+import plotly.express as px
+
+import pandas as pd
+import io
+
+st.set_page_config(
+    page_title="Plan de Compras",
+    layout="wide"
+)
+
+
+st.title("📊 Análisis de Plan de Compras")
+
+##############################################################
+# SIDEBAR
+##############################################################
+
+st.sidebar.header("Configuraciones")
+
+archivo = st.sidebar.file_uploader(
+    "Seleccione archivo Excel",
+    type=["xlsx", "xls"]
+)
+
+# Mijael
+# codigo_year = st.sidebar.selectbox(
+#     "codigo_year",
+#     [2022, 2023, 2024, 2025],
+#     index=3
+# )
+codigo_year=2025
+
+codigo_proceso = f"PC{str(codigo_year)[-2:]}"
+
+st.sidebar.info(f"Código proceso: {codigo_proceso}")
+
+
+
+##############################################################
+# CARGA
+##############################################################
+
+if archivo is not None:
+    #status = st.status("Procesando archivo...", expanded=True)
+    #status.write("Carga: leyendo archivo Excel.")
+
+    df = pd.read_excel(archivo)
+
+    ##############################################################
+    # COLUMNAS LOWERCASE
+    ##############################################################
+
+    df.columns = (
+        df.columns
+        .str.lower()
+        .str.strip()
+    )
+
+
+    ##############################################################
+    # TRANSFORMACIONES
+    ##############################################################
+    #status.write("Carga: normalizando columnas y aplicando transformaciones iniciales.")
+    # 1
+    df = df[
+        df["id proyecto"]
+        .astype(str)
+        .str.upper()
+        .str.endswith(codigo_proceso.upper())
+    ].copy()
+
+    # 2
+    df["anexo"] = (
+        df["teléfono responsable"]
+        .astype(str)
+        .str.split("-")
+        .str[-1]
+        .str[-4:]
+    )
+
+    # 3
+    df["teléfono responsable"] = (
+        df["teléfono responsable"]
+        .astype(str)
+        .str.replace("-", "", regex=False)
+        .str.replace(" ", "", regex=False)
+    )
+
+    #status.write("Carga: actualizando nombres de proyecto con el catálogo de códigos.")
+
+    # -------------------------------------------------------------
+    # modificar el nombre del proyecto segun el nombre de la planilla 
+    # # codigos_unicos
+    # ---------------------------------------------
+    # transformacion de nombre de proyecto basado en codigos unicos
+    codigos = pd.read_excel('codigos_unicos.xlsx')
+    # Asegurar que las columnas de cruce tengan formato string sin espacios extra
+    df['código presupuestario'] = df['código presupuestario'].astype(str).str.strip()
+    codigos['Codigo'] = codigos['Codigo'].astype(str).str.strip()
+
+    # Realizar el Join entre df y codigos
+    df_merged = df.merge(
+        codigos[['Codigo', 'Nombre']], 
+        left_on='código presupuestario', 
+        right_on='Codigo', 
+        how='left'
+    )
+    # Reemplazar los valores en 'Nombre Proyecto' con el nuevo 'Nombre' obtenido del join
+    # Se mantiene el valor original en caso de que no haya coincidencia
+    df['nombre proyecto'] = df_merged['Nombre'].fillna(df['nombre proyecto'])
+
+    #status.write("Análisis: preparando métricas y revisión exploratoria de datos.")
+
+    ##############################################################
+    # HEADER TARJETAS
+    ##############################################################
+
+    total_registros = len(df)
+
+    monto_total = df["monto total ítem año 2025"].sum()
+
+    c1, c2, c3, c4 = st.columns(4)
+
+    c1.metric(
+        "Total registros",
+        f"{total_registros:,}",
+        delta="30",
+    )
+
+    c2.metric(
+        "Monto Total",
+    millify(monto_total, precision=2),
+    delta=millify(monto_total - 1000000, precision=2)
+    )
+
+    c3.metric(
+        "Monto promedio",
+        millify(df["monto total ítem año 2025"].mean(), precision=2),
+        delta="-50"
+    )
+    c4.metric(
+        "Valor máximo",
+        millify(df["monto total ítem año 2025"].max(), precision=2)
+    )
+
+    style_metric_cards()
+
+    st.divider()
+
+    ##############################################################
+    # ANALISIS EXPLORATORIO
+    ##############################################################
+
+
+    st.header("Análisis Exploratorio")
+    st.divider()
+    # walker = pyg.walk(df) # exploración de datos esilo Tableau
+
+    st.dataframe(df.head(500), use_container_width=True)
+
+    data = st.data_editor(df, num_rows="dynamic", use_container_width=True) 
+
+    nulos = pd.DataFrame({
+
+        "Columna": df.columns,
+
+        "Nulos": df.isnull().sum().values,
+
+        "Porcentaje": (
+            df.isnull().mean()*100
+        ).round(2)
+
+    })
+
+    st.dataframe(nulos, use_container_width=True)
+
+
+    columna_eliminar = (
+        nulos
+        .sort_values("Nulos", ascending=False)
+        .iloc[0]["Columna"]
+    )
+
+    st.warning(
+        f"Se propone eliminar la columna **{columna_eliminar}** "
+        "por ser la que posee más valores nulos."
+    )
+
+    eliminar = st.radio(
+        "¿Desea eliminarla?",
+        ["NO", "SI"],
+        horizontal=True
+    )
+
+    if eliminar == "SI":
+        df = df.drop(columns=[columna_eliminar])
+        st.success("Columna eliminada.")
+
+    ##############################################################
+    # TABLAS RESUMEN
+    ##############################################################
+    #status.write("Tablas: generando resúmenes para responsables e ítems.")
+    
+    st.header("Resúmenes")
+
+    resumen1 = (
+        df.groupby("nombre responsable", as_index=False)
+        ["monto total ítem año 2025"]
+        .sum()
+        .sort_values(
+            "monto total ítem año 2025",
+            ascending=False
+        ).head(10)
+    )
+
+    resumen2 = (
+        df[
+            [
+                "nombre ítem",
+                "nombre responsable",
+                "monto unitario ítem"
+            ]
+        ]
+        .sort_values(
+            "monto unitario ítem",
+            ascending=False
+        )
+        .head(6)
+    )
+
+    resumen3 = (
+        df
+        .groupby("nombre ítem", as_index=False)
+        .agg({
+            "monto unitario ítem":"sum"
+        })
+        .sort_values(
+            "monto unitario ítem",
+            ascending=True
+        ).head(10)
+    )
+
+    st.subheader("Monto por Responsable")
+    st.dataframe(resumen1, use_container_width=True)
+
+    st.subheader("10 Ítems más caros")
+    st.dataframe(resumen2, use_container_width=True)
+
+    st.subheader("Ítems más comprados")
+    st.dataframe(resumen3, use_container_width=True)
+
+    ##############################################################
+    # GRAFICOS
+    ##############################################################
+
+
+
+    #status.write("Gráficos: construyendo visualizaciones del resumen.")
+
+    st.header("Gráficos")
+
+    fig1 = px.bar(
+        resumen1,
+        x="nombre responsable",
+        y="monto total ítem año 2025",
+        title="Monto Total por Responsable"
+    )
+
+    st.plotly_chart(
+        fig1,
+        use_container_width=True
+    )
+
+    fig2 = px.bar(
+        resumen2,
+        x="nombre ítem",
+        y="monto unitario ítem",
+        color="nombre responsable",
+        title="10 Ítems más caros"
+    )
+    fig2.update_layout(height=600)
+    st.plotly_chart(
+        fig2,
+        use_container_width=True
+    )
+
+    fig3 = px.bar(
+        resumen3,
+        x="monto unitario ítem",
+        y="nombre ítem",
+        title="Ítems más comprados",
+        orientation="h",
+        color="monto unitario ítem",
+    )
+    fig3.update_layout(height=600)
+    st.plotly_chart(
+        fig3,
+        use_container_width=True
+    )
+
+    #status.update(label="Proceso completado", state="complete", expanded=False)
+
+    ##############################################################
+    # DESCARGA ARCHIV
+    ##############################################################
+    output_bytes = io.BytesIO()
+    with pd.ExcelWriter(output_bytes, engine="openpyxl") as writer:
+        df.to_excel(writer, index=False)
+    st.download_button(
+        label="Descargar Excel procesado",
+        data=output_bytes.getvalue(),
+        file_name="plan_de_compras_2025_procesado.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+    )
+
+
+else:
+    st.info("Por favor, suba un archivo Excel para comenzar el análisis.")
+
+```
+</details>

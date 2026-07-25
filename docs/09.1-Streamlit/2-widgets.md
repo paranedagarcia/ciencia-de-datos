@@ -395,7 +395,7 @@ Se usa cuando no conoces el tiempo exacto que tomará la tarea, pero quieres mos
 El widget **`st.spinner`** se utiliza en Streamlit para mostrar un mensaje de espera mientras la aplicación ejecuta una tarea pesada o un proceso en segundo plano. Su función principal es mejorar la experiencia del usuario (UX) al indicar visualmente que la aplicación está procesando información y no se ha congelado.
 
 <details>
-<summary>Un ejemplo completo que simula la carga de un modelo de datos:</summary>
+<summary>💻 Un ejemplo completo que simula la carga de un modelo de datos:</summary>
 
 ```python
 import streamlit as st
@@ -442,6 +442,7 @@ if st.button('Iniciar Proceso'):
     ```.
 
 ### Estado de la operación (`st.status`)
+
 Este widget es útil para mostrar el estado de operaciones en curso, permitiendo incluir notificaciones o alertas sobre si la tarea está progresando, se completó o encontró errores.
 
 El widget **`st.status`** es una herramienta de Streamlit diseñada para mostrar el estado de operaciones o tareas de larga duración. A diferencia de otros indicadores de carga, actúa como un contenedor que permite agrupar múltiples notificaciones o mensajes internos, informando al usuario si el proceso está en progreso, se ha completado o ha encontrado errores.
@@ -453,7 +454,7 @@ El widget **`st.status`** es una herramienta de Streamlit diseñada para mostrar
 import streamlit as st
 import time
 
-st.title("Monitor de Tareas con st.status")
+st.subtitle("Monitor de Tareas con st.status")
 
 # 1. Iniciamos el widget st.status como un administrador de contexto
 # El parámetro 'expanded=True' permite ver los detalles de los pasos internos.
@@ -541,7 +542,135 @@ Si el proceso es de duración incierta y no puedes calcular un porcentaje, se re
 
 ## Inputs
 
-### Especializados
+Como parte esencial de todo lenguaje de programación los compponentes de input permiten el ingreso de información a cualquier sistema de gestión de datos.
+
+### Input estándares
+
+Streamlit dispone de una serie de componentes, de hecho de todos los necesarios y habituales para el gestionar el ingreso de datos. Desde textos a archivos. También dispone de componentes adicionales dispuestos por la comunidad y que amplian las posibilidades de ingreso de datos de diverso tipo.
+
+Para crear una aplicación autocontenida que agrupe diversos tipos de entrada dentro de un formulario en Streamlit, es necesario utilizar el administrador de contexto `st.form` junto con un identificador único (`key`) y el widget obligatorio `st.form_submit_button`.
+
+Este ejemplo muestra los diversos tipos de widgets de entrada disponibles en el núcleo de Streamlit dentro de un `st.form`.
+
+<details>
+<summary>💻 Código</summary>
+
+```python showLineNumbers
+import streamlit as st
+import datetime
+
+# Configuración inicial de la página
+st.set_page_config(page_title="Formulario Maestro de Inputs", layout="centered")
+
+st.title("Formulario de Registro Completo")
+st.write("Este ejemplo muestra los diversos tipos de widgets de entrada disponibles en el núcleo de Streamlit dentro de un `st.form`.")
+
+# 1. Creación del formulario con una clave única
+with st.form(key='formulario_maestro'):
+    st.subheader("Información Personal y Preferencias")
+    
+    # Organizar en columnas para mejor diseño
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        # Input de texto simple
+        nombre = st.text_input("Nombre completo", placeholder="Ej. Juan Pérez")
+        
+        # Input numérico con límites y paso
+        edad = st.number_input("Edad", min_value=0, max_value=120, value=25, step=1)
+        
+        # Selector de fecha (Calendario)
+        fecha_nacimiento = st.date_input("Fecha de nacimiento", value=datetime.date(2000, 1, 1))
+        
+        # Selector de color (Hexadecimal)
+        color_favorito = st.color_picker("Elige tu color de marca", "#00f900")
+
+    with col2:
+        # Input de contraseña (texto enmascarado)
+        password = st.text_input("Contraseña secreta", type="password")
+        
+        # Selector único (Radio buttons)
+        genero = st.radio("Género", ["Masculino", "Femenino", "Otro", "Prefiero no decirlo"])
+        
+        # Selector de hora
+        hora_contacto = st.time_input("Hora preferida de contacto", value=datetime.time(9, 0))
+        
+        # Interruptor de activación (Toggle)
+        notificaciones = st.toggle("Activar notificaciones por correo")
+
+    st.divider() # Separador visual
+    st.subheader("Experiencia y Selección")
+
+    # Selección desplegable (Selectbox)
+    pais = st.selectbox("País de residencia", ["Argentina", "Chile", "Colombia", "España", "México", "Otro"])
+
+    # Selección múltiple (Multiselect)
+    habilidades = st.multiselect(
+        "Habilidades técnicas (selecciona varias)",
+        ["Python", "Streamlit", "Data Science", "SQL", "Machine Learning", "Cloud Computing"]
+    )
+
+    # Deslizador numérico (Slider)
+    nivel_satisfaccion = st.slider("Nivel de satisfacción con la herramienta (0-100)", 0, 100, 50)
+
+    # Deslizador de opciones específicas (Select Slider)
+    talla_camiseta = st.select_slider(
+        "Talla de camiseta promocional",
+        options=["XS", "S", "M", "L", "XL", "XXL"]
+    )
+
+    # Área de texto para mensajes largos
+    biografia = st.text_area("Breve biografía o comentarios adicionales", height=100)
+
+    # Casilla de verificación simple
+    terminos = st.checkbox("Acepto los términos y condiciones")
+
+    # 2. Botón de envío obligatorio para procesar el formulario
+    # Al hacer clic, Streamlit enviará todos los datos en un solo lote.
+    submit_button = st.form_submit_button(label='Enviar Registro', type="primary")
+
+# 3. Lógica para mostrar los resultados tras el envío
+if submit_button:
+    if terminos:
+        st.success(f"¡Gracias, {nombre}! Los datos se han enviado correctamente.")
+        
+        # Mostrar resumen de datos capturados
+        with st.expander("Ver resumen de datos"):
+            st.write(f"**Edad:** {edad}")
+            st.write(f"**País:** {pais}")
+            st.write(f"**Género:** {genero}")
+            st.write(f"**Habilidades:** {', '.join(habilidades)}")
+            st.write(f"**Color favorito (HEX):** {color_favorito}")
+            st.write(f"**Notificaciones activas:** {'Sí' if notificaciones else 'No'}")
+    else:
+        st.error("Debes aceptar los términos y condiciones para continuar.")
+```
+</details>
+
+<center>
+<figure>
+![](img/st.form.png)
+<figcaption>Ejemplos de componentes de input.</figcaption>
+</figure>
+</center>
+
+<center>
+<figure>
+![](img/st.form-2.png)
+<figcaption>Ejemplos de componentes de input. Continuación</figcaption>
+</figure>
+</center>
+
+#### Detalles clave de este ejemplo:
+*   **Eficiencia de ejecución:** Al usar `st.form`, la aplicación no se recarga cada vez que el usuario interactúa con un widget individual (como mover un deslizador o escribir una letra), sino que espera hasta que se presiona el botón de envío.
+
+*   **Organización visual:** Se utilizan `st.columns` para aprovechar el ancho de la página y `st.divider` para segmentar la información lógicamente.
+
+*   **Diversidad de datos:** El código maneja cadenas de texto, booleanos (checkbox/toggle), fechas, horas, números enteros y selecciones categóricas.
+
+*   **Validación básica:** Se incluye una condición final que verifica si el usuario marcó la casilla de términos antes de mostrar el mensaje de éxito.
+
+### Inputs personalizados
 
 <details>
 <summary>💻 Código</summary>
