@@ -135,7 +135,7 @@ Si el filtrado requiere procesar datasets muy grandes, usa el decorador **`@st.c
 
 Para combinar varios filtros en una misma vista de Streamlit, el enfoque principal consiste en capturar los valores de múltiples **widgets de entrada** y aplicarlos secuencialmente para manipular un DataFrame de Pandas antes de renderizar los gráficos.
 
-A continuación, se detallan las estrategias recomendadas según las fuentes:
+A continuación, se detallan algunas de las estrategias recomendadas:
 
 #### 1. Organización en la Interfaz
 Para no saturar el área principal de visualización, los filtros suelen organizarse de dos maneras:

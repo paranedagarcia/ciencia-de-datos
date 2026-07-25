@@ -178,7 +178,7 @@ El proceso estándar consiste en definir un objeto de gráfico y luego pasarlo a
 
 ### Ventajas de Altair
 
-La elección entre **Altair**, **Matplotlib** y **Plotly** depende de las necesidades de interactividad y personalización del proyecto. Según las fuentes, **Altair** presenta ventajas significativas, especialmente en su integración con Streamlit:
+La elección entre **Altair**, **Matplotlib** y **Plotly** depende de las necesidades de interactividad y personalización del proyecto. **Altair** presenta ventajas significativas, especialmente en su integración con Streamlit:
 
 #### 1. Enfoque Declarativo vs. Imperativo
 *   **Altair:** Es una librería **declarativa**. Esto significa que el desarrollador define las **relaciones entre las columnas** de los datos (qué va en el eje X, qué en el Y, qué determina el color) y Altair se encarga del resto del diseño.
@@ -200,7 +200,7 @@ La elección entre **Altair**, **Matplotlib** y **Plotly** depende de las necesi
 *   **Matplotlib:** Requiere definir explícitamente objetos de figura (`plt.subplots()`) y pasarlos al comando `st.pyplot()`, lo que puede generar advertencias globales si no se gestiona correctamente.
 
 #### 4. Estética y Diseño
-*   **Altair:** Las fuentes lo describen como una opción que genera gráficos **"generalmente bonitos"** con poco esfuerzo, siguiendo principios modernos de visualización estadística.
+*   **Altair:** Es una opción que genera gráficos **"generalmente bonitos"** con poco esfuerzo, siguiendo principios modernos de visualización estadística.
 
 *   **Matplotlib:** Es ampliamente adoptado pero se considera **"no particularmente atractivo"** estéticamente sin una configuración manual extensa.
 

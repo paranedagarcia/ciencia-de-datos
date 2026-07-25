@@ -45,7 +45,7 @@ CRISP-DM destaca por su carácter iterativo: las fases no son estrictamente secu
 
 OSEMN representa cinco etapas fundamentales:
 
-1. **Obtain (Obtener):** Recolectar los datos necesarios desde diversas fuentes, como bases de datos, APIs, archivos planos, web scraping, etc.
+1. **Obtain (Obtener):** Recolectar los datos necesarios desde numerosas fuentes, como bases de datos, APIs, archivos planos, web scraping, etc.
 2. **Scrub (Limpiar):** Procesar y limpiar los datos para corregir errores, eliminar duplicados, tratar valores faltantes y asegurar la calidad de la información.
 3. **Explore (Explorar):** Analizar los datos de manera exploratoria mediante estadísticas descriptivas y visualizaciones para identificar patrones, tendencias y anomalías.
 4. **Model (Modelar):** Aplicar técnicas de modelado estadístico o de machine learning para extraer conocimiento, hacer predicciones o clasificaciones.
@@ -98,7 +98,7 @@ El **AWS Data Science Lifecycle** es el marco metodológico propuesto por Amazon
 **Fases principales del AWS Data Science Lifecycle:**
 
 1. **Problem Definition (Definición del problema):** Identificación clara de los objetivos de negocio y los resultados esperados, alineando el proyecto con las necesidades de la organización.
-2. **Data Collection (Recolección de datos):** Obtención de datos desde diversas fuentes, como bases de datos, almacenamiento en la nube, APIs o flujos en tiempo real, utilizando servicios como AWS S3, AWS Glue o Amazon RDS.
+2. **Data Collection (Recolección de datos):** Obtención de datos desde múltiples fuentes, como bases de datos, almacenamiento en la nube, APIs o flujos en tiempo real, utilizando servicios como AWS S3, AWS Glue o Amazon RDS.
 3. **Data Preparation (Preparación de datos):** Limpieza, transformación y enriquecimiento de los datos mediante herramientas como AWS Glue, Amazon SageMaker Data Wrangler o scripts personalizados.
 4. **Model Building (Construcción del modelo):** Desarrollo, entrenamiento y ajuste de modelos de machine learning utilizando Amazon SageMaker, que permite gestionar entornos, recursos y experimentos de manera eficiente.
 5. **Model Deployment (Despliegue del modelo):** Implementación de modelos en producción a través de endpoints gestionados, integración con aplicaciones o automatización de inferencias usando servicios como SageMaker Endpoint o AWS Lambda.

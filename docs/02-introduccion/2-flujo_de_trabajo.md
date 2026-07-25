@@ -10,7 +10,7 @@ description: "Flujo de trabajo de un proyecto"
 Un flujo de trabajo típico en un proyecto de ciencia de datos puede incluir los siguientes pasos:
 1. **Definición del problema**: Comprender los objetivos del proyecto y las preguntas que se quieren responder.
 
-2. **Recolección de datos**: Obtener los datos necesarios desde diversas fuentes (bases de datos, APIs, archivos CSV, etc.).
+2. **Recolección de datos**: Obtener los datos necesarios desde varias fuentes (bases de datos, APIs, archivos CSV, etc.).
 
 3. **Limpieza y preprocesamiento de datos**: Manejar valores faltantes, eliminar duplicados, transformar variables y preparar los datos para el análisis.
 

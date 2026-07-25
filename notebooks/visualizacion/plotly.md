@@ -80,7 +80,7 @@ fig.show()
 
 
 ## Conversión de Matplotlib a Plotly
-Una característica fundamental mencionada en las fuentes es la capacidad de **Plotly** para tomar un objeto de figura de **Matplotlib** y convertirlo en una versión interactiva.
+Una característica fundamental es la capacidad de **Plotly** para tomar un objeto de figura de **Matplotlib** y convertirlo en una versión interactiva.
 
 
 ```python
