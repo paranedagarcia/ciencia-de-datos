@@ -1,5 +1,7 @@
 # Ciencia de Datos
 
+![](/static/img/github-ciencia-de-datos.png)
+
 Este manual está disponible para su estudio online en **https://patricioaraneda.cl/ciencia-de-datos/**
 
 Este tiene su origen en las clases que he realizado a lo largo de los años en estas áreas. Orientado principalmente a lograr la comprensión de los temas y de los datos, que es el primer paso para cualquier proyecto de ciencia de datos. Aquí aprenderás a explorar, limpiar y visualizar datos de manera efectiva.
