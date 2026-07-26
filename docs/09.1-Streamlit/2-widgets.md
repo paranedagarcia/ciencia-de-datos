@@ -1,9 +1,9 @@
 ---
 id: streamlit-widgets
-title: "Uso de Widgets"
-sidebar_label: "💻 Widgets"
-sidebar_position: 1
-description: "Widgets"
+title: "Uso de Componentes"
+sidebar_label: "💻 Componentes"
+sidebar_position: 2
+description: "Componentes de usabilidad en Streamlit"
 slug: /streamlit-widgets
 ---
 
@@ -14,7 +14,9 @@ En el ecosistema de Streamlit, los **widgets** son los *componentes* fundamental
 
 Por defecto Streamlit incluye una gran cantidad de widgets propios listos para usar, además de eso, hay una amplia dosponibilidad de widgets de terceros que pueden ser accedidos a través de extras.
 
-**Componentes**: https://streamlit.io/components
+**Componentes**: 
+- https://streamlit.io/components
+- https://extras.streamlit.app
 
 <center>
 <figure>
@@ -193,16 +195,19 @@ A continuación se detallan las diferencias principales:
 </center>
 
 #### Retorno de Datos
+
 *   **`st.dataframe`**: Su valor de retorno es `None` (o simplemente se usa para mostrar el objeto), por lo que no devuelve información de vuelta al script de Python más allá de la visualización.
 *   **`st.data_editor`**: Es un widget bidireccional que **devuelve el DataFrame editado** como un nuevo objeto. Esto permite capturar los cambios del usuario y utilizarlos para otros procesos, como actualizar gráficos o guardar los datos en un archivo o base de datos.
 
 #### Funcionalidades de Fila y Columna
+
 *   **`st.data_editor`** permite configuraciones avanzadas que no están presentes o no son relevantes en `st.dataframe`:
     *   **Filas dinámicas**: Se puede configurar para permitir al usuario añadir o eliminar filas (por ejemplo, con el parámetro `num_rows="dynamic"`).
 
     *   **Configuración de columnas**: Ambos admiten `st.column_config`, pero en el editor esto permite definir tipos de entrada específicos para cada columna, como casillas de verificación (checkboxes), menús desplegables (selectboxes), selectores de fecha o URLs clicables.
 
 #### Casos de Uso Ideales
+
 | Función | Uso principal |
 | :--- | :--- |
 | **`st.dataframe`** | Exploración y análisis de datos donde solo se necesita visualizar grandes conjuntos de datos de forma interactiva (zoom, ordenamiento). |
@@ -538,6 +543,30 @@ st.write("¡Proceso completado!")
 *   **Limpieza:** Una vez terminado el proceso, puedes usar el comando `.empty()` sobre el objeto de la barra de progreso si deseas que desaparezca de la interfaz.
 
 Si el proceso es de duración incierta y no puedes calcular un porcentaje, se recomienda usar **`st.spinner()`** en su lugar para mostrar un indicador de carga temporal.
+
+
+### st.status vs st.spinner
+
+La principal diferencia entre **`st.spinner`** y **`st.status`** radica en su complejidad y en cómo presentan la información al usuario durante la ejecución de tareas.
+
+Diferencias clave:
+
+#### Naturaleza y Propósito
+*   **`st.spinner`**: Se define como una animación simple de un círculo giratorio acompañada de un mensaje temporal. Su propósito principal es indicar al usuario que la aplicación está procesando algo en segundo plano.
+
+*   **`st.status`**: Es un **contenedor** diseñado específicamente para mostrar el estado de operaciones o tareas en curso. Actúa de manera más robusta que un simple icono, organizando notificaciones o alertas sobre el progreso.
+
+#### Comportamiento y Persistencia
+*   **`st.spinner`**: Es de naturaleza estrictamente **temporal**. Una vez que el bloque de código asociado termina de ejecutarse, el spinner y su mensaje desaparecen automáticamente de la pantalla.
+
+*   **`st.status`**: Al ser un contenedor, permite informar al usuario sobre distintos estados finales. Ayuda a los usuarios a mantenerse informados sobre si las tareas están en progreso, se han completado con éxito o si han encontrado errores.
+
+#### Información Visual
+*   **`st.spinner`**: Solo muestra un mensaje de texto y la animación de carga mientras la operación está activa.
+
+*   **`st.status`**: Gestiona visualmente estados más complejos (ej. "running", "complete" o "error") a través de notificaciones agrupadas, lo que ofrece una mayor transparencia en procesos de larga duración.
+
+En resumen, utiliza **`st.spinner`** para notificaciones rápidas de carga que no necesitan dejar rastro tras finalizar. Utiliza **`st.status`** cuando necesites un contenedor que informe detalladamente sobre el progreso y el resultado final (éxito o fallo) de una operación.
 
 
 ## Inputs

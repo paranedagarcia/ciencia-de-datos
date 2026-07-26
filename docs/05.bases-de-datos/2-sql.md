@@ -611,7 +611,7 @@ WHERE (ciudad = 'Concepción' AND edad >= 45 OR estado = TRUE)
 AND fecha IS NOT NULL
 ```
 
-### Ejemplos de agregaciones
+#### Ejemplos de agregaciones
 
 
 ```sql showLineNumbers
@@ -703,7 +703,7 @@ FROM ventas
 ```
 
 
-### Registros duplicados
+#### Registros duplicados
 
 Uno de los problemas más acuciantes en el análisis de datos tiene que ver con este tema.
 

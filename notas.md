@@ -1,15 +1,15 @@
 
+<details>
+<summary>💻 Código</summary>
+
+</details>
+
 <center>
 <figure>
 ![](img/sql_analisis_g.png)
 <figcaption>Tu subtítulo</figcaption>
 </figure>
 </center>
-
-<details>
-<summary>💻 Código</summary>
-
-</details>
 
 ## streamlit
 
@@ -18,7 +18,6 @@
 ¿Es posible descargar los gráficos generados en el dashboard?
 ¿Cómo se integra un selector de fechas en el dashboard?
 ¿Cómo se combinan varios filtros en una misma vista?
-¿Cómo puedo guardar los cambios hechos en el st.data_editor?
 ¿Cómo optimizar el rendimiento de procesos largos con cache?
 Explica cómo gestionar el estado de la sesión en aplicaciones interactivas
 ¿Qué opciones de diseño existen para organizar widgets y contenedores?
@@ -35,18 +34,13 @@ Explica cómo gestionar el estado de la sesión en aplicaciones interactivas
 
 
 ## CHART
-¿Es posible hacer que los gráficos de Matplotlib sean interactivos?
-¿Qué otras librerías de visualización son compatibles con Streamlit?
-¿Cómo puedo personalizar los colores de los gráficos de Altair?
+
 ¿Qué diferencias hay entre st.line_chart y st.area_chart?
 ¿Cómo se añaden tooltips informativos a un gráfico interactivo?
 ¿Qué librerías adicionales puedo usar para gráficos más avanzados?
 ¿Cómo se aplican temas personalizados a los gráficos?
 ¿Cómo puedo habilitar la interactividad en un gráfico de Altair?
 ¿Cómo puedo usar st.columns para organizar mis gráficos?
-¿Cómo puedo personalizar los colores en mis gráficos de Altair?
-¿Qué ventajas tiene Altair frente a Matplotlib y Plotly?
-¿Cómo puedo añadir interactividad a un gráfico de Altair?
 ¿Cómo puedo mostrar mapas interactivos avanzados con st-folium?
 ¿Cómo puedo usar Seaborn con st.pyplot?
 ¿Qué ventajas ofrece st.plotly_chart para dashboards interactivos?
@@ -58,6 +52,8 @@ Explica cómo gestionar el estado de la sesión en aplicaciones interactivas
 ¿Es posible añadir tooltips interactivos en Altair?
 ¿Cómo puedo filtrar el gráfico de Altair por categoría?
 ¿Qué librerías adicionales puedo usar para mapas más complejos?
+¿Cómo puedo personalizar el diseño de los gráficos en Altair?
+¿Qué otras librerías de visualización avanzada recomienda Streamlit?
 
 ## 3D
 ¿Qué tipos de visualizaciones 3D permite la capa HexagonLayer?

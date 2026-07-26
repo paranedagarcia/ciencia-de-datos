@@ -603,7 +603,63 @@ df_maximas['Fecha'] = df_maximas['Fecha'].dt.strftime('%Y-%m-%d')
 df_maximas.head()
 ```
 
+### Pandas y Bases de datos
 
+Para conectar **pandas** a una base de datos **PostgreSQL** y cargar datos, se utiliza generalmente la librería **SQLAlchemy** como interfaz unificada y un controlador específico como **psycopg2**.
+
+### Pasos principales para la conexión
+
+1.  **Instalación de dependencias:** Es necesario tener instaladas las librerías `sqlalchemy` y `psycopg2` (el adaptador de base de datos para PostgreSQL).
+2.  **Creación del motor (Engine):** Se utiliza la función `create_engine()` de SQLAlchemy pasando una cadena de conexión (URI) con el formato: `postgresql://usuario:contraseña@host:puerto/nombre_base_datos`.
+3.  **Lectura de datos:** Se emplea la función `pd.read_sql()`, la cual acepta una consulta SQL o un nombre de tabla y el objeto de conexión.
+
+#### Ejemplo de código
+
+<details>
+<summary>💻 Código</summary>
+
+El siguiente ejemplo implementa el uso de `with` (como **gestor de contexto** para asegurar que la conexión se cierre automáticamente) y un bloque `try-except` para el manejo de errores:
+
+```python showLineNumbers
+import pandas as pd
+from sqlalchemy import create_engine
+
+# 1. Definir los parámetros de conexión
+# Formato: postgresql://usuario:password@host:puerto/base_de_datos
+conn_uri = "postgresql://postgres:mi_password@localhost:5432/mi_base_datos"
+
+try:
+    # 2. Crear el motor de conexión de SQLAlchemy
+    engine = create_engine(conn_uri)
+    
+    # 3. Establecer la conexión usando 'with' para garantizar el cierre automático
+    with engine.connect() as connection:
+        query = "SELECT * FROM ventas WHERE total > 100"
+        
+        # 4. Cargar los datos directamente a un DataFrame
+        df = pd.read_sql(query, connection)
+    
+    # Mostrar el resultado si la operación fue exitosa
+    if not df.empty:
+        print("Datos cargados exitosamente:")
+        print(df.head())
+    else:
+        print("La consulta no devolvió resultados.")
+
+except Exception as e:
+    # Capturar cualquier error de conexión o sintaxis SQL
+    print(f"Ocurrió un error al interactuar con la base de datos: {e}")
+```
+</details>
+
+
+### Consideraciones importantes
+
+*   **Context Manager (`with`):** El uso del bloque `with` es una buena práctica porque gestiona la limpieza de recursos de forma automática, cerrando la conexión incluso si ocurre una excepción durante la ejecución.
+
+*   **Manejo de errores:** El bloque `try-except` es vital para capturar problemas comunes como credenciales incorrectas, base de datos fuera de línea o tablas inexistentes.
+
+*   **Alternativa directa:** Si tienes SQLAlchemy instalado, pandas permite pasar la cadena de conexión (URI) directamente a `read_sql()` sin abrir explícitamente la conexión con `with`, aunque esto ofrece menos control sobre el ciclo de vida de la conexión.
 
 
 ## Merge, Join

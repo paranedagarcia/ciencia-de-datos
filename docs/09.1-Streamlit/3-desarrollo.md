@@ -2,7 +2,7 @@
 id: streamlit-dev
 title: "Streamlit"
 sidebar_label: "💻 Desarrollo en Streamlit"
-sidebar_position: 1
+sidebar_position: 3
 description: "Desarrollo de aplicaciones"
 slug: /streamlit-dev
 ---
@@ -172,8 +172,69 @@ Una vez capturados los valores de los widgets (almacenados normalmente en variab
 3.  El script calcula un nuevo DataFrame (`main_df`) aplicando todas las condiciones booleanas simultáneamente.
 4.  Los widgets de salida, como **`st.metric`** y **`st.plotly_chart`**, se actualizan automáticamente para mostrar los resultados del nuevo DataFrame filtrado.
 
+## Secrets
 
+Para utilizar **`st.secrets`** con el fin de conectar de forma segura a una base de datos, debes seguir un proceso que implica la creación de un archivo de configuración local y el uso de un objeto similar a un diccionario en tu código Python.
 
+Aquí tienes los pasos detallados:
+
+#### Configuración local (`secrets.toml`)
+Para el desarrollo en tu máquina local, debes crear un archivo donde se almacenarán las credenciales sin exponerlas en el código principal.
+
+El archivo global secrets de estar en:
+
+- ~/.streamlit/secrets.toml for **macOS/Linux**
+- %userprofile%/.streamlit/secrets.toml for **Windows**:
+
+1.  En la carpeta raíz de tu proyecto, crea un directorio oculto llamado **`.streamlit`**.
+2.  Dentro de esa carpeta, crea un archivo llamado **`secrets.toml`**.
+3.  Define las credenciales: Escribe tus datos sensibles siguiendo el formato TOML (Tom's Obvious Minimal Language), que utiliza pares de clave-valor y permite organizar la información en secciones mediante corchetes.
+
+- Ejemplo de formato simple: api_key = "tu_clave_aqui".
+
+Ejemplo con secciones:
+Este formato se mapea internamente a un diccionario anidado en Python
+
+**Ejemplos de formato:**
+*   **Para una cadena de conexión general (ej. PostgreSQL):**
+    ```toml title="secrets.toml"
+    [config]
+    connection_string = "postgresql://usuario:password@localhost:5432/nombre_db"
+    ```
+*   **Para conectar a un servicio snowflake**
+    ```toml title="secrets.toml"
+    [snowflake]
+    user = "mi_usuario"
+    password = "mi_password"
+    account = "identificador_de_cuenta"
+    warehouse = "COMPUTE_WH"
+
+    api_key = "ejemplo de api key"
+    ```
+:::warning[Seguridad]
+Seguridad y .gitignore: Es una práctica fundamental no incluir nunca el archivo secrets.toml en tu sistema de control de versiones (como Git). Debes añadir la ruta `.streamlit/` a tu archivo `.gitignore` para evitar que las credenciales se publiquen accidentalmente en repositorios públicos como GitHub.
+:::
+
+#### Acceso desde el código Python
+Streamlit carga automáticamente el contenido de este archivo en el objeto **`st.secrets`**. Puedes acceder a los datos de la siguiente manera:
+
+*   **Acceso directo:** `db_url = st.secrets["config"]["connection_string"]`.
+*   **Paso de parámetros en bloque:** Para conectores que aceptan diccionarios (como Snowflake o PostgreSQL con `psycopg2`), puedes usar el operador `**` para pasar todas las credenciales de una sección a la vez:
+    ```python
+    import snowflake.connector
+    import streamlit as st
+
+    # Se desempaquetan todas las claves de la sección [snowflake]
+    conn = snowflake.connector.connect(**st.secrets["snowflake"])
+    ```
+
+#### Seguridad y Despliegue
+*   **Archivo `.gitignore`:** Es fundamental **no subir nunca el archivo `secrets.toml` a un repositorio público** (como GitHub). Debes añadir la carpeta `.streamlit/` a tu archivo `.gitignore` para evitar filtraciones de credenciales.
+
+*   **En la nube (Streamlit Community Cloud):** Una vez desplegada tu aplicación, ve a la configuración del app (**Settings > Secrets**) y pega allí el contenido de tu archivo TOML. Streamlit los cifrará y los servirá de forma segura en tiempo de ejecución.
+
+#### Recomendación de rendimiento
+Dado que Streamlit ejecuta el script de arriba abajo en cada interacción, se recomienda envolver la creación de la conexión en una función decorada con **`@st.cache_resource`**. Esto garantiza que la conexión a la base de datos se inicialice solo una vez y se comparta entre todas las sesiones, mejorando drásticamente la velocidad de la aplicación.
 
 
 ## Bases de datos
@@ -198,6 +259,55 @@ Para bases de datos como PostgreSQL, Snowflake o BigQuery, el proceso es similar
 *   **Google BigQuery:** Necesitas una cuenta de servicio de Google Cloud y sus credenciales en formato JSON (que deben convertirse a TOML para el archivo de secretos). Utiliza `@st.cache_resource` para el cliente de BigQuery.
 
 *   **PostgreSQL:** Se suele utilizar `psycopg2` o `SQLAlchemy`. Al igual que con las anteriores, la conexión debe mantenerse en un "pool" compartido mediante `@st.cache_resource` para que sea eficiente entre múltiples usuarios.
+
+Ejemplo de conexión:
+```toml title=".streamlit/secrets.toml"
+# .streamlit/secrets.toml
+[postgres]
+host = "localhost"
+port = 5432
+database = "tu_base_de_datos"
+user = "tu_usuario"
+password = "tu_password"
+```
+En tu script principal, utiliza el decorador `@st.cache_resource` para inicializar la conexión. Esto es crucial porque permite que la conexión se cree una sola vez y se comparta entre todas las sesiones, mejorando el rendimiento y evitando saturar el servidor de base de datos.
+
+```python showLineNumbers title="app.py"
+import streamlit as st
+import psycopg2
+
+# 1. Función para inicializar la conexión utilizando caché
+# Se utiliza **st.secrets para desempaquetar el diccionario de credenciales directamente
+@st.cache_resource
+def init_connection():
+    return psycopg2.connect(**st.secrets["postgres"])
+
+conn = init_connection()
+
+# 2. Función para ejecutar una consulta
+# El uso de 'with conn.cursor() as cur' garantiza que el cursor se cierre automáticamente [7]
+def run_query(query):
+    with conn.cursor() as cur:
+        cur.execute(query)
+        return cur.fetchall()
+
+st.title("Conexión Segura a PostgreSQL")
+
+# Ejecutar una consulta de prueba
+try:
+    rows = run_query("SELECT * FROM mi_tabla LIMIT 10;")
+    
+    # Mostrar los resultados
+    for row in rows:
+        st.write(f"Registro: {row}")
+except Exception as e:
+    st.error(f"Error al conectar o consultar la base de datos: {e}"
+```
+:::info
+**Despliegue en la nube:** Si despliegas en algún servicio de la nube, deberás copiar el contenido del archivo TOML en la configuración de Settings > Secrets del panel de control de tu aplicación.
+
+**Gestión de Cursors:** Se recomienda usar context managers (with conn.cursor() as cur) para asegurar que los recursos de memoria se liberen correctamente tras cada consulta.
+:::
 
 #### Conexión a Bases de Datos No Relacionales (NoSQL)
 *   **MongoDB:** Permite almacenar datos no estructurados como documentos JSON. Se utiliza la librería `pymongo` y se establece un cliente cacheado para evitar reconexiones costosas.
@@ -285,7 +395,9 @@ with st.sidebar:
 
 Esta organización mediante el bloque `with` permite agrupar el logo con otros widgets de forma ordenada.
 
-## Aplicacíon completa
+## Aplicación completa
+
+Se presenta un ejemplo de una aplicación completa con todas las secciones básicas. De es manera puedes usarlo como plantilla para aplicar desde lo básico de la creación en Streamlit. Usalo como punto de partida.
 
 <center>
 <figure>
@@ -670,3 +782,73 @@ else:
 
 ```
 </details>
+
+## Una app multipáginas
+
+Crear una aplicación multipágina en Streamlit se puede lograr de dos maneras principales: mediante la **estructura de carpetas estándar** o de forma programática utilizando **`st.navigation`**.
+
+### Método Estándar
+Este método (estuctura de carpetas) el método más sencillo y se basa en organizar tus archivos en el sistema de archivos de tu proyecto. Streamlit detecta automáticamente los archivos dentro de una carpeta específica y los muestra en la barra lateral.
+
+**Estructura del proyecto:**
+*   **`home.py`**: El archivo principal que ejecutarás con `streamlit run`. Este actúa como la página de inicio.
+
+*   **`pages/`**: Una carpeta que debe llamarse exactamente así, ubicada en el mismo directorio que tu archivo principal.
+    *   **`pagina_2.py`**: Los archivos dentro de esta carpeta se convertirán en páginas adicionales.
+    *   **`pagina_3.py`**: Streamlit usará los nombres de los archivos para crear los enlaces de navegación en el sidebar.
+
+**Reglas clave:**
+*   Solo los archivos `.py` dentro de la carpeta `pages` se cargarán como páginas.
+*   Este método funciona en versiones de Streamlit superiores a la **1.10**.
+
+```raw title="Estructura de proyecto"
+carpeta_proyecto/
+├── pages/
+│   ├── pagina_1.py
+│   └── pagina_2.py
+└── app.py
+```
+
+
+
+### Método Programático
+
+Este método utiliza `st.navigation` y `st.Page` para aplicaciones más complejas que requieren un control dinámico de la navegación, se utilizan los objetos **`st.Page`** y la función **`st.navigation`**.
+
+**Pasos para este método:**
+
+1.  **Definir las páginas:** Crea objetos `st.Page` especificando la ruta del archivo, el título y un icono opcional.
+    ```python
+    pagina_inicio = st.Page("inicio.py", title="Inicio", icon=":material/home:")
+    pagina_datos = st.Page("datos.py", title="Datos", icon=":material/analytics:")
+    ```
+2.  **Configurar la navegación:** Pasa una lista de estos objetos a `st.navigation`.
+    ```python
+    pg = st.navigation([pagina_inicio, pagina_datos])
+    ```
+3.  **Ejecutar la página seleccionada:** Llama al método `.run()` del objeto devuelto por la navegación.
+    ```python
+    pg.run()
+    ```
+```raw title="Estructura de proyecto"
+carpeta_proyecto/
+├── pagina_1.py
+├── pagina_2.py
+└── app.py
+```
+```python title="Navegación por páginas"
+import streamlit as st
+
+pg = st.navigation([st.Page("pagina_1.py"), st.Page("pagina_2.py")])
+pg.run()
+```
+
+### Beneficios y Herramientas Adicionales
+
+*   **Estado compartido:** El **`st.session_state`** se comparte entre todas las páginas de la aplicación, lo que permite que los datos o selecciones del usuario persistan mientras navega.
+
+*   **Iconos:** Puedes añadir iconos a las páginas usando la sintaxis `:material/nombre_del_icono:` de la librería Material Symbols de Google.
+
+*   **Librerías de la comunidad:** Existen herramientas como **`st-pages`** que permiten añadir funcionalidades extra, como agrupar páginas en secciones o añadir emojis a los enlaces de forma más flexible.
+
+Para una organización óptima, se recomienda mantener las funciones de carga de datos pesadas centralizadas y utilizar **`@st.cache_data`** para que la navegación sea rápida y no recargue datos innecesariamente en cada página.

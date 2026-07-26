@@ -36,20 +36,32 @@ Profesional senior con +20 años de experiencia en informática y software, espe
 
 <br />
 
-## 🎓 Docencia universitaria
+## 🎓 Docencia
 
-**UDLA**: Bases de Datos | Analítica de Negocios | Análisis de Datos | Fundamentos de Sistemas Inteligentes | Machine Learning (Magíster en Ciencia de Datos)
+- **Universidad de Las Américas**: 
+  
+  Bases de Datos | Analítica de Negocios | Análisis de Datos | Fundamentos de Sistemas Inteligentes | Machine Learning (Magíster en Ciencia de Datos)
+- **Universidad de Talca**: 
 
-**UTALCA**: Tecnologías de la Información | Sistemas y Tecnologías de Información | Taller de Ofimática
+  Tecnologías de la Información | Sistemas y Tecnologías de Información | Taller de Ofimática
+- **Universidad Berbardo O'Higgins**: 
 
-**UBO**: Inteligencia de Negocios | Ciencia de Datos para los negocios
+  Inteligencia de Negocios | Ciencia de Datos para los negocios
+- **Universidad de Chile**: 
 
-**UCHILE**: Bioestadística, Matemática para Bioestadística
+  Bioestadística, Matemática para Bioestadística (Postgrado)
+
+## 🎓 Relatoría
+
+- Ciencia de Datos (**Bootcamp Talento Digital**)
+- Python para el Manejo de Datos en Gestión Pública (**Ministerio de Vivienda y Urbanismo**)
+- Inteligencia Artificial para la Gestión Pública (**Secretaría General de la Presidencia**)
+- SQL para creación, consulta y análisis de datos (**CENABAST**)
 
 ## ☕ Contacto
 
 * **Web**: https://patricioaraneda.cl
-* **Email**: [paraneda@ug.uchile.cl](mailto:paraneda@ug.uchile.cl)
+* **Email**: [paraneda@ug.uchile.cl](mailto:paraneda@ug.uchile.cl) / [patricioaranedagarcia@gmail.com](mailto:patricioaranedagarcia@gmail.com)
 * **LinkedIn**: https://www.linkedin.com/in/patricioaraneda/
 * **GitHub**: https://github.com/paranedagarcia
 

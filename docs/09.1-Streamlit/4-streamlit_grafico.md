@@ -1,15 +1,15 @@
 ---
-id: streamlit-graf
-title: "Streamlit"
-sidebar_label: "💻 Uso de Gráficos"
-sidebar_position: 3
+id: streamlit-graficos
+title: "Librerías gráficas"
+sidebar_label: "📊 Librerías gráficas"
+sidebar_position: 4
 description: "Uso de librerias gráficas"
-slug: /streamlit-graf
+slug: /streamlit-graficos
 ---
 
-<div className="text--center">
-![](img/streamlit-logo.webp)
-</div>
+<center>
+![](img/st-altair-banner.png)
+</center>
 
 :::info[datasets]
 - https://patricioaraneda.cl/public/titanic3.csv
@@ -22,6 +22,13 @@ slug: /streamlit-graf
 Integrar gráficos de **Matplotlib** y **Plotly** en Streamlit es un proceso sencillo gracias a comandos nativos diseñados específicamente para estas bibliotecas. A continuación, se detalla cómo hacerlo para cada una:
 
 ### Matplotlib
+
+<center>
+<figure>
+![](img/matplotlib.png)
+<figcaption></figcaption>
+</figure>
+</center>
 
 Para crear un gráfico de barras utilizando la librería **Matplotlib** en una aplicación de Streamlit, se debe utilizar la función **`st.pyplot()`**. Esta función es la encargada de renderizar figuras de Matplotlib directamente en la interfaz web.
 
@@ -85,6 +92,14 @@ st.pyplot(fig)
 
 
 ### Plotly
+
+<center>
+<figure>
+![](img/plotly-logo.png)
+<figcaption></figcaption>
+</figure>
+</center>
+
 Para gráficos interactivos de Plotly, Streamlit ofrece el comando **`st.plotly_chart()`**.
 
 *   **Interactividad:** Una gran ventaja es que toda la interactividad nativa de Plotly (zoom, herramientas de información al pasar el mouse, descarga como imagen) funciona automáticamente dentro de la aplicación.
@@ -118,7 +133,7 @@ Para personalizar los colores de un gráfico en Streamlit, puedes utilizar méto
 
 A continuación, se detallan las formas principales de lograrlo:
 
-### Uso del widget `st.color_picker`
+#### Uso del widget `st.color_picker`
 Streamlit ofrece el comando **`st.color_picker()`**, que permite al usuario seleccionar un color de forma interactiva. Este widget devuelve el color seleccionado como una cadena de texto en formato hexadecimal (por ejemplo, `"#D6266A"`), que luego puedes pasar a tus funciones de graficado.
 
 *   **Con Seaborn/Matplotlib:** Puedes pasar el valor obtenido del selector de color al argumento `color` de la función de gráfico.
@@ -131,14 +146,14 @@ Streamlit ofrece el comando **`st.color_picker()`**, que permite al usuario sele
     fig = px.histogram(df, x="variable", color_discrete_sequence=[graph_color])
     ```
 
-### Personalización según la biblioteca de gráficos
+#### Personalización según la biblioteca de gráficos
 Cada biblioteca integrada con Streamlit tiene sus propios parámetros para gestionar colores:
 
 *   **Plotly:** Puedes asignar colores basados en variables específicas del dataset usando el argumento `color` (por ejemplo, `color="especie"`). También puedes definir escalas de colores continuas como "Viridis" en gráficos de dispersión.
 *   **Altair:** La personalización se realiza dentro del método `.encode()`, utilizando el parámetro `color` para vincular una columna de datos a una escala cromática.
 *   **Mapas (PyDeck):** En gráficos geoespaciales, puedes definir el color de las capas (como `ScatterplotLayer` o `HexagonLayer`) basándote en la densidad de los puntos o en valores específicos.
 
-### Temas globales de la aplicación
+#### Temas globales de la aplicación
 Puedes cambiar el esquema de colores de toda la interfaz, lo que afecta indirectamente a cómo se ven los widgets y algunos elementos gráficos, modificando el archivo **`config.toml`** en la carpeta `.streamlit`. Los parámetros clave son:
 
 *   **`primaryColor`**: Cambia el color de acento de los elementos interactivos como botones y deslizadores.
@@ -163,17 +178,17 @@ Se detallan las librerías principales:
 
 *   **Vega-Lite:** Utiliza una sintaxis JSON compacta para crear gráficos interactivos. Se puede renderizar con `st.vega_lite_chart()`.
 
-### Visualización Geoespacial y de Mapas
+#### Visualización Geoespacial y de Mapas
 *   **PyDeck:** Especializada en visualizaciones de datos espaciales a gran escala y en 3D, construida sobre deck.gl. Se integra con `st.pydeck_chart()`.
 
 *   **Folium:** Permite crear mapas interactivos utilizando la librería Leaflet.js de JavaScript. Existe un componente de la comunidad llamado `st-folium` que permite incluso capturar eventos de clic en el mapa de vuelta hacia Streamlit.
 
-### Visualizaciones Especializadas
+#### Visualizaciones Especializadas
 *   **Graphviz:** Se utiliza para crear diagramas de red, flujogramas y estructuras de grafos utilizando el lenguaje DOT. Streamlit ofrece el comando `st.graphviz_chart()` para este propósito.
 
 *   **Dagre-D3:** Otra opción para visualizaciones de grafos y redes disponible a través de integraciones.
 
-### Herramientas de Análisis Automático
+#### Herramientas de Análisis Automático
 *   **Pandas-Profiling:** Aunque es más una herramienta de análisis exploratorio de datos (EDA), existe un componente (`streamlit-pandas-profiling`) que genera reportes interactivos completos directamente dentro de una aplicación Streamlit.
 
 **Nota sobre la compatibilidad:** Streamlit permite extender su funcionalidad mediante **componentes personalizados** de terceros, lo que significa que casi cualquier librería de visualización de JavaScript puede ser adaptada para funcionar dentro del entorno de Streamlit si existe el envoltorio (*wrapper*) adecuado.
@@ -432,3 +447,182 @@ La elección entre **Altair**, **Matplotlib** y **Plotly** depende de las necesi
 
 En conclusión, **Altair ofrece la mejor combinación de simplicidad de código, interactividad web y rendimiento** para la mayoría de los casos de uso en Streamlit, mientras que Matplotlib se reserva para visualizaciones científicas muy específicas y Plotly para dashboards donde se requiera una interactividad bidireccional extremadamente compleja.
 
+### Personalizar
+
+Para personalizar el diseño de tus gráficos de **Altair** en Streamlit, puedes utilizar diversos métodos y parámetros integrados en la librería que permiten controlar desde los colores hasta la interactividad.
+
+A continuación, se detallan las formas principales de personalización según las fuentes:
+
+#### Uso de Métodos de Marca (`mark_*`)
+El método de marca define el tipo de gráfico y permite ajustes estéticos globales:
+*   **Color Fijo:** Puedes definir un color estático para todos los elementos, por ejemplo: `alt.Chart(df).mark_area(color="orange")`.
+*   **Opacidad:** Es útil para gráficos con datos superpuestos, usando parámetros como `opacity=0.4` dentro del método de marca [Turn 21].
+*   **Grosor de línea:** En gráficos de línea, se puede ajustar con `strokeWidth`.
+
+#### Personalización mediante `encode()`
+El método `.encode()` vincula los datos con canales visuales y permite un control granular:
+*   **Mapeo de Colores Dinámico:** Puedes asignar colores basados en una columna específica y definir escalas personalizadas: `alt.Color('columna:N', scale=alt.Scale(range=['red', 'green']))` [Turn 21].
+*   **Ejes y Títulos:** Utiliza `alt.X()` o `alt.Y()` para renombrar ejes o configurar escalas cuantitativas (`:Q`) o nominales (`:N`): `alt.X('edad:Q', title='Edad del Pasajero')` [Turn 21].
+*   **Tamaño:** En gráficos de dispersión, puedes variar el tamaño de los puntos según una variable: `encode(size='Col3')`.
+
+#### Configuración de Leyendas y Tooltips
+*   **Posicionamiento de Leyendas:** Puedes mover la leyenda a diferentes partes del gráfico (arriba, abajo, izquierda, derecha) usando `alt.Legend(orient='top')` dentro del canal de color [Turn 22].
+*   **Tooltips Interactivos:** Para mostrar información al pasar el cursor, añade el parámetro `tooltip` en el método `encode()` pasando una lista de las columnas que deseas visualizar.
+
+#### Interactividad y Dimensiones
+*   **Zoom y Desplazamiento:** Simplemente añadiendo `.interactive()` al final de la definición de tu gráfico, permites que el usuario haga zoom y mueva la visualización [83, Turn 21].
+*   **Ajuste al Contenedor:** Para que el gráfico ocupe todo el ancho disponible en la interfaz de Streamlit (especialmente útil si usas columnas), utiliza el parámetro `use_container_width=True` en la función de renderizado: `st.altair_chart(chart, use_container_width=True)` [900, Turn 21].
+
+#### Títulos del Gráfico
+Puedes añadir un título principal directamente al inicializar el objeto del gráfico: `alt.Chart(df, title="Mi Gráfico Personalizado")`.
+
+Como recordatorio, Altair es una librería **declarativa**, lo que significa que en lugar de escribir cada detalle visual manualmente, defines las relaciones entre las columnas de tus datos y Altair se encarga de aplicar el diseño de forma inteligente.
+
+
+### Personalizar tema de color
+
+Establecer un tema de color para gráficos de **Altair** en Streamlit se puede lograr de dos maneras principales: a través de la configuración global del **tema de la aplicación** (que Altair respeta automáticamente) o definiendo **escalas de colores personalizadas** dentro del código del gráfico.
+
+A continuación, se detallan los métodos indicados:
+
+#### Configuración Global del Tema en Streamlit
+Streamlit permite definir un esquema de colores para toda la aplicación que afecta a los componentes interactivos y visualizaciones. Esto se configura en el archivo de configuración de la aplicación.
+
+*   **Gráficamente:** Puedes probar colores en tiempo real haciendo clic en el menú de hamburguesa (esquina superior derecha), seleccionando **Settings** y luego **Edit active theme**. Aquí puedes ajustar el `Primary color` (usado para elementos interactivos), `Background color`, `Text color` y `Secondary background color`.
+
+*   **En el archivo de configuración:** Una vez elegidos los colores, debes guardarlos en el archivo `.streamlit/config.toml` en la sección `[theme]`:
+    ```toml
+    [theme]
+    primaryColor = "#de8ba1"
+    backgroundColor = "#f4f1ea"
+    secondaryBackgroundColor = "#9fe4cc"
+    textColor = "#262730"
+    ```
+    Los componentes (incluyendo Altair) están diseñados para adaptarse a estos ajustes de forma predeterminada para que la interfaz sea coherente.
+
+#### Definición de Colores en el Gráfico de Altair
+Si necesitas que un gráfico específico de Altair tenga un esquema de colores distinto o vinculado a los datos, se utiliza el parámetro **`scale`** dentro del método `encode()`.
+
+*   **Mapeo de colores dinámico:** Puedes asignar un rango de colores específico para las categorías de tus datos:
+    ```python
+    alt.Color('columna_categoria:N', 
+              scale=alt.Scale(range=['#e74c3c', '#27ae60'])) # Rojo y verde personalizados
+    ```
+*   **Uso de esquemas predefinidos:** Aunque las fuentes se centran en rangos manuales, mencionan que el método `mark_*` permite definir colores estáticos (ej. `mark_area(color="orange")`).
+
+#### Personalización Dinámica con `st.color_picker`
+Puedes permitir que el usuario elija el tema de color del gráfico interactivamente usando el widget **`st.color_picker()`**.
+1.  Captura el color seleccionado por el usuario en una variable (ej. `color_usuario = st.color_picker(...)`).
+2.  Pasa esa variable al parámetro de color de Altair para que el gráfico se actualice inmediatamente con la preferencia del usuario.
+
+En resumen, mientras que el diseño visual general se gestiona en **`config.toml`**, el control granular de los colores dentro de Altair se realiza mediante el objeto **`alt.Scale`** en la codificación del color del gráfico.
+
+
+### Ejemplo: Titanic
+
+Para crear una visualización personalizada en Streamlit utilizando Altair y el dataset del Titanic, integraremos elementos de interactividad, personalización de colores y ajustes de diseño (leyendas superiores y tooltips).
+
+A continuación, se presenta un ejemplo completo que analiza la relación entre la edad, la clase y la supervivencia:
+
+<details>
+<summary>💻 Código</summary>
+
+```python showLineNumbers
+import streamlit as st
+import pandas as pd
+import altair as alt
+
+# 1. Configuración y Carga de Datos
+st.set_page_config(layout="wide")
+st.title("Análisis Personalizado del Titanic con Altair")
+
+@st.cache_data
+def load_titanic():
+    # El archivo titanic3.csv contiene columnas como pclass, survived y age [1]
+    df = pd.read_csv('titanic3.csv')
+    # Limpieza: eliminar nulos en edad para los gráficos de distribución [1]
+    df = df.dropna(subset=['age', 'pclass', 'survived'])
+    # Mapeo para mejorar la legibilidad de las leyendas [1]
+    df['survived_str'] = df['survived'].map({1: 'Sobrevivió', 0: 'Falleció'})
+    df['pclass_str'] = df['pclass'].astype(str) + "° Clase"
+    return df
+
+df = load_titanic()
+
+# 2. Personalización en el Sidebar
+st.sidebar.header("Opciones de Personalización")
+# Permitir al usuario elegir un color corporativo mediante el color_picker
+
+color_base = st.sidebar.color_picker("Elige color para la clase", "#4b9ed9")
+
+# 3. Visualización 1: Densidad de Edad y Supervivencia
+st.subheader("Distribución de Edad por Supervivencia")
+
+# Aplicamos leyenda superior y orientación horizontal [Turn 22]
+chart_age = alt.Chart(df).transform_density(
+    'age',
+    as_=['age', 'density'],
+    groupby=['survived_str']
+).mark_area(opacity=0.6).encode(
+    alt.X('age:Q', title='Edad del Pasajero'),
+    alt.Y('density:Q', title='Densidad'),
+    alt.Color('survived_str:N', 
+              title=None,
+              scale=alt.Scale(range=["#e7b51f", "#0d9ab6"]), # Rojo para fallecidos, verde para sobrevivientes
+              legend=alt.Legend(orient='top', direction='horizontal')),
+    tooltip=[
+        alt.Tooltip('survived_str:N', title='Estado'),
+        alt.Tooltip('age:Q', title='Edad'),
+        alt.Tooltip('density:Q', title='Densidad')
+    ] # Tooltips interactivos [4]
+).properties(
+    height=400
+).interactive() # Zoom y desplazamiento habilitados [5, 6]
+
+st.altair_chart(chart_age, use_container_width=True)
+
+# 4. Visualización 2: Relación entre Clase (Pclass) y Supervivencia
+st.divider()
+col1, col2 = st.columns(2)
+
+with col1:
+    st.write("**Probabilidad de Supervivencia por Clase**")
+    # Gráfico de barras apiladas al 100% para ver proporciones
+    chart_pclass = alt.Chart(df).mark_bar().encode(
+        alt.X('pclass_str:N', title='Clase'),
+        alt.Y('count():Q', stack="normalize", title='Proporción'),
+        alt.Color('survived_str:N', scale=alt.Scale(range=['#e74c3c', '#27ae60'])),
+        tooltip=['pclass_str', 'survived_str', 'count()']
+    ).properties(height=350)
+    st.altair_chart(chart_pclass, use_container_width=True)
+
+with col2:
+    st.write("**Promedio de Edad por Clase**")
+    # Uso del color personalizado del sidebar [2]
+    chart_box = alt.Chart(df).mark_boxplot(color=color_base).encode(
+        alt.X('pclass_str:N', title='Clase'),
+        alt.Y('age:Q', title='Edad')
+    ).properties(height=350)
+    st.altair_chart(chart_box, use_container_width=True)
+
+```
+</details>
+
+<center>
+<figure>
+![](img/st-altair-titanic.png)
+<figcaption></figcaption>
+</figure>
+</center>
+
+**Características de este ejemplo:**
+
+**Gestión de Datos:** Utiliza @st.cache_data para optimizar el rendimiento al cargar el archivo titanic3.csv.
+
+**Leyendas Superiores:** El gráfico de densidad implementa alt.Legend(orient='top') para posicionar la clave de supervivencia entre el título y el gráfico, facilitando la comparación inmediata.
+
+**Interactividad:** Se incluye .interactive() para permitir que el usuario explore regiones específicas del gráfico de edad mediante zoom y paneo.
+
+**Personalización Dinámica:** Integra un st.color_picker para modificar el color del gráfico de caja (boxplot) en tiempo real, demostrando flexibilidad en el diseño visual.
+
+**Tipos de Marcas:** Se emplean mark_area() para la densidad, mark_bar() para la supervivencia por clase y mark_boxplot() para la distribución de promedios de edad.
