@@ -5,6 +5,9 @@
  */
 
 /* You can override the default Infima variables here. */
+
+@import url("https://patricioaraneda.cl/public/css/docusaurus/estilos.css");
+
 :root {
   --ifm-color-primary: #3b385d;
   --ifm-color-primary-dark: #29784c;

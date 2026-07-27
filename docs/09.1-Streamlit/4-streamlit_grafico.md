@@ -8,7 +8,7 @@ slug: /streamlit-graficos
 ---
 
 <center>
-![](img/st-altair-banner.png)
+![](img/data-visualisation.png)
 </center>
 
 :::info[datasets]
