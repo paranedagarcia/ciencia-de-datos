@@ -83,6 +83,10 @@ const config = {
         theme: {
           customCss: './src/css/custom.css',
         },
+        gtag: {
+          trackingID: 'G-3V2QKLCVQR',
+          anonymizeIP: true,
+        },
       }),
     ],
   ],
@@ -90,6 +94,13 @@ const config = {
   themeConfig:
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
+      metadata: [
+        {name: 'description', content: 'Curso de Ciencia de Datos. Aprende los fundamentos de la Ciencia de Datos, desde la estadística, probabilidades, análisis y salida a producción, con Python, SQL y Scikit-learn.'},
+        {name: 'keywords', content: 'ia, curso, inteligencia artificial, gestión pública, análisis de datos, ciencia de datos, data science, machine learning, aprendizaje automático, deep learning, aprendizaje profundo, visualización de datos, data visualization, python, r, sql, bash'},
+        {name: 'author', content: 'Patricio Araneda'},
+        {property: 'og:type', content: 'website' },
+        {property: 'og:image', content: 'https://patricioaraneda.cl/ciencia-de-datos/img/ciencia-de-datos.jpg' },
+      ],
       // Replace with your project's social card
       image: 'img/ciencia-de-datos.jpg',
       colorMode: {
