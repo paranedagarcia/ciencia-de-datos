@@ -91,7 +91,7 @@ const config = {
     /** @type {import('@docusaurus/preset-classic').ThemeConfig} */
     ({
       // Replace with your project's social card
-      image: 'img/ODC-isotipo.svg',
+      image: 'img/ciencia-de-datos.jpg',
       colorMode: {
         respectPrefersColorScheme: true,
       },
@@ -120,7 +120,7 @@ const config = {
         style: 'dark',
         links: footerLinks,
         copyright: `Copyright © ${new Date().getFullYear()} Patricio Araneda G. | Inteligencia Artificial para la Gestión Pública, Built with Docusaurus. <br /><a href="https://doi.org/10.5281/zenodo.21569010"><img src="https://zenodo.org/badge/1297925885.svg" alt="DOI"></a>
-        <br /><img src="img/cc-by-nc-sa.png" alt="CC-BY-SA 4.0" width="120" />`,
+        <br /><img src="https://patricioaraneda.cl/public/images/cc-by-nc-sa.png" alt="CC-BY-SA 4.0" width="120" />`,
       },
       prism: {
         theme: prismThemes.github,

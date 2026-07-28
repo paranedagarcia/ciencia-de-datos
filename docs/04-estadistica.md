@@ -1,6 +1,6 @@
 ---
 id: estadistica
-title: "Estadística"
+title: "📊 Fundamentos de Estadística"
 sidebar_label: "💻 Estadística"
 sidebar_position: 4
 description: "Estadística básica y probabilidades"
@@ -9,11 +9,10 @@ slug: /estadistica
 
 ![](img/estadistica.webp)
 
-## 📊 Fundamentos de Estadística y Probabilidades
 
 :::info
-Para revisar los conceptos básicos y avanzados de estadística acceda al curso:
+Para aprender tanto los conceptos básicos como avanzados de estadística, necesarias para la Ciencia de Datos, acceda al curso:
 
-[**Bioestadistica**](https://patricioaraneda.cl/bioestadistica/docs/intro)
+[**Bioestadística**](https://patricioaraneda.cl/bioestadistica/docs/intro)
 
 :::

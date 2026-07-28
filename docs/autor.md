@@ -2,7 +2,7 @@
 id: autor
 title: "🎓 Autor"
 sidebar_label: "🎓 Autor"
-sidebar_position: 15
+sidebar_position: 18
 slug: /autor
 ---
 
@@ -14,7 +14,7 @@ slug: /autor
   <div class="avatar avatar--vertical">
     <img
       class="circle-image"
-      src="https://patricioaraneda.cl/wp-content/uploads/2021/05/pato-fondo2-300x300.jpg" />
+      src="https://patricioaraneda.cl/public/images/patricio-250.jpg" />
     <div class="avatar__intro">
       <div class="avatar__name">Patricio Araneda G.</div>
       <small class="avatar__subtitle">
@@ -39,12 +39,12 @@ Con experiencia transversal como CTO/CIO/PO/Program Manager.
 
 ## 🎓 Docencia
 
-<div class="container text-center">
-<div class="row align-items-end">
-  <div class="col">![](img/udla.jpg)</div>
-  <div class="col">![](img/utalca.png)</div>
-  <div class="col">![](img/ubo.png)</div>
-  <div class="col">![](img/uchile.png)</div>
+<div className="container text-center">
+<div className="row row--center">
+  <div className="col col--6-xs col--3"><img src="https://patricioaraneda.cl/public/images/udla.jpg" /></div>
+  <div className="col col--6-xs col--3"><img src="https://patricioaraneda.cl/public/images/utalca.png" /></div>
+  <div className="col col--6-xs col--3"><img src="https://patricioaraneda.cl/public/images/ubo.png" /></div>
+  <div className="col col--6-xs col--3"><img src="https://patricioaraneda.cl/public/images/uchile.png" /></div>
 </div>
 
 <div className="margin-top--md">
