@@ -2,8 +2,8 @@
 id: airflow
 title: "Apache Airflow"
 sidebar_label: "💻 Apache Airflow"
-sidebar_position: 3
-description: "Apache Airflow"
+description: "Plataforma de código abierto para crear, programar y monitorear flujos de trabajo (pipelines de datos) de forma programática"
+slug: /airflow
 ---
 
 ![](img/AirflowLogo.png)

@@ -2,8 +2,8 @@
 id: git
 title: "Git & GitHub"
 sidebar_label: "💻 Git & GitHub"
-sidebar_position: 3
-description: "Control de versiones con Gitw"
+description: "Control de versiones con Git"
+slug: /git
 ---
 
 # Git
