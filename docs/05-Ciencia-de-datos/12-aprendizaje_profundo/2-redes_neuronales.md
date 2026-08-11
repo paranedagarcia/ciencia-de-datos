@@ -1,7 +1,6 @@
 ---
-id: dl-redneuronal
+id: redneuronal
 title: "Red neuronal"
-sidebar_label: "💻 Red neuronal"
-sidebar_position: 2
+sidebar_label: "Red neuronal"
 description: "Red Neuronal"
 ---

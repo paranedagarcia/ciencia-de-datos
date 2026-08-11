@@ -1,4 +1,12 @@
-# Machine Learning No Supervisado
+---
+id: mlns
+title: "Introducción"
+sidebar_label: "Introducción"
+
+description: "Introducción al aprendizaje supervisado"
+---
+
+# Aprendizaje No Supervisado
 
 El *machine learning no supervisado* es una rama de la inteligencia artificial donde los algoritmos analizan datos sin que les diga cuál es la respuesta correcta. Es decir, no se les da una "respuesta" o etiqueta previa, sino que el sistema debe encontrar patrones, similitudes o estructuras por sí mismo.
 
