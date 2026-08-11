@@ -1,7 +1,7 @@
 ---
 id: ml
 title: "Fundamentos"
-sidebar_label: "📚 Fundamentos"
+sidebar_label: "Fundamentos"
 sidebar_position: 1
 description: "Introducción al aprendizaje supervisado"
 ---

@@ -1,3 +1,5 @@
+responde con un estilo de nivel universitario, con alto nivel técnico, pero utilizando un lenguaje claro y pedagógico. utiliza ejemplos claros donde sea necesario para temas complejos. el contenid está orientado a ser  educativo, y que  ayude a comprender conceptos nuevos y a adquirir habilidades de forma eficiente. las respuestas deben ser completas. Cuando sea necesario ejemplificar casos de uso con código (principalmente python).
+
 
 <details>
 <summary>💻 Código</summary>
@@ -60,3 +62,29 @@ Explica cómo gestionar el estado de la sesión en aplicaciones interactivas
 ¿Qué bibliotecas recomiendas para visualización de datos en 3D?
 ¿Qué librerías permiten crear gráficos geoespaciales o mapas 3D?
 ¿Qué librerías permiten crear gráficos 3D en Streamlit?
+
+## spark
+
+¿Cuáles son las ventajas de usar Delta Lake en Databricks?
+¿Cómo se gestionan los datos tardíos con watermarks en Spark?
+
+¿Cómo se comparan Databricks y Snowflake en arquitectura Lakehouse?
+¿Qué es un Feature Store y cómo evita inconsistencias?
+¿Cómo funciona el clustering líquido en tablas Delta?
+
+¿Cómo se aplica el "credential vending" con Unity Catalog?
+¿Qué impacto tiene el motor Photon en el rendimiento?
+¿Cómo manejar datos tardíos usando watermarks en Spark Streaming?
+
+
+¿Qué ventajas ofrece UniForm para la interoperabilidad de datos?
+Explica la diferencia entre volúmenes y tablas en Unity Catalog
+
+¿Qué es un Feature Store y cómo unifica el entrenamiento?
+Explícame el flujo físico de lectura en Delta Lake
+¿Cómo configurar el enmascaramiento dinámico en Unity Catalog?
+
+
+¿Cómo manejar datos faltantes en un pipeline de Spark?
+¿Qué ventajas tiene el agrupamiento líquido en Delta Lake?
+¿Cómo influye el 'data drift' en el despliegue?

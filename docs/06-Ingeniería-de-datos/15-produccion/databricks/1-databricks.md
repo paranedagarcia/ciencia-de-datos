@@ -1,12 +1,12 @@
 ---
 id: databricks
 title: "Databricks"
-sidebar_label: "📦 Databricks"
+sidebar_label: "Databricks"
 description: "Procesamiento Distribuido con Apache Spark en el Ecosistema Databricks"
 slug: /databricks
 ---
 
-## ¿Qué es?
+## **¿Qué es?**
 
 **Databricks** es una **Plataforma de Inteligencia de Datos** unificada y optimizada para la nube. Su función principal es implementar la arquitectura de **Data Lakehouse**, un modelo híbrido que integra la apertura, escalabilidad y bajo costo de un *data lake* con la confiabilidad, estructura y rendimiento de un *data warehouse* tradicional. Esto permite unificar en un único entorno las tareas de ingeniería de datos, analítica de negocio (BI), transmisión en tiempo real y machine learning (IA).
 
@@ -34,7 +34,7 @@ En lugar de que los clústeres hereden accesos permanentes a la nube, Unity Cata
 
 ***
 
-## La arquitectura de medallón (Bronze, Silver y Gold)
+## **La arquitectura de medallón**
 
 La **arquitectura de medallón** (también conocida como *arquitectura multi-hop*) es un patrón de diseño que organiza los datos de manera lógica en diferentes capas de refinamiento progresivo. Su objetivo principal es mejorar de forma incremental la estructura, la calidad y la usabilidad de la información a medida que fluye por el sistema. Además, garantiza la transaccionalidad ACID en cada paso del proceso, evitando la lectura de datos inconsistentes.
 
@@ -156,11 +156,11 @@ gold_df.show(truncate=False)
 
 </details>
 
-## Arquitectura del Procesamiento Distribuido
+## **Arquitectura del Procesamiento Distribuido**
 
 La arquitectura de Apache Spark representa la culminación de una evolución crítica sobre sistemas de legado como MapReduce. Mientras que los modelos anteriores sufrían de una rigidez operativa basada en accesos constantes a disco para resultados intermedios, Spark nació bajo la filosofía de hacer que la programación distribuida se sienta como "programación regular", abstrayendo la complejidad del sistema subyacente. En el ecosistema Databricks, esta visión se materializa mediante un desacoplamiento estratégico entre el cómputo y el almacenamiento. Este diseño permite una escalabilidad horizontal elástica donde los recursos de procesamiento pueden ajustarse dinámicamente según la demanda, sin las restricciones físicas de la persistencia de datos local, optimizando así el costo y la eficiencia operativa.
 
-### Roles Fundamentales y Orquestación del Clúster
+#### Roles Fundamentales y Orquestación del Clúster
 
 Para gestionar la complejidad del cómputo paralelo, Spark implementa una estructura jerárquica de procesos:
 
@@ -175,7 +175,7 @@ Para gestionar la complejidad del cómputo paralelo, Spark implementa una estruc
 
 Esta estructura física del clúster es el soporte necesario para el despliegue del plan lógico de ejecución que define el flujo operativo de Spark.
 
-### Modelo de Ejecución y Flujo de Trabajo (DAG, Transformaciones y Acciones)
+#### Modelo de Ejecución y Flujo de Trabajo (DAG, Transformaciones y Acciones)
 
 El núcleo de la inteligencia de Spark reside en el **DAG (Directed Acyclic Graph)**, que actúa como el plano maestro de ejecución. A diferencia de otros sistemas, el DAG permite a Spark visualizar la secuencia completa de operaciones antes de que ocurran, facilitando una optimización estratégica que mejora tanto la resiliencia (mediante el linaje de datos) como el rendimiento global de las consultas.
 
@@ -197,28 +197,28 @@ Spark separa estrictamente la definición del trabajo (plan lógico) de su ejecu
 
 La lógica de estas transformaciones se traduce físicamente en la unidad mínima de paralelismo de Spark: la partición.
 
-### Gestión y Optimización de Particiones
+#### Gestión y Optimización de Particiones
 
 El particionamiento es la unidad atómica de paralelismo. Una estrategia deficiente en este nivel es la causa principal de los cuellos de botella y errores en producción. Si los datos no se distribuyen equitativamente, aparecen los **"stragglers" (nodos rezagados)**, provocados por el **"data skew" (sesgo de datos)**, donde un núcleo trabaja mientras el resto del clúster espera.
 
-#### Dinámica Técnica del Particionamiento
+**Dinámica Técnica del Particionamiento**
 
 * **Relación Memoria-Almacenamiento:** Existe una correspondencia directa entre los bloques físicos de almacenamiento y las particiones lógicas en la memoria del Executor. Cada partición es procesada por un hilo de ejecución en un núcleo físico.  
 * **Gestión de Particiones:**  
   * `repartition()`: Induce un *full shuffle* para redistribuir los datos de manera uniforme en un número específico de particiones.  
   * `coalesce()`: Reduce el número de particiones de forma eficiente, evitando el shuffle al combinar particiones existentes en el mismo nodo.
 
-#### Sintonía Fina: `spark.sql.shuffle.partitions`
+**Sintonía Fina: `spark.sql.shuffle.partitions`**
 
 Por defecto, este parámetro está configurado en **200**. Este valor es frecuentemente inadecuado para cargas de trabajo modernas: resulta excesivo para conjuntos de datos pequeños (causando saturación por gestión de tareas) e insuficiente para procesamientos en escala de Terabytes (causando desbordamientos de memoria u **OOM**). El ajuste preciso de este parámetro es vital para balancear el aprovechamiento de los núcleos y evitar la fragmentación del trabajo.
 
 **Capa de Valor:** Un particionamiento equilibrado garantiza que todos los núcleos del clúster se utilicen al 100%, eliminando tiempos muertos. La eficiencia de estas particiones depende, en última instancia, de la jerarquía de memoria del Executor.
 
-### Gestión de Memoria y Rendimiento Físico
+#### Gestión de Memoria y Rendimiento Físico
 
 Para un Arquitecto de Datos, la gestión de la memoria del Executor es fundamental para mitigar el impacto negativo de la Recolección de Basura (*Garbage Collection*) de Java, que puede detener la ejecución de tareas críticas.
 
-#### Segmentación y Jerarquía de Memoria
+**Segmentación y Jerarquía de Memoria**
 
 La memoria del Executor se segmenta estratégicamente:
 
@@ -226,7 +226,7 @@ La memoria del Executor se segmenta estratégicamente:
 2. **Storage Memory:** Dedicada a la persistencia y almacenamiento en caché (`cache()` y `persist()`).  
 3. **Reserved Memory:** Reservada para el funcionamiento interno y metadatos del motor.
 
-#### Proyecto Tungsten y Encoders
+**Proyecto Tungsten y Encoders**
 
 El **Project Tungsten** optimiza el uso de CPU mediante:
 
@@ -238,11 +238,11 @@ El **Project Tungsten** optimiza el uso de CPU mediante:
 
 Aunque estas optimizaciones son potentes en Spark *Open Source*, Databricks las lleva al límite mediante capas de aceleración exclusivas como Photon.
 
-### Optimizaciones Exclusivas del Entorno Databricks
+#### Optimizaciones Exclusivas del Entorno Databricks
 
 Databricks se presenta como una capa de optimización avanzada (Spark 3.0+) que automatiza la sintonía fina. Un hito relevante es que **Spark 3.0 es casi dos veces más rápido que Spark 2.4** en el benchmark TPC-DS, gracias a estas innovaciones.
 
-#### Motor Photon y Ejecución Adaptativa
+**Motor Photon y Ejecución Adaptativa**
 
 * **Motor Photon:** Es un motor de ejecución **vectorizado** escrito en C++. A diferencia del procesamiento fila por fila de la JVM, Photon procesa bloques de datos nativamente, superando las limitaciones físicas de la arquitectura Java y acelerando consultas SQL masivas.  
 * **Adaptive Query Execution (AQE):** Activado por defecto desde Spark 3.2+, AQE re-optimiza el plan de ejecución en tiempo real:  
@@ -251,7 +251,7 @@ Databricks se presenta como una capa de optimización avanzada (Spark 3.0+) que 
   3. **Resolución de Skew:** Divide automáticamente particiones sesgadas para eliminar *stragglers*.  
 * **Poda Dinámica de Particiones (DPP):** Optimiza esquemas en estrella evitando el "Full Table Scan" en tablas de hechos, reduciendo drásticamente los costos de I/O de red y disco.
 
-#### Gobernanza y Arquitectura de Acceso
+**Gobernanza y Arquitectura de Acceso**
 
 Databricks integra **Unity Catalog** para la gobernanza centralizada y **Spark Connect**, que utiliza contenedores para aislar los entornos de ejecución en modo compartido, garantizando seguridad y eficiencia en entornos multi-usuario.
 
