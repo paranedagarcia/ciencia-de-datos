@@ -3,6 +3,7 @@ id: airflow-ejemplos
 title: "Ejemplos de Airflow"
 sidebar_label: "Ejemplos"
 description: "Ejemplos de uso práctico de Airflow"
+slug: airflow-ejemplos
 ---
 
 
@@ -369,3 +370,121 @@ extract_task >> branch_task >> [basic_val_task, full_val_task] >> transform_task
                     ▼                       ▼
             cleanup_temporary_files   send_daily_report
 ```
+
+### Ejemplo 3: Alertas con Callback
+
+Para configurar un sistema de alertas ante fallos en **Apache Airflow**, la práctica estándar de ingeniería de datos consiste en utilizar **callbacks de fallo** (`on_failure_callback`). Un *callback* es una función de Python que se ejecuta de forma síncrona en el *worker* en el instante exacto en que una tarea o el DAG completo cambia su estado a fallido (`failed`).
+
+En Airflow, los *callbacks* pueden definirse a dos niveles:
+1.  **Nivel de DAG:** Se ejecuta si la ejecución completa del flujo de trabajo falla o expira.
+2.  **Nivel de Tarea:** Se define en la clase base de todos los operadores (`BaseOperator`), por lo que cualquier tarea individual puede disparar su propia alerta. Para evitar configurar cada tarea una por una, se utiliza el diccionario `default_args` del DAG, el cual propaga el *callback* de forma hereditaria a todas las tareas del flujo.
+
+Además del callback de fallo, Airflow permite definir callbacks para otros estados operativos, tales como `on_success_callback` (ejecutado al completarse con éxito) y `on_retry_callback` (ejecutado cuando una tarea se somete a un reintento automatizado).
+
+<Tabs>
+<TabItem value="mnp" label="Antecedentes" default>
+<div class="alert alert--primary">
+**Gestor de Alertas con Callback**
+
+El siguiente script de Python demuestra cómo crear una función de alerta personalizada que accede al **contexto de ejecución** de Airflow para extraer diagnósticos precisos (como el nombre de la tarea, el identificador de ejecución y el mensaje de error exacto) y cómo asociarla al DAG y a sus tareas.
+
+**Alternativa Nativa: Configuración de Alertas por Correo Electrónico (SMTP)**
+
+Si no se desea escribir una función de callback propia, Airflow incluye un parámetro nativo en el operador base llamado `email_on_failure` (el cual por defecto está configurado como `True`). Este parámetro permite que el sistema envíe un correo electrónico de alerta estructurado al destinatario que se especifique en la propiedad `email` del operador.
+
+Para que este flujo funcione, se deben seguir los siguientes pasos:
+
+1.  **Asignar el correo del destinatario** en las tareas del DAG (normalmente mediante `default_args`):
+    ```python
+    default_args = {
+        "email": "operaciones_datos@empresa.com",
+        "email_on_failure": True, # Activado por defecto en la clase BaseOperator
+    }
+    ```
+2.  **Configurar los parámetros del servidor SMTP** dentro del archivo `airflow.cfg` de tu entorno o mediante variables de entorno del sistema:
+    ```ini
+    [smtp]
+    smtp_host = smtp.gmail.com
+    smtp_mail_from = alertas_airflow@empresa.com
+    smtp_port = 587
+    smtp_ssl = False
+    smtp_starttls = True
+    ```
+3.  **Registrar las credenciales de autenticación** (usuario y contraseña) a través del portal de conexiones de Airflow (usando el identificador de conexión por defecto `smtp_default`).
+
+Una vez configurado, si alguna tarea falla, el sistema enviará un correo detallando la traza del error, el número de intento y proporcionando un enlace directo hacia la interfaz de usuario para auditar los logs correspondientes.
+</div>
+</TabItem>
+<TabItem value="mnp-python" label="💻 Código">
+
+```python showLineNumbers
+from pendulum import datetime, duration
+from airflow import DAG
+from airflow.providers.standard.operators.bash import BashOperator
+from airflow.providers.standard.operators.python import PythonOperator
+
+# 1. DEFINICIÓN DE LA FUNCIÓN DE ALERTA (CALLBACK)
+def notificar_fallo_tarea(context: dict):
+    """
+    Esta función es invocada automáticamente por el worker de Airflow
+    cuando una tarea falla. Recibe el diccionario 'context' que contiene
+    los metadatos de ejecución de la instancia.
+    """
+    task_instance = context.get("task_instance")
+    dag_run = context.get("dag_run")
+    exception = context.get("exception")
+    
+    # Extracción de metadatos de diagnóstico
+    dag_id = task_instance.dag_id if task_instance else "Desconocido"
+    task_id = task_instance.task_id if task_instance else "Desconocido"
+    run_id = dag_run.run_id if dag_run else "Desconocido"
+    try_number = task_instance.try_number if task_instance else 1
+    
+    # Formateo del mensaje de diagnóstico
+    print(f"🚨 [ALERTA DE PRODUCCIÓN] Excepción en {dag_id}.{task_id} (Run ID: {run_id})")
+    print(f"Intento número: {try_number}")
+    print(f"Excepción capturada: {exception}")
+    
+    # Nota de integración: En un entorno de producción real, aquí se programaría
+    # el envío de un webhook de HTTP POST hacia plataformas como Slack o PagerDuty.
+
+
+# 2. CONFIGURACIÓN DEL DAG CON PROPAGACIÓN DE CALLBACKS
+default_args = {
+    "owner": "Universidad_Data_Ops",
+    "retries": 1,
+    "retry_delay": duration(minutes=3),
+    # Se propaga el callback de fallo a todas las tareas hijas del DAG
+    "on_failure_callback": notificar_fallo_tarea, 
+}
+
+with DAG(
+    dag_id="pipeline_ventas_con_alertas",
+    start_date=datetime(2026, 8, 1),
+    schedule=None,
+    catchup=False,
+    default_args=default_args,
+    # Callback opcional a nivel de DAG completo
+    on_failure_callback=notificar_fallo_tarea, 
+) as dag:
+
+    # Tarea 1: Simula una ejecución exitosa
+    procesar_ventas = BashOperator(
+        task_id="procesar_ventas",
+        bash_command="echo 'Procesando archivo de transacciones diarias...'"
+    )
+
+    # Tarea 2: Diseñada intencionalmente para fallar
+    # Al retornar un código de salida distinto de 0 en Bash, la tarea fallará y
+    # disparará de inmediato la función de alerta definida en default_args
+    generar_reporte_financiero = BashOperator(
+        task_id="generar_reporte_financiero",
+        bash_command="exit 1"
+    )
+
+    procesar_ventas >> generar_reporte_financiero
+```
+</TabItem>
+</Tabs><br />
+
+

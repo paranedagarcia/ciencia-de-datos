@@ -1,8 +1,9 @@
 ---
-id: airflow
+id: airflow-intro
 title: "Apache Airflow"
 sidebar_label: "Apache Airflow"
 description: "Plataforma de código abierto para crear, programar y monitorear flujos de trabajo (pipelines de datos) de forma programática"
+slug: /airflow-intro
 ---
 
 ![](img/AirflowLogo.png)
@@ -165,11 +166,23 @@ Aunque técnicamente corre dentro del proceso del Scheduler, define la **estrate
   * **`KubernetesExecutor`:** Instancia un pod de Kubernetes temporal y dedicado para ejecutar cada tarea individual de forma aislada en el clúster.
 
 ---
+## Arquitectura de Observabilidad y Seguridad
 
-### Ejemplo Práctico
+En **Airflow 3**, el manejo de alertas y diagnóstico de fallos ha experimentado un cambio de paradigma debido a la restructuración de su arquitectura interna. A diferencia de Airflow 2, donde los *workers* y los hilos de ejecución de las tareas tenían conexión directa con la base de datos de metadatos (*metastore*), **Airflow 3 desacopla por completo la ejecución de tareas de la base de datos**. 
+
+Ahora, toda interacción con los metadatos o las credenciales se realiza de manera segura y aislada a través del **API Server** utilizando el nuevo **Task SDK**. Al ejecutarse un *callback* de fallo (`on_failure_callback`), el *worker* recopila de manera segura el contexto de la ejecución fallida y se comunica con el API Server para persistir el estado y, opcionalmente, disparar notificaciones sin comprometer la integridad de la base de datos central.
+
+#### Ejemplo Práctico
+
+<Tabs>
+<TabItem value="mnp" label="Antecedentes" default>
+<div class="alert alert--primary">
 **Definición de un DAG en Python (TaskFlow API)**
 
-Para ilustrar cómo se orquestan estas piezas bajo la API moderna de Airflow, este script en Python define un flujo simple de ETL que procesa datos de forma secuencial utilizando decoradores:
+Para ilustrar cómo se orquestan estas piezas bajo la API moderna de Airflow, este script en Python define un flujo simple de ETL que procesa datos de forma secuencial utilizando decoradores
+</div>
+</TabItem>
+<TabItem value="mnp-python" label="💻 Código">
 
 ```python showLineNumbers title="Definición de un DAG"
 from pendulum import datetime
@@ -214,3 +227,6 @@ def mi_primer_pipeline():
 # Ejecución de la función para registrar el DAG en el scope global
 mi_primer_pipeline()
 ```
+</TabItem>
+</Tabs><br />
+

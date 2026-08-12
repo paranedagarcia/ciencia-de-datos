@@ -14,21 +14,16 @@ responde con un estilo de nivel universitario, con alto nivel técnico, pero uti
 </center>
 
 <br />
-#### 💻 Código:
+#### Ejemplo:
 <Tabs>
 <TabItem value="mnp" label="Antecedentes" default>
 <div class="alert alert--primary">
-**Distribución t de Student**<br />
+**Distribución t de Student**
 </div>
 </TabItem>
-<TabItem value="mnp-python" label="Pyhton" default>
+<TabItem value="mnp-python" label="💻 Código">
 ```python showLineNumbers
 # Implementación en Python
-```
-</TabItem>
-<TabItem value="mnp-r" label="R" default>
-```r showLineNumbers
-# Implementación en R
 ```
 </TabItem>
 </Tabs><br />
@@ -136,3 +131,15 @@ Explícame el concepto de evaluación perezosa en Spark
 ¿Qué diferencias técnicas existen entre el modelo medallón y el tradicional?
 ¿Cómo se implementa el linaje de datos en Unity Catalog?
 Dame un ejemplo de cómo configurar alertas para fallos en Airflow
+
+¿Qué es el patrón multi-hop y cómo se relaciona?
+¿Cómo configurar una alerta automatizada en Slack con Airflow?
+¿Qué algoritmos de ML admite PySpark para clasificación?
+
+¿Qué es el Task SDK y cómo cambia en Airflow 3?
+Explica el concepto de idempotencia en un DAG de ETL
+¿Cómo se integra PySpark con el ecosistema de Machine Learning?
+
+¿Cómo se aplica la idempotencia en un DAG de Airflow?
+¿Cuáles son las diferencias entre CeleryExecutor y KubernetesExecutor?
+Explícame cómo configurar un Secrets Backend para mayor seguridad

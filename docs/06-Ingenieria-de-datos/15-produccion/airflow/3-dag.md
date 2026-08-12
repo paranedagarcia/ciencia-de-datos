@@ -3,6 +3,7 @@ id: airflow-dag
 title: "Grafo Acíclico Dirigido"
 sidebar_label: "DAG"
 description: "Diagrama que representa un flujo de trabajo, canalización o *pipeline* de datos"
+slug: /airflow-dag
 ---
 
 # Grafo Acíclico Dirigido (DAG)
@@ -69,12 +70,44 @@ Cuando un script de DAG se coloca en el directorio correspondiente (`dags_folder
 
 *   **Atomicidad:** Cada tarea en el DAG debe realizar exactamente una única operación lógica indivisible. Separar los procesos de extracción, transformación y carga en tareas independientes permite aislar errores, optimizar la computación distribuida y reanudar únicamente el paso exacto que falló, en lugar de reiniciar todo el flujo desde el principio.
 
+
+
+
+### Análisis Técnico de las Buenas Prácticas Aplicadas
+
+Para que un pipeline de datos sea estable y robusto en producción, este script implementa de forma nativa tres principios fundamentales de ingeniería de software:
+
+#### 1. Idempotencia Estricta (*"Same In - Same Out"*)
+Si un pipeline falla en el paso final de carga debido a un corte en la conexión con la base de datos, el orquestador reintentará la tarea. Al volver a ejecutar el pipeline para el mismo periodo de tiempo, **no deben generarse registros duplicados o inconsistencias**.
+*   **A nivel de archivos:** En lugar de utilizar `datetime.now()`, el script utiliza el parámetro contextual de Airflow `data_interval_start`. Esto asegura que el archivo descargado y procesado pertenezca únicamente a la ventana lógica de tiempo correspondiente a la ejecución programada, incluso si se realiza un rellenado de datos históricos (*backfilling*) meses después.
+*   **A nivel de base de datos:** La sentencia SQL generada en la capa Gold utiliza el patrón **UPSERT** (`INSERT ... ON CONFLICT (fecha, pais) DO UPDATE SET ...`). Si la tarea se ejecuta varias veces para la misma fecha y país, simplemente sobrescribe y actualiza los valores existentes en lugar de duplicarlos.
+
+#### 2. Atomicidad del Flujo de Trabajo
+Cada tarea del DAG tiene un único propósito delimitado y bien definido. Al separar la extracción (Bronze), la limpieza (Silver) y la agregación (Gold) en procesos aislados, logramos que, en caso de fallar la conexión al almacén de datos (Gold), **no tengamos que volver a realizar la llamada a la API externa de origen** (Bronze). Simplemente se limpia el estado de la tarea de carga en Airflow y se reinicia desde el paso fallido de forma localizada, ahorrando ancho de banda y costes de cómputo.
+
+#### 3. Interoperabilidad de la API TaskFlow y Operadores Tradicionales
+Airflow 3 permite la convivencia armoniosa del código moderno de Python (decorado con `@task`) con clases de operadores tradicionales e integrados de proveedores externos (como `SQLExecuteQueryOperator`). La API de TaskFlow expone el atributo de salida `.output` de los métodos decorados, el cual puede ser renderizado en las propiedades plantillables (*templated fields*) de los operadores tradicionales mediante sintaxis Jinja.
+
+
+
+
+
 ### Ejemplos
-**Implementación de un DAG de ETL**
+
 
 La forma recomendada y moderna de escribir DAGs en Airflow es a través de la **API TaskFlow**, la cual utiliza decoradores de Python para simplificar la declaración de tareas, reduciendo el código repetitivo (*boilerplate*) y gestionando de forma automática el paso de datos mediante XCom (comunicación cruzada).
 
+#### Ejemplo 1
+<Tabs>
+<TabItem value="mnp" label="Antecedentes" default>
+<div class="alert alert--primary">
+
+**Implementación de un DAG de ETL**
+
 A continuación se muestra un script técnico completo de un pipeline de ETL simulado:
+</div>
+</TabItem>
+<TabItem value="mnp-python" label="💻 Código" default>
 
 ```python showLineNumbers
 import uuid
@@ -144,19 +177,16 @@ def pipeline_etl():
 # 4. INSTANCIACIÓN FINAL DEL FLUJO DE TRABAJO
 pipeline_etl()
 ```
+</TabItem>
+</Tabs>
 
 
-#### Ejemplo
+#### Ejemplo 2
 
-Este ejemplo avanzado de **implementación de un DAG de ETL** está diseñado bajo los estándares modernos de **Apache Airflow 3**, utilizando el paradigma de la **API TaskFlow** combinada con operadores tradicionales, estructurado bajo la arquitectura de refinamiento progresivo **Medallón**.
-
----
-<br />
-#### 💻 Ejemplo:
 <Tabs>
 <TabItem value="mnp" label="Antecedentes" default>
 <div class="alert alert--primary">
-Ingesta y Procesamiento Diario de Ventas (*E-commerce*)<br />
+**Ingesta y Procesamiento Diario de Ventas (*E-commerce*)**
 
 En entornos corporativos reales, los sistemas transaccionales (OLTP) generan constantemente registros de ventas que se almacenan temporalmente o se exponen mediante APIs. El departamento de Business Intelligence (BI) y el equipo de Data Science requieren que estos datos se integren de forma limpia, consistente e incremental dentro de un repositorio analítico central (un *Data Lakehouse* o *Data Warehouse*) sin sobrecargar los sistemas de origen.
 
@@ -167,16 +197,7 @@ Para resolver esto, diseñaremos un pipeline que se ejecuta de forma diaria y au
 4.  **Carga (Load):** Ejecuta de forma transaccional el lote de inserciones en la base de datos analítica centralizada (Data Warehouse).
 </div>
 </TabItem>
-<TabItem value="mnp-python" label="Pyhton" default>
-
-```python showLineNumbers
-# Implementación en Python
-
-```
-</TabItem>
-</Tabs><br />
-
-
+<TabItem value="mnp-python" label="💻 Código" default>
 
 ```python showLineNumbers title="Código Completo del DAG en Python"
 import os
@@ -315,21 +336,152 @@ def etl_ecommerce():
 # Instanciación lógica del pipeline para el motor de Airflow
 etl_ecommerce()
 ```
+</TabItem>
+</Tabs>
 
----
 
-### Análisis Técnico de las Buenas Prácticas Aplicadas
 
-Para que un pipeline de datos sea estable y robusto en producción, este script implementa de forma nativa tres principios fundamentales de ingeniería de software:
 
-#### 1. Idempotencia Estricta (*"Same In - Same Out"*)
-Si un pipeline falla en el paso final de carga debido a un corte en la conexión con la base de datos, el orquestador reintentará la tarea. Al volver a ejecutar el pipeline para el mismo periodo de tiempo, **no deben generarse registros duplicados o inconsistencias**.
-*   **A nivel de archivos:** En lugar de utilizar `datetime.now()`, el script utiliza el parámetro contextual de Airflow `data_interval_start`. Esto asegura que el archivo descargado y procesado pertenezca únicamente a la ventana lógica de tiempo correspondiente a la ejecución programada, incluso si se realiza un rellenado de datos históricos (*backfilling*) meses después.
-*   **A nivel de base de datos:** La sentencia SQL generada en la capa Gold utiliza el patrón **UPSERT** (`INSERT ... ON CONFLICT (fecha, pais) DO UPDATE SET ...`). Si la tarea se ejecuta varias veces para la misma fecha y país, simplemente sobrescribe y actualiza los valores existentes en lugar de duplicarlos.
+<br/>
+<Tabs>
+<TabItem value="mnp" label="Antecedentes" default>
+<div class="alert alert--primary">
+**Gestor de Alertas Automatizado en Airflow 3**
 
-#### 2. Atomicidad del Flujo de Trabajo
-Cada tarea del DAG tiene un único propósito delimitado y bien definido. Al separar la extracción (Bronze), la limpieza (Silver) y la agregación (Gold) en procesos aislados, logramos que, en caso de fallar la conexión al almacén de datos (Gold), **no tengamos que volver a realizar la llamada a la API externa de origen** (Bronze). Simplemente se limpia el estado de la tarea de carga en Airflow y se reinicia desde el paso fallido de forma localizada, ahorrando ancho de banda y costes de cómputo.
+Este script de Python implementa un **Gestor de Alertas** centralizado de nivel de producción. El código utiliza la API moderna de **TaskFlow** de Airflow 3.
 
-#### 3. Interoperabilidad de la API TaskFlow y Operadores Tradicionales
-Airflow 3 permite la convivencia armoniosa del código moderno de Python (decorado con `@task`) con clases de operadores tradicionales e integrados de proveedores externos (como `SQLExecuteQueryOperator`). La API de TaskFlow expone el atributo de salida `.output` de los métodos decorados, el cual puede ser renderizado en las propiedades plantillables (*templated fields*) de los operadores tradicionales mediante sintaxis Jinja.
+**Análisis Técnico del Script**
+
+1. **Contexto de Ejecución de Tareas (`TaskInstance`):** El callback de fallo tiene acceso al diccionario `context`, el cual provee el estado actual del ejecutor en el momento del colapso. Campos como `context['task_instance']` y `context['exception']` permiten realizar un análisis forense preciso de la traza de ejecución directamente desde la memoria RAM del *worker*, antes de que el estado sea serializado.
+
+2. **Propagación Jerárquica de Callbacks:** Al colocar `on_failure_callback` dentro del diccionario `default_args`, Airflow aplica de forma hereditaria el gestor de alertas a todas las tareas hijas del DAG. Esto asegura que no sea necesario codificar la lógica de alerta tarea por tarea, reduciendo la redundancia de código (*boilerplate*).
+
+3. **Idempotencia en Notificaciones:** El script está diseñado para no generar escrituras colaterales. El uso de variables relativas al tiempo de ejecución (como `logical_date` de Airflow 3) garantiza que las alertas generadas por reintentos o ejecuciones históricas (*backfilling*) mantengan consistencia cronológica con la ventana de datos afectada, facilitando la auditoría de los datos históricos.
+</div>
+</TabItem>
+<TabItem value="mnp-python" label="💻 Código" default>
+
+```python showLineNumbers title="Gestor de alertas automatizado"
+# Implementación en Python
+
+"""
+DAG de Producción con Sistema de Alertas Automatizado (Airflow 3)
+Este script implementa un gestor de excepciones en tiempo real utilizando
+la directiva on_failure_callback para capturar diagnósticos detallados.
+"""
+
+import logging
+import os
+from pendulum import datetime, duration
+from airflow.sdk import dag, task, Asset
+from airflow.exceptions import AirflowSkipException
+
+# ==============================================================================
+# 1. DEFINICIÓN DEL GESTOR DE ALERTAS (CALLBACK)
+# ==============================================================================
+def gestor_alertas_produccion(context: dict):
+    """
+    Función de callback ejecutada de forma síncrona en el worker en el 
+    instante exacto en que ocurre una excepción no controlada.
+    
+    Extrae metadatos críticos del contexto de ejecución de Airflow de forma segura.
+    """
+    # Extraer objetos del entorno de ejecución desde el contexto
+    ti = context.get("task_instance")  # Representa la instancia de la tarea fallida
+    dag_run = context.get("dag_run")   # Representa la corrida del DAG correspondiente
+    exception = context.get("exception")  # Captura el objeto de excepción/traza de error
+    logical_date = context.get("logical_date")  # Marca de tiempo run_after (Airflow 3)
+
+    # Extraer metadatos de diagnóstico con salvaguardas (fallbacks)
+    dag_id = ti.dag_id if ti else "Desconocido"
+    task_id = ti.task_id if ti else "Desconocido"
+    run_id = dag_run.run_id if dag_run else "Desconocido"
+    try_number = ti.try_number if ti else 1
+    
+    # Formatear el diagnóstico técnico para el volcado de logs y alertas
+    mensaje_diagnostico = (
+        f"\n"
+        f"======================================================================\n"
+        f"🚨 [ALERTA DE PRODUCCIÓN] - EXCEPCIÓN DETECTADA EN PIPELINE\n"
+        f"======================================================================\n"
+        f"• DAG Asociado      : {dag_id}\n"
+        f"• Tarea Afectada    : {task_id}\n"
+        f"• ID de Ejecución   : {run_id}\n"
+        f"• Intento Actual    : {try_number}\n"
+        f"• Fecha Lógica (UTC): {logical_date}\n"
+        f"• Tipo de Excepción : {type(exception).__name__ if exception else 'N/A'}\n"
+        f"• Mensaje de Error  : {exception}\n"
+        f"======================================================================\n"
+    )
+
+    # 1. Registrar diagnóstico detallado en el sistema de logs nativo de Airflow
+    logging.error(mensaje_diagnostico)
+
+    # 2. Integración Conceptual para Canales de Notificación Externos (Webhooks)
+    # En producción, aquí se despacha la carga útil (payload) a Slack, Teams o PagerDuty
+    # Ejemplo:
+    # import requests
+    # url_webhook = os.getenv("SLACK_WEBHOOK_URL")
+    # if url_webhook:
+    #     requests.post(url_webhook, json={"text": mensaje_diagnostico})
+
+
+# ==============================================================================
+# 2. CONFIGURACIÓN DEL DAG Y FLUJO DE TRABAJO (TASKFLOW API)
+# ==============================================================================
+@dag(
+    dag_id="pipeline_ventas_produccion",
+    start_date=datetime(2026, 8, 1),
+    schedule=None,              # Trigger manual o externo para este caso de estudio
+    catchup=False,              # Airflow 3 desactiva catchup por defecto a nivel global
+    # Callback de nivel de DAG (se ejecuta si el flujo general falla o expira)
+    on_failure_callback=[gestor_alertas_produccion],
+    # Propagación de parámetros por defecto a todas las tareas hijas
+    default_args={
+        "retries": 1,                               # Número de reintentos automáticos
+        "retry_delay": duration(minutes=3),         # Intervalo entre reintentos
+        "on_failure_callback": [gestor_alertas_produccion] # Alerta a nivel de tarea individual
+    }
+)
+def pipeline_ventas_produccion_dag():
+
+    @task
+    def extraer_datos_tienda():
+        """Simula una extracción exitosa de transacciones."""
+        logging.info("Extrayendo transacciones de la base de datos relacional...")
+        return [100.50, 250.00, 15.75, 0.0]
+
+    @task
+    def calcular_impuestos_criticos(valores: list):
+        """
+        Simula una transformación crítica propensa a fallas matemáticas
+        para demostrar el comportamiento del disparador de alertas.
+        """
+        logging.info("Iniciando procesamiento de impuestos por transacción...")
+        
+        factor_calculo = 5.0
+        impuestos_calculados = []
+        
+        for valor in valores:
+            if valor == 0.0:
+                # Provocamos de forma intencional una división por cero
+                logging.warning("Valor nulo detectado. Ejecutando operación de riesgo...")
+                resultado = factor_calculo / valor  # Lanzará ZeroDivisionError
+            else:
+                resultado = valor * 0.15
+            impuestos_calculados.append(resultado)
+            
+        return impuestos_calculados
+
+    # Definición del linaje lógico y dependencias implícitas mediante TaskFlow
+    datos = extraer_datos_tienda()
+    calcular_impuestos_criticos(datos)
+
+# Instanciación del flujo para registro en el plano de control
+pipeline_ventas_produccion_dag()
+```
+</TabItem>
+</Tabs>
+<br/>
+
 
