@@ -8,8 +8,8 @@ responde con un estilo de nivel universitario, con alto nivel técnico, pero uti
 
 <center>
 <figure>
-![](img/sql_analisis_g.png)
-<figcaption>Tu subtítulo</figcaption>
+![](img)
+<figcaption>caption</figcaption>
 </figure>
 </center>
 

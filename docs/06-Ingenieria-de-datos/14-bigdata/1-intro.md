@@ -19,7 +19,7 @@ A continuación, se detallan las tecnologías y herramientas más relevantes seg
 ### 2. Bases de Datos NoSQL
 
 Diseñadas para manejar datos no estructurados y semiestructurados (como videos, redes sociales o sensores) con alta escalabilidad. 
-   - **[MongoDB](mongodb.md)**: Almacenamiento orientado a documentos.
+   - **MongoDB**: Almacenamiento orientado a documentos.
 Cassandra: Diseñada por Facebook para manejar grandes cantidades de datos distribuidos en muchos servidores.
 
    - HBase: Base de datos distribuida y escalable que corre sobre HDFS. 

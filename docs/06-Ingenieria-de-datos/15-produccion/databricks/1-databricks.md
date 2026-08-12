@@ -1,9 +1,8 @@
 ---
-id: databricks
+id: databricks-intro
 title: "Databricks"
 sidebar_label: "Databricks"
 description: "Procesamiento Distribuido con Apache Spark en el Ecosistema Databricks"
-slug: /databricks
 ---
 
 ## **¿Qué es?**

@@ -1,5 +1,5 @@
 {
-  "label": "🌎 Producción",
+  "label": "Producción",
   "link": {
     "type": "generated-index",
     "description": "Conceptos de producción, incluyendo despliegue y mantenimiento de modelos en entornos de producción.",
