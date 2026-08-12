@@ -11,6 +11,10 @@ description: "Procesamiento Distribuido con Apache Spark en el Ecosistema Databr
 
 De esta manera, proporciona un espacio de trabajo colaborativo donde diferentes perfiles técnicos pueden programar usando lenguajes como Python, SQL, Scala y R.
 
+:::info
+* [Databricks home page](https://www.databricks.com/learn/training/certification)
+* [Databricks Certification and Badging](https://www.databricks.com/learn/training/certification)
+:::
 
 ### ¿Cómo funciona Databricks?
 

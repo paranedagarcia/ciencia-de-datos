@@ -30,14 +30,17 @@ Formar profesionales capaces de **diseñar, desarrollar, implementar, evaluar y 
 
 No es formar especialistas aislados en herramientas, sino profesionales capaces de desarrollar el ciclo completo:
 
-**Datos → Ingeniería → Análisis → Modelamiento → IA → Producción → Monitoreo**
+```mermaid
+graph LR;
+    A["Datos"] --> B["Ingeniería"] --> C["Análisis"] --> D["Modelamiento"] --> E["IA"] --> F["Producción"] --> G["Monitoreo"]
+```
+:::info[Capacidades:]
+Diseñar y desarrollar soluciones de datos completas, desde la adquisición e ingestión de información hasta su procesamiento, almacenamiento, análisis, modelamiento predictivo, implementación de soluciones de inteligencia artificial y despliegue en ambientes productivos.
+:::
 
-Capacidades:
-> Diseñar y desarrollar soluciones de datos completas, desde la adquisición e ingestión de información hasta su procesamiento, almacenamiento, análisis, modelamiento predictivo, implementación de soluciones de inteligencia artificial y despliegue en ambientes productivos.
 
 
-
-En un entorno productivo, ambos mundos están estrechamente relacionados.
+En un entorno productivo, ambos mundos se encuentran estrechamente relacionados.
 
 Un modelo predictivo de alto rendimiento puede ser inútil si:
 
@@ -50,7 +53,7 @@ Un modelo predictivo de alto rendimiento puede ser inútil si:
 * no existe monitoreo;
 * el código solamente funciona dentro de un notebook.
 
-Por otra parte, un excelente Data Engineer necesita comprender:
+Por otra parte, un Data Engineer necesita comprender:
 
 * qué variables necesita un modelo;
 * cómo se genera leakage;
@@ -61,22 +64,49 @@ Por otra parte, un excelente Data Engineer necesita comprender:
 
 Por ello, se propone una formación **T-shaped**:
 
-```text
-                    CIENCIA E INGENIERÍA DE DATOS
-                               │
-          ┌────────────────────┼────────────────────┐
-          │                    │                    │
-   DATA ENGINEERING      DATA SCIENCE        ML / AI ENGINEERING
-          │                    │                    │
-      ETL / ELT             Estadística            ML
-      SQL                   EDA                    Deep Learning
-      Airflow               ML                     GenAI
-      Spark                 IA                     MLOps
-      Kafka
-          │                    │                    │
-          └────────────────────┼────────────────────┘
-                               │
-                        CLOUD / PRODUCCIÓN
+<center>
+```mermaid
+
+graph TD;
+    A["CIENCIA E INGENIERÍA DE DATOS"]
+    B["DATA ENGINEERING"]
+    C["DATA SCIENCE"]
+    D["ML / AI ENGINEERING"]
+    E["CLOUD / PRODUCCIÓN"]
+    
+    A --> B
+    A --> C
+    A --> D
+    
+    B --> B1["ETL / ELT<br/> SQL <br/>Airflow <br/>Spark <br/>Kafka"]
+    
+    C --> C1["Estadística<br/>EDA<br/>Machine Learning<br/>IA"]
+    
+    D --> D1["Machine Learning<br/> Deep Learning<br/> GenAI<br/> MLOps"]
+    
+    B1 --> E
+    C1 --> E
+    D1 --> E
+
+    style B fill:#ff6b6b
 ```
+</center>
+<br />
+<center>
+```mermaid
+---
+title: "Grades"
+---
+radar-beta
+  axis m["Machine Learning"], s["SQL"], e["Deep Learning"]
+  axis t["Statistics"], c["Cloud Computing"], a["Art"]
 
+  curve a["Data Engineer"]{85, 90, 80, 70, 75, 90}
+  curve b["Data Scientist"]{70, 75, 85, 80, 90, 85}
+  curve b["ML Engineer"]{40, 45, 65, 70, 40, 65}
 
+  max 100
+  min 0
+
+```
+</center>

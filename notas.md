@@ -13,6 +13,26 @@ responde con un estilo de nivel universitario, con alto nivel técnico, pero uti
 </figure>
 </center>
 
+<br />
+#### 💻 Código:
+<Tabs>
+<TabItem value="mnp" label="Antecedentes" default>
+<div class="alert alert--primary">
+**Distribución t de Student**<br />
+</div>
+</TabItem>
+<TabItem value="mnp-python" label="Pyhton" default>
+```python showLineNumbers
+# Implementación en Python
+```
+</TabItem>
+<TabItem value="mnp-r" label="R" default>
+```r showLineNumbers
+# Implementación en R
+```
+</TabItem>
+</Tabs><br />
+
 ## streamlit
 
 ¿Cómo puedo añadir filtros interactivos a estos gráficos?
@@ -65,18 +85,27 @@ Explica cómo gestionar el estado de la sesión en aplicaciones interactivas
 
 ## spark
 
-¿Cuáles son las ventajas de usar Delta Lake en Databricks?
-¿Cómo se gestionan los datos tardíos con watermarks en Spark?
 
-¿Cómo se comparan Databricks y Snowflake en arquitectura Lakehouse?
-¿Qué es un Feature Store y cómo evita inconsistencias?
-¿Cómo funciona el clustering líquido en tablas Delta?
-
-¿Cómo se aplica el "credential vending" con Unity Catalog?
 ¿Qué impacto tiene el motor Photon en el rendimiento?
 ¿Cómo manejar datos tardíos usando watermarks en Spark Streaming?
 
 
+¿Cómo manejar datos faltantes en un pipeline de Spark?
+¿Qué ventajas tiene el agrupamiento líquido en Delta Lake?
+¿Cómo influye el 'data drift' en el despliegue?
+
+## airflow
+
+¿Qué es un DAG y cómo funciona en Airflow?
+¿Cuáles son las diferencias entre LocalExecutor y KubernetesExecutor?
+Explícame qué es el Triggerer y cómo ahorra costes.
+
+¿Qué es Spark Connect y cómo mejora el aislamiento de procesos?
+
+Explícame el rol de los checkpoints en Spark Structured Streaming
+
+## Databricks
+¿Cómo se gestionan los metadatos y credenciales en Unity Catalog?
 ¿Qué ventajas ofrece UniForm para la interoperabilidad de datos?
 Explica la diferencia entre volúmenes y tablas en Unity Catalog
 
@@ -84,7 +113,26 @@ Explica la diferencia entre volúmenes y tablas en Unity Catalog
 Explícame el flujo físico de lectura en Delta Lake
 ¿Cómo configurar el enmascaramiento dinámico en Unity Catalog?
 
+¿Cuáles son las ventajas de usar Delta Lake en Databricks?
+¿Cómo se gestionan los datos tardíos con watermarks en Spark?
 
-¿Cómo manejar datos faltantes en un pipeline de Spark?
-¿Qué ventajas tiene el agrupamiento líquido en Delta Lake?
-¿Cómo influye el 'data drift' en el despliegue?
+¿Cómo se comparan Databricks y Snowflake en arquitectura Lakehouse?
+¿Qué es un Feature Store y cómo evita inconsistencias?
+¿Cómo funciona el clustering líquido en tablas Delta?
+¿Cómo funciona el aislamiento de procesos con Lakeguard en Databricks?
+
+¿Cómo se aplica el "credential vending" con Unity Catalog?
+
+##
+¿Qué es el MLlib y cómo se usa con PySpark?
+
+Explícame el concepto de evaluación perezosa en Spark
+
+
+¿Cómo se visualiza el linaje de datos en la interfaz?
+¿Qué diferencia hay entre linaje de tabla y de columna?
+¿Puedo rastrear el origen de una métrica en la capa Gold?
+
+¿Qué diferencias técnicas existen entre el modelo medallón y el tradicional?
+¿Cómo se implementa el linaje de datos en Unity Catalog?
+Dame un ejemplo de cómo configurar alertas para fallos en Airflow

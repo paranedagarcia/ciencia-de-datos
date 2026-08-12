@@ -29,6 +29,7 @@ const config = {
       footnoteBackLabel: 'Volver a referencia',
     },
   },
+  themes: ['@docusaurus/theme-mermaid'],
   // Future flags, see https://docusaurus.io/docs/api/docusaurus-config#future
   future: {
     v4: true, // Improve compatibility with the upcoming Docusaurus v4
