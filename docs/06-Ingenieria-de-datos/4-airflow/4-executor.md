@@ -98,10 +98,7 @@ mi_pipeline()
 
 Esta aproximación híbrida e interoperable garantiza que juegues con las fortalezas de cada ejecutor: utilizando la rapidez y el bajo coste de `CeleryExecutor` para tareas sencillas de integración de datos, y el aislamiento robusto del `KubernetesExecutor` para computaciones complejas o tareas de Machine Learning.
 
-***
 
----
----
 
 En la arquitectura de **Apache Airflow 3**, el **ejecutor** (*executor*) es el componente encargado de definir la estrategia de ejecución de las tareas. Su función consiste en tomar las tareas encoladas por el planificador (*scheduler*) y asignarles los recursos físicos para su procesamiento.
 

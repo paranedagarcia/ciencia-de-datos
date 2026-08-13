@@ -122,6 +122,14 @@ Abra el navegador en http://localhost:8080
 
 En la arquitectura de **Apache Airflow** (con especial énfasis en la evolución hacia la versión 3.0), el sistema se divide de manera rigurosa para **desacoplar la ejecución del código de usuario (tareas) del almacenamiento de metadatos**. Este diseño optimiza la seguridad, la escalabilidad y la tolerancia a fallos en entornos de producción distribuidos.
 
+<center>
+**Evolución Arquitectónica: Airflow 2 vs Airflow 3**
+<figure>
+![](img/airflow-arch.jpg)
+<figcaption></figcaption>
+</figure>
+</center>
+
 A continuación, se presenta un análisis técnico y pedagógico de los **componentes principales** de Airflow y su función dentro del flujo de trabajo:
 
 
@@ -130,6 +138,13 @@ En las versiones más recientes, el **API Server** se convierte en el eje centra
 * **Función:** Actúa como la única puerta de enlace de comunicación (*gateway*) para todos los componentes que necesitan interactuar con la base de datos de metadatos (metastore).
 * **Task SDK (Task Execution Interface):** Los trabajadores (*workers*) ya no se conectan directamente a la base de datos. En su lugar, solicitan credenciales de conexión o reportan estados a través de llamadas seguras al API Server. 
 * **Interfaz y REST API:** También es responsable de servir la interfaz de usuario (UI) moderna y la API REST pública.
+
+<center>
+<figure>
+![](img/airflow-api.jpg)
+<figcaption>Airflow 3 aísla la ejecución del estado. El API Server es el único puente de comunicación.</figcaption>
+</figure>
+</center>
 
 #### El Scheduler (Planificador)
 Es el cerebro encargado de coordinar la ejecución del flujo de trabajo.

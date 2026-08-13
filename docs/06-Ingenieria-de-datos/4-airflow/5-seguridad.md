@@ -277,6 +277,3 @@ pipeline_ventas()
 </TabItem>
 </Tabs><br />
 
-***
-
-🎨 ¿Te gustaría que prepare una infografía bento-grid en tu panel de **Studio** que represente visualmente la transición del plano de datos y control de Airflow 2 hacia el nuevo estándar del API Server y Task SDK de Airflow 3?
