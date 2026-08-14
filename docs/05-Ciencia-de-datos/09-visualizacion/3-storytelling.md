@@ -4,6 +4,7 @@ title: "Storytelling en Ciencia de Datos"
 sidebar_label: "📚 Storytelling"
 sidebar_position: 3
 description: "Storytelling en Ciencia de Datos"
+slug: /storytelling
 ---
 
 ![](img/visual-intro.webp)

@@ -111,33 +111,147 @@ graph TD;
 title: "Tools & Knowlegdes"
 ---
 radar-beta
-  axis m["MACHINE LEARNING"], s["SQL"], e["DATABASE"]
+  axis m["MACHINE LEARNING"], s["SQL"], e["DATABASE"], s["SPARK"]
   axis t["STATISTICS"], c["CLOUD COMPUTING"], a["AI"]
-  axis etl["ETL/ELT"], h["MATH"], d["DEEP LEARNING"]
+  axis etl["ETL/ELT"], eda["EDA"], h["MATH"], d["DEEP LEARNING"]
 
-  curve a["Data Engineer"]{25, 90, 95, 10, 90, 20, 100, 10,10}
-  curve b["Data Scientist"]{70, 80, 80, 100, 70, 75, 65, 80, 65}
-  curve b["ML Engineer"]{40, 45, 65, 60, 75, 85, 45, 40, 85}
+   curve a["Data Engineer"]{25, 90, 95, 100, 10, 100, 20, 100, 25, 10,10}
+  curve b["Data Scientist"]{95, 80, 80, 65, 100, 70, 75, 65, 85, 85, 65}
+     curve b["ML Engineer"]{40, 45, 65, 60, 80, 85, 100, 45, 25, 40, 85}
 
   graticule polygon
   max 100
   min 0
 
 ```
+**TOOLS & KNOWLEDGES BY ROL (0-100)**
+```mermaid
+%%{init: {'theme': 'base', 
+    'themeVariables':{
+        'primaryColor': '#A4CFE5',
+        'lineColor': '#C6CBCC'
+        }
+    }
+}%%
+radar-beta
+
+axis etl["ETL/ELT"], sql["SQL"], air["AIRFLOW"], spk["SPARK"], kaf["KAFKA"]
+axis stat["STATISTICS"], math["MATH"], git["GIT"], doc["DOCKER"], eda["EDA"]
+axis ml["MACHINE LEARNING"], dl["DEEP LEARNING"], mlops["MLOps"]
+
+curve de["Data Engineering"]{95, 95, 90, 90, 85, 20, 20, 85, 85, 20, 15, 5, 40}
+curve ds["Data Scientist"]{40, 85, 30, 50, 15, 95, 90, 65, 40, 95, 95, 80, 30}
+curve mle["ML/AI Engineering"]{60, 70, 50, 65, 50, 75, 80, 95, 95, 50, 95, 95, 95}
+
+graticule polygon
+max 100
+min 0
+```
+**TOOLS & KNOWLEDGES BY ROL (0-100)**
+```mermaid
+%%{init: {'theme': 'base', 
+    'themeVariables':{
+        'primaryColor': '#A4CFE5',
+        'lineColor': '#C6CBCC'
+        }
+    }
+}%%
+radar-beta
+  title Comparacion de Roles en Ciencia e Ingenieria de Datos
+
+  axis ETL_ELT, SQL, SPARK, KAFKA, STATISTICS, MATH, AIRFLOW, GIT, DOCKER, EDA, ML, DL, CLOUD, MLOps, DATA, PYTHON, APIs, CI_CD, DATAQUALITY, OBSERVABILITY
+
+  curve Data_Engineering {
+    95, 95, 90, 90, 45, 50, 95, 80, 80, 55,
+    30, 15, 90, 45, 95, 75, 60, 70, 95, 85
+  }
+
+  curve Data_Scientist {
+    45, 85, 60, 30, 95, 90, 35, 80, 55, 95,
+    95, 75, 65, 50, 60, 95, 45, 45, 60, 35
+  }
+
+  curve ML_AI_Engineering {
+    70, 75, 65, 65, 70, 90, 75, 95, 95, 65,
+    95, 95, 95, 100, 70, 95, 90, 90, 65, 90
+  }
+
+  graticule polygon
+  max 100
+  min 0
+```
+</center>
+Los roles de **Ingeniero de Datos** y **Científico de Datos** representan dos disciplinas complementarias pero con responsabilidades, metodologías y conjuntos de herramientas profundamente diferenciados.
+
+El patrón que emerge es bastante claro:
+
+* **Data Engineer** → "hacer que los datos existan, fluyan y sean confiables"
+Su núcleo está en ETL/ELT + SQL + Spark + Kafka + Airflow + cloud + data platforms + calidad.
+* **Data Scientist** → "convertir datos en conocimiento y modelos"
+Su núcleo está en estadística + matemáticas + Python + EDA + Machine Learning + Deep Learning.
+* **ML/AI Engineer** → "convertir modelos en sistemas productivos"
+Su núcleo está en ML/DL + Python + Docker + cloud + APIs + CI/CD + MLOps + observabilidad.
+
+Lo más interesante es que los tres roles forman una cadena:
+```text
+                 DATA ENGINEERING
+                        │
+                        │ Datos confiables
+                        ▼
+                 DATA SCIENCE
+                        │
+                        │ Modelos / conocimiento
+                        ▼
+                ML / AI ENGINEERING
+                        │
+                        │ Sistemas productivos
+                        ▼
+                 Aplicaciones de IA
+```
+Donde hay una zona común que debería ser obligatoria:
+
+Python + SQL + Git + Docker + Cloud + arquitectura de datos + estadística + EDA + fundamentos de ML
+
+Y posteriormente profundizar en cada rol específico:
+<center>
+```mermaid
+%%{init: {'theme': 'base', 
+    'themeVariables':{
+        'primaryColor': '#c6d6df',
+        'lineColor': '#C6CBCC'
+        }
+    }
+}%%
+
+flowchart TD
+    A["FUNDAMENTOS COMUNES<br/>Python / SQL / Git<br/>Statistics / Cloud"]
+
+    A --> B["DATA ENGINEERING"]
+    A --> C["DATA SCIENCE"]
+    A --> D["ML/AI ENGINEERING"]
+
+    B --> B1["ETL/ELT<br/>Spark<br/>Kafka<br/>Airflow<br/>Lakehouse"]
+
+    C --> C1["EDA<vr/>Statistics<br/>Machine Learning<br/>Deep Learning<br/>Experimentación"]
+
+    D --> D1["ML/DL<br/>Docker<br/>APIs<br/>CI/CD<br/>MLOps"]
+
+    B1 --> E["DATA & AI PLATFORM"]
+    C1 --> E
+    D1 --> E
+```
+
 </center>
 
-En el ecosistema de la **Ciencia e Ingeniería de Datos**, los roles de **Ingeniero de Datos** y **Científico de Datos** representan dos disciplinas complementarias pero con responsabilidades, metodologías y conjuntos de herramientas profundamente diferenciados. Analizamos la definición de cada rol, sus diferencias fundamentales y las acciones para su integración operativa en entornos de producción.
+### Definiciones
 
-
-### Definiciones Fundamentales
-
-*   **Ingeniero de Datos (*Data Engineer*):** Es el especialista en software y sistemas encargado de diseñar, construir, optimizar y mantener las canalizaciones de datos (*data pipelines*) y las arquitecturas de almacenamiento (como *Data Lakes*, *Data Warehouses* o *Lakehouses*). Su objetivo primordial es realizar el "trabajo invisible" de ingesta, limpieza e integración a gran escala (Big Data) para transformar datos crudos y sucios en activos de datos limpios, consistentes, particionados y gobernados, listos para ser consumidos.
+*   **Ingeniero de Datos (*Data Engineer*):** Este rol está asociado al especialista en software y sistemas encargado de diseñar, construir, optimizar y mantener las canalizaciones de datos (*data pipelines*) y las arquitecturas de almacenamiento asociadas (como *Data Lakes*, *Data Warehouses* o *Lakehouses*). Su objetivo primordial es realizar el "trabajo invisible" de ingesta, limpieza e integración a gran escala (Big Data) para transformar datos crudos y sucios en activos de datos limpios, consistentes, particionados y gobernados, listos para ser consumidos.
 
 *   **Científico de Datos (*Data Scientist*):** Es el especialista analítico enfocado en interrogar los datos, formular preguntas de negocio, extraer *insights* estadísticos y construir modelos predictivos o prescriptivos de Machine Learning y Deep Learning. Tradicionalmente, se le define mediante el aforismo clásico: *"Un científico de datos es alguien que sabe más de ingeniería de software que cualquier estadístico, y más de estadística que cualquier ingeniero de software"*. Su prioridad es el valor de negocio de las predicciones y la optimización de métricas de modelado.
 
 
 
-### Diferencias Fundamentales
+### Diferencias
 
 Las discrepancias entre ambos roles se estructuran en tres dimensiones clave: su enfoque en el ciclo de vida del dato, sus herramientas de trabajo y la naturaleza de sus entregables.
 
@@ -145,7 +259,7 @@ Las discrepancias entre ambos roles se estructuran en tres dimensiones clave: su
 | :--- | :--- | :--- |
 | **Enfoque Principal** |**Infraestructura, confiabilidad y escalabilidad.** Se asegura de que los datos fluyan eficientemente desde las fuentes transaccionales hasta los destinos de analítica sin pérdida de datos. |**Modelado, experimentación y predicción.** Se enfoca en entender los patrones matemáticos del dato y optimizar algoritmos para tomar decisiones de negocio futuras. |
 | **Etapa en el Ciclo del Dato** | **Onboarding e Ingesta.** Captura datos de sistemas de origen (APIs, bases de datos OLTP, colas de mensajería) y aplica transformaciones iniciales pesadas. | **Active Duty.** Consume los datos procesados para entrenar modelos, validar hipótesis, realizar análisis de correlación y desplegar servicios predictivos. |
-| **Herramientas de Cabecera** | Motores distribuidos (Apache Spark/PySpark), orquestadores de flujos ([Apache Airflows](/docs/airflow)), bases de datos NoSQL y almacenes con transacciones ACID (Delta Lake, Apache Iceberg). | Librerías de modelado (Scikit-Learn, PyTorch, TensorFlow), manipulación local ([Pandas](/docs/pandas)), visualización ([Matplotlib](/docs/Ciencia-de-datos/visualizacion/matplotlib), [Seaborn](/docs/Ciencia-de-datos/visualizacion/seaborn)) y plataformas de tracking (MLflow). |
+| **Herramientas de Cabecera** | Motores distribuidos (Apache Spark/PySpark), orquestadores de flujos ([Apache Airflows](/docs/airflow)), bases de datos NoSQL y almacenes con transacciones ACID (Delta Lake, Apache Iceberg). | Librerías de modelado (Scikit-Learn, PyTorch, TensorFlow), manipulación local ([Pandas](/docs/pandas)), visualización ([Matplotlib](/docs/matplotlib), [Seaborn](/docs/seaborn)) y plataformas de tracking (MLflow). |
 | **Propiedades Clave del Código** | **Idempotencia, tolerancia a fallos y atomicidad.** El código debe ser reproducible y capaz de reejecutarse sobre petabytes de datos sin duplicar registros. | **Iteración rápida y determinismo.** El código se ejecuta de forma iterativa y ad-hoc para buscar hiperparámetros y evaluar funciones de pérdida (*loss functions*). |
 
 ---

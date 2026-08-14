@@ -20,10 +20,10 @@ La visualización de datos es el proceso de representar información de forma gr
 
 **Contenidos:**
 1. Principios de visualización
-2. [Matplotlib](./4-matplotlib.md)
-3. [Seaborn](./5-seaborn.md)
-4. Dashboards básicos con Plotly Express
-5. [Storytelling con datos](./3-storytelling.md)
+2. [Matplotlib](/docs/matplotlib)
+3. [Seaborn](/docs/seaborn)
+4. Dashboards básicos con [Plotly Express](/docs/plotly)
+5. [Storytelling con datos](/docs/storytelling)
 
 
 ### 1. Historia de la Visualización

@@ -1,0 +1,8 @@
+{
+  "label": "💻 Apache Spark",
+  "link": {
+    "type": "generated-index",
+    "description": "Conceptos de ingeniería de datos, incluyendo almacenamiento, procesamiento y gestión de datos.",
+    "slug": "/spark"
+  }
+}

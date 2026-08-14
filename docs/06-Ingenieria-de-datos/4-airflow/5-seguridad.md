@@ -3,6 +3,7 @@ id: airflow-seguridad
 title: "Seguridad en Airflow 3"
 sidebar_label: "Seguridad"
 description: "Manejo y control de la seguridad"
+slug: airflow-seguridad
 ---
 
 <center>

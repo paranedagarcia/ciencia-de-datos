@@ -17,7 +17,7 @@ En proyectos de ciencia de datos, se utilizan diversas herramientas y entornos p
 
 - **Visual Studio Code (VS Code)**: Editor de código fuente ligero y potente con soporte para extensiones específicas de ciencia de datos.
 
-- **Librerías de visualización**: [**Matplotlib**](/docs/05-Ciencia-de-datos/09-visualizacion/4-matplotlib.md), [**Seaborn**](/docs/05-Ciencia-de-datos/09-visualizacion/5-seaborn.md), [**Plotly**](/docs/05-Ciencia-de-datos/09-visualizacion/6-plotly.md) para crear gráficos y visualizaciones interactivas.
+- **Librerías de visualización**: [**Matplotlib**](/docs/matplotlib), [**Seaborn**](/docs/seaborn), [**Plotly**](/docs/plotly) para crear gráficos y visualizaciones interactivas.
 
 - **Entornos de desarrollo**: Anaconda, que facilita la gestión de paquetes y entornos virtuales.
 

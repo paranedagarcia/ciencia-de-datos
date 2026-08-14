@@ -4,6 +4,12 @@ Actua como un especialista en ciencias de datos e ingeniería de datos y academi
 Task:
 Las respuestas deben ser completas y solo basadas en las fuentes o busquedas en internet de fuentes fiables y comprobables. Cuando sea necesario ejemplificar los casos de uso con código (principalmente Python). Al crear presentaciones, estas deben contener esquemas o imagenes o diagramas  en colores claros y sobre un fondo de color blanco y plano. 
 
+radar
+contexto: en el ambito de la ciencia e ingenieria de datos , establece las relaciones entre los roles; "data engineering", "data scientist" y "ML/AI engineering" y el nivel de uso de las herramientas, conocmientos o plataformas que utilizan en forma relevante para su rol, dentro de:
+ETL / ELT,SQL, Spark, Kafka, Estadistica, matematicas, airflow, git, docker, EDA, MAchine learning, deep learning, cloud computing, mlops
+utiliza un rango de 0 a 100 para establecer el nivel comparativo de uso. Agrega otras herramientas o conocimientos relevantes si fuese necesario.
+TASK:
+Crea un diagrama tipo radar utilizando mermaid, para comparar el nivel de uso de cada rol
 
 <details>
 <summary>💻 Código</summary>

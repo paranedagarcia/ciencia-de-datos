@@ -3,6 +3,7 @@ id: seaborn
 title: ""
 sidebar_label: "📈 Seaborn"
 sidebar_position: 5
+slug: /seaborn
 ---
 
 <div className="text--center">
