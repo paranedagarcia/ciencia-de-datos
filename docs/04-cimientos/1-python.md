@@ -1,8 +1,7 @@
 ---
 id: python
 title: "Programación en Python"
-sidebar_label: "💻 Programación en Python"
-sidebar_position: 3
+sidebar_label: "💻 Python"
 description: "Programación en Python"
 slug: /python
 ---

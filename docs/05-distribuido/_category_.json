@@ -1,0 +1,8 @@
+{
+  "label": "📚 Computo distribuido",
+  "link": {
+    "type": "generated-index",
+    "description": "Conceptos básicos de cómputo distribuido, incluyendo arquitecturas, frameworks y técnicas de procesamiento paralelo.",
+    "slug": "/computo-distribuido"
+  }
+}

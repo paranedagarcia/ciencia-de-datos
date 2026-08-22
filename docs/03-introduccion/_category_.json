@@ -1,8 +1,8 @@
 {
-  "label": "📚 Fundamentos básicos",
+  "label": "📚 Aspectos básicos",
   "link": {
     "type": "generated-index",
     "description": "Conceptos básicos de la ciencia de datos, incluyendo la comprensión de datos, el aprendizaje automático y la producción de modelos.",
-    "slug": "/fundamentos-basicos"
+    "slug": "/aspectos-basicos"
   }
 }

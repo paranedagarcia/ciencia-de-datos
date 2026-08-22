@@ -1,0 +1,8 @@
+{
+  "label": "📚 Orquestación",
+  "link": {
+    "type": "generated-index",
+    "description": "Procedimientos para automatizar tareas periódicamente, garantizando la reproducibilidad y el manejo robusto de excepciones (DataOps). Asegurando la gobernanza de datos para garantizar el control de accesos y linaje.",
+    "slug": "/orquestacion"
+  }
+}
