@@ -1,7 +1,7 @@
 ---
 id: herramientas
 title: "Herramientas"
-sidebar_label: "💻 Herramientas"
+sidebar_label: "📚 Herramientas"
 sidebar_position: 3
 description: "Herramientas y entornos comunes"
 ---

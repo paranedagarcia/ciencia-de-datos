@@ -1,7 +1,7 @@
 ---
 id: bd-intro
 title: "Ruta de Aprendizaje"
-sidebar_label: "💻 Ruta de Aprendizaje"
+sidebar_label: "📄 Ruta de Aprendizaje"
 sidebar_position: 2
 description: "Propuesta de ruta de aprendizaje para Ciencia e Ingenieria de datos"
 ---

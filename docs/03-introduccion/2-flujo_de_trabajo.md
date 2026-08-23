@@ -1,7 +1,7 @@
 ---
 id: flujo
 title: "Flujo de trabajo"
-sidebar_label: "💻 Flujo de trabajo"
+sidebar_label: "📚 Flujo de trabajo"
 sidebar_position: 2
 description: "Flujo de trabajo de un proyecto"
 ---

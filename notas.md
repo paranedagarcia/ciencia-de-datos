@@ -101,6 +101,12 @@ Explica cómo gestionar el estado de la sesión en aplicaciones interactivas
 
 ## airflow
 
+¿Cómo configurar una alerta automatizada en Slack con Airflow?
+Dame un ejemplo de cómo configurar alertas para fallos en Airflow
+¿Qué es el Task SDK y cómo cambia en Airflow 3?
+Explica el concepto de idempotencia en un DAG de ETL
+¿Cómo se aplica la idempotencia en un DAG de Airflow?
+
 ¿Qué es un DAG y cómo funciona en Airflow?
 ¿Cuáles son las diferencias entre LocalExecutor y KubernetesExecutor?
 Explícame qué es el Triggerer y cómo ahorra costes.
@@ -129,10 +135,14 @@ Explícame el flujo físico de lectura en Delta Lake
 ¿Cómo se aplica el "credential vending" con Unity Catalog?
 
 ##
+
+Explícame el Z-Order en Delta Lake
+¿Cómo se integra PySpark con MLflow?
+¿Qué es el Training-Serving Skew?
+
 ¿Qué es el MLlib y cómo se usa con PySpark?
 
 Explícame el concepto de evaluación perezosa en Spark
-
 
 ¿Cómo se visualiza el linaje de datos en la interfaz?
 ¿Qué diferencia hay entre linaje de tabla y de columna?
@@ -140,16 +150,19 @@ Explícame el concepto de evaluación perezosa en Spark
 
 ¿Qué diferencias técnicas existen entre el modelo medallón y el tradicional?
 ¿Cómo se implementa el linaje de datos en Unity Catalog?
-Dame un ejemplo de cómo configurar alertas para fallos en Airflow
 
 ¿Qué es el patrón multi-hop y cómo se relaciona?
-¿Cómo configurar una alerta automatizada en Slack con Airflow?
+
 ¿Qué algoritmos de ML admite PySpark para clasificación?
 
-¿Qué es el Task SDK y cómo cambia en Airflow 3?
-Explica el concepto de idempotencia en un DAG de ETL
+
+
+
 ¿Cómo se integra PySpark con el ecosistema de Machine Learning?
 
-¿Cómo se aplica la idempotencia en un DAG de Airflow?
 ¿Cuáles son las diferencias entre CeleryExecutor y KubernetesExecutor?
 Explícame cómo configurar un Secrets Backend para mayor seguridad
+
+¿Qué es el data skipping?
+¿Cómo se integra dbt con Airflow?
+¿Qué es el Training-Serving Skew?

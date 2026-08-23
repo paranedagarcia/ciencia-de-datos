@@ -1,7 +1,7 @@
 ---
 id: github
 title: "GitHub"
-sidebar_label: "💻 GitHub"
+sidebar_label: "🗜️ GitHub"
 description: "Control de versiones con Github"
 slug: /gitgub
 ---

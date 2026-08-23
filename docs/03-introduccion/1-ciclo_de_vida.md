@@ -1,7 +1,7 @@
 ---
 id: ciclodevida
 title: "Ciclo de vida"
-sidebar_label: "💻 Ciclo de vida"
+sidebar_label: "📚 Ciclo de vida"
 sidebar_position: 1
 description: "Ciclo de Vida de un Proyecto de Data Science"
 ---

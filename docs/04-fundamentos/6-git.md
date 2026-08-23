@@ -1,7 +1,7 @@
 ---
 id: git
 title: "Git"
-sidebar_label: "​📊 Git"
+sidebar_label: "​🗜️ Git"
 description: "Control de versiones con git"
 slug: /git
 ---
