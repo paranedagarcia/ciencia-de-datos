@@ -1,7 +1,7 @@
 ---
 id: git
 title: "Git"
-sidebar_label: "​📊 Git & GitHub"
+sidebar_label: "​📊 Git"
 description: "Control de versiones con git"
 slug: /git
 ---
@@ -17,13 +17,17 @@ Aunque los sistemas de control de versiones existen desde hace décadas, el est�
 
 ### Características técnicas principales
 
-*   **Arquitectura Distribuida:** A diferencia de los sistemas antiguos, un control de versiones distribuido aloja una **copia completa del repositorio en cada máquina local** que trabaja en el código. Esto permite trabajar sin conexión a internet y asegura que, si el servidor central falla, cualquier colaborador pueda restaurar el proyecto completo.
+*   **Arquitectura Distribuida:** A diferencia de los sistemas antiguos, un control de versiones distribuido aloja una **copia completa del repositorio en cada máquina local** que trabaja en el código. Esto permite trabajar sin conexión a internet y asegura que, si el servidor central falla, cualquier colaborador pueda restaurar el proyecto completo. Cada desarrollador tiene una copia completa del repositorio, lo que permite trabajar de manera independiente y sin conexión.
 
-*   **Ramificación (Branching):** Es la capacidad de crear **líneas de desarrollo independientes** o bifurcaciones. Esto permite que un equipo trabaje en una nueva funcionalidad en una rama mientras otro corrige un error en una rama distinta, sin que sus cambios se interfieran hasta que decidan integrarlos.
+*   **Ramificación (Branching):** Es la capacidad de crear **líneas de desarrollo independientes** o bifurcaciones. Esto permite que un equipo trabaje en una nueva funcionalidad en una rama mientras otro corrige un error en una rama distinta, sin que sus cambios se interfieran hasta que decidan integrarlos. Esto permite a los desarrolladores trabajar en características o correcciones de errores de manera aislada antes de fusionarlas con la rama principal.
 
 *   **Confirmaciones (Commits):** Cada unidad de guardado es un **commit**, que registra los cambios exactos y les asigna un identificador único (hash). Cada commit incluye metadatos como el autor, la fecha y un mensaje descriptivo.
 
 *   **Fusión e Integración (Merge/Rebase):** Proporciona mecanismos técnicos para **unir diferentes líneas de trabajo**, detectando automáticamente si hay conflictos cuando dos personas modifican la misma línea de un archivo y solicitando una resolución manual para garantizar la integridad del código.
+
+*   **Integridad de datos**: Git utiliza un sistema de hash SHA-1 para asegurar la integridad de los datos y rastrear los cambios en el código.
+
+*   **Historial completo**: Git mantiene un historial completo de todos los cambios realizados en el código, lo que permite a los desarrolladores revertir a versiones anteriores si es necesario.
 
 ### Importancia del control de versiones
 
@@ -48,32 +52,33 @@ El uso de estos sistemas es vital en el desarrollo de software profesional por l
 
 
 ### Instalación de Git
-#### instalar en Mac OS
+**instalar en Mac OS**
 ```bash
 brew install git
 ```
-#### instalar en Windows
+**instalar en Windows**
 ```bash
 choco install git
 ```
-#### instalar en Linux (Debian/Ubuntu)
+**instalar en Linux (Debian/Ubuntu)**
 ```bash
 sudo apt-get install git
 ```
-#### instalar en Linux (Fedora)
+**instalar en Linux (Fedora)**
 ```bash
 sudo dnf install git
 ```
-#### instalar en Linux (Fedora)
+**instalar en Linux (Fedora)**
 ```bash
 sudo dnf install git
 ```
-#### instalar en Linux (Arch)
+**instalar en Linux (Arch)**
 ```bash
 sudo pacman -S git
 ```
 
-#### Verificar instalación de Git
+**Verificar instalación de Git**
+
 Independientemente del sistema operativo, para verificar que Git se haya instalado correctamente, puedes ejecutar el siguiente comando en la terminal:
 
 ```bash
@@ -388,28 +393,3 @@ Una vez realizada la integración en la nube, se recomienda seguir estos pasos d
 3.  **Podar referencias:** Se pueden usar comandos como `git pull -p` o `git remote prune origin` para eliminar las referencias locales a ramas que ya fueron borradas en el remoto.
 
 
-## Github
-GitHub es una plataforma de alojamiento de código fuente y control de versiones que utiliza Git. Permite a los desarrolladores colaborar en proyectos, gestionar versiones de código y compartir su trabajo con la comunidad.
-
-<center>
-<figure>
-![](img/git-hub.jpg)
-<figcaption></figcaption>
-</figure>
-</center>
-
-### Crear un repositorio en GitHub
-1. Inicia sesión en tu cuenta de GitHub.
-2. Haz clic en el botón "New" o "Nuevo" para crear un nuevo repositorio.
-3. Proporciona un nombre para tu repositorio y una descripción opcional.
-4. Elige si deseas que el repositorio sea público o privado.
-5. Haz clic en "Create repository" o "Crear repositorio".
-
-### Clonar un repositorio
-```bash
-git clone <REMOTE_REPOSITORY_URL>
-```
-
-:::info
-... tema en desarrollo.
-:::

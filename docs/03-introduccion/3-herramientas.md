@@ -9,15 +9,15 @@ description: "Herramientas y entornos comunes"
 ## Herramientas y entornos comunes
 En proyectos de ciencia de datos, se utilizan diversas herramientas y entornos para facilitar el análisis, modelado y visualización de datos. Algunas de las herramientas más comunes incluyen:
 
-- **Python**: Lenguaje de programación ampliamente utilizado en ciencia de datos por su simplicidad y la gran cantidad de bibliotecas disponibles ([**pandas**](/docs/05-Ciencia-de-datos/07-pandas/0-introduccion.md), NumPy, scikit-learn, etc.).
+- **Python**: Lenguaje de programación ampliamente utilizado en ciencia de datos por su simplicidad y la gran cantidad de bibliotecas disponibles ([**pandas**](/docs/pandas), NumPy, scikit-learn, etc.).
 
 - **Jupyter Notebooks**: Entorno interactivo para escribir y ejecutar código, ideal para análisis exploratorio y visualización de datos.
 
-- **Git y GitHub**: Herramientas de control de versiones para gestionar cambios en el código y colaborar con otros.
+- **[Git y GitHub](/docs/git)**: Herramientas de control de versiones para gestionar cambios en el código y colaborar con otros.
 
 - **Visual Studio Code (VS Code)**: Editor de código fuente ligero y potente con soporte para extensiones específicas de ciencia de datos.
 
-- **Librerías de visualización**: [**Matplotlib**](/docs/matplotlib), [**Seaborn**](/docs/seaborn), [**Plotly**](/docs/plotly) para crear gráficos y visualizaciones interactivas.
+- **[Librerías de visualización](/docs/data-visualization)**: [**Matplotlib**](/docs/matplotlib), [**Seaborn**](/docs/seaborn), [**Plotly**](/docs/plotly) para crear gráficos y visualizaciones interactivas.
 
 - **Entornos de desarrollo**: Anaconda, que facilita la gestión de paquetes y entornos virtuales.
 

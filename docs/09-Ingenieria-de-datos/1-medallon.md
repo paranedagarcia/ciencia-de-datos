@@ -2,7 +2,6 @@
 id: medallon
 title: "Arquitectura Medallon"
 sidebar_label: "💻 Arquitectura Medallon"
-sidebar_position: 4
 description: "Esta arquitectura se prefiere para cargas de trabajo analíticas ya que garantiza transacciones **ACID**"
 slug: /medallon
 ---
