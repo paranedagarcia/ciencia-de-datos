@@ -257,7 +257,19 @@ print(f"Versión {metadata_version.version} promovida con éxito a PRODUCCIÓN p
 
 ## **Seguimiento de ruta**
 
+Esta es la ruta propuesta para el cumplimiento de un aprendizaje integrado en Ciencia e Ingeniería de Datos.
 
+- [Fundamentos](/docs/aspectos-basicos)
+  - [Programación en Python](/docs/python)
+  - [Bases de datos y SQL](/docs/bases-de-datos)
+- [**Computación distribuida**](/docs/computo-distribuido)
+  - Apache Spark
+  - Databricks
 
-- Programación en Python
+- **Orquestación y Gobierno**
+  - Apache Airflow 3
 
+- **Ciencia de Datos**
+- **Ingeniería**
+  - [Medallon System](/docs/medallon)
+  - [MLflow](/docs/mlflow)

@@ -99,6 +99,10 @@ Explica cómo gestionar el estado de la sesión en aplicaciones interactivas
 ¿Qué ventajas tiene el agrupamiento líquido en Delta Lake?
 ¿Cómo influye el 'data drift' en el despliegue?
 
+¿Qué es la deriva de datos?
+¿Cómo funciona el Feature Store?
+¿Por qué el Driver se cae con toPandas?
+
 ## airflow
 
 ¿Cómo configurar una alerta automatizada en Slack con Airflow?
@@ -124,10 +128,11 @@ Explica la diferencia entre volúmenes y tablas en Unity Catalog
 Explícame el flujo físico de lectura en Delta Lake
 ¿Cómo configurar el enmascaramiento dinámico en Unity Catalog?
 
-¿Cuáles son las ventajas de usar Delta Lake en Databricks?
+
 ¿Cómo se gestionan los datos tardíos con watermarks en Spark?
 
 ¿Cómo se comparan Databricks y Snowflake en arquitectura Lakehouse?
+
 ¿Qué es un Feature Store y cómo evita inconsistencias?
 ¿Cómo funciona el clustering líquido en tablas Delta?
 ¿Cómo funciona el aislamiento de procesos con Lakeguard en Databricks?

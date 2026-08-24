@@ -133,33 +133,39 @@ SELECT employee_id, full_name, email, salary FROM employees;
 *   **Gobernanza de IA:** Permite catalogar no solo datos, sino también endpoints de inferencia, herramientas de búsqueda vectorial (*Vector Search*) y modelos de lenguaje (LLMs) con la misma matriz de permisos ANSI SQL.
 
 
-## Linaje de Datos
+## **Linaje de Datos**
 
 El **linaje de datos** (*data lineage*) es la disciplina y el conjunto de metadatos que permite **rastrear, registrar y visualizar el origen, el flujo de transformaciones y el destino final de los activos de datos** a lo largo de todo su ciclo de vida. En términos sencillos, actúa como un "mapa de dependencias" detallado que responde de manera precisa a tres preguntas críticas: de dónde provienen los datos, cómo se han modificado y quién o qué herramientas los consumen río abajo (*downstream*).
 
 ---
 
-#### **¿Por qué es fundamental el linaje de datos?**
+#### ¿Por qué es fundamental el linaje de datos?
 
 Desde un punto de vista pedagógico y de ingeniería, el linaje no es solo una funcionalidad de auditoría, sino una herramienta operativa clave con múltiples aplicaciones:
 
-#### **1. Tolerancia a fallos y computación distribuida**
+#### 1. Tolerancia a fallos y computación distribuida
 En motores de procesamiento como **Apache Spark**, el linaje es la columna vertebral de la resiliencia. Spark no calcula inmediatamente los datos al aplicar transformaciones (evaluación perezosa o *lazy evaluation*). En su lugar, construye un **Grafo Acíclico Dirigido (DAG)** que define un linaje para el dataset. Si un nodo del clúster falla y se pierde una partición de memoria, Spark consulta este linaje histórico de operaciones y **recomputa únicamente la partición perdida** a partir de los datos de entrada originales.
 
-#### **2. Diagnóstico de modelos (*Debugging*) y sesgo en Machine Learning**
+#### 2. Diagnóstico de modelos (*Debugging*) y sesgo en Machine Learning
 En proyectos de IA, entrenar un modelo con datos de múltiples fuentes sin examinar su calidad puede provocar fallas inexplicables en producción. Si el rendimiento de un modelo decae repentinamente, el linaje de datos permite aislar los registros nuevos de los históricos y rastrear su procedencia (por ejemplo, identificando qué grupo de anotadores etiquetó un lote defectuoso). Esto es vital para mitigar sesgos y asegurar la reproducibilidad de los experimentos.
 
-#### **3. Análisis de impacto y "Alertas Tempranas"**
+#### 3. Análisis de impacto y "Alertas Tempranas"
 El linaje mapea las relaciones de dependencia entre tablas, cuadernos, flujos de trabajo (*workflows*) y tableros de BI. Si se detecta un problema de calidad (como valores nulos inesperados) en una ingesta cruda (*upstream*), el linaje sirve como un sistema de alerta temprana que revela de inmediato qué reportes financieros, modelos de machine learning o dashboards de negocio se verán afectados por el fallo.
 
----
 
 #### Ejemplo Práctico en PySpark 
+
+<Tabs>
+<TabItem value="mnp" label="Antecedentes" default>
+<div class="alert alert--primary">
 **Construcción de un Linaje Lógico**
 
 A nivel de programación, cada DataFrame que creas en PySpark no contiene datos físicos inmediatamente, sino una receta de instrucciones que define su linaje.
 
 El siguiente código en Python demuestra cómo PySpark registra la secuencia de transformaciones (linaje lógico) y permite inspeccionarla de forma declarativa mediante el método `.explain()`:
+</div>
+</TabItem>
+<TabItem value="mnp-python" label="💻 Código">
 
 ```python showLineNumbers title="Linaje de datos"
 from pyspark.sql import SparkSession
@@ -201,6 +207,11 @@ df_gold.explain(True)
 # Apagamos la sesión de manera limpia
 spark.stop()
 ```
+</TabItem>
+</Tabs><br />
+
+
+
 
 #### **Explicación del Plan de Ejecución Generado:**
 Cuando ejecutas `.explain(True)`, Spark te mostrará:
@@ -231,8 +242,15 @@ El linaje de datos se persiste de forma estructurada en tablas Delta de solo lec
 *   **`system.access.table_lineage`:** Registra las dependencias y el flujo de información a nivel de tablas y rutas físicas.
 *   **`system.access.column_lineage`:** Desglosa la trazabilidad a nivel granular de columna, identificando exactamente cómo se derivan y transforman los campos individuales.
 
-##### Ejemplo de implementación programática (Python / PySpark)
+#### Ejemplo de implementación programática (Python / PySpark)
+
+<Tabs>
+<TabItem value="mnp" label="Antecedentes" default>
+<div class="alert alert--primary">
 Para extraer y analizar el linaje de una tabla específica de forma programática, un ingeniero de datos puede interactuar con las tablas de sistema mediante la API de DataFrame de Spark:
+</div>
+</TabItem>
+<TabItem value="mnp-python" label="💻 Código">
 
 ```python showLineNumbers
 def obtener_linaje_tabla(nombre_tabla, ruta_tabla=None):
@@ -255,6 +273,9 @@ def obtener_linaje_tabla(nombre_tabla, ruta_tabla=None):
 df_resultado = obtener_linaje_tabla("datawarehousing.gold.gold_clientes")
 display(df_resultado)
 ```
+</TabItem>
+</Tabs><br />
+
 
 #### 3. Visualización de Dependencias en la UI (DAG)
 La plataforma procesa estos metadatos y genera automáticamente un **mapa de dependencias** en la interfaz de usuario de Databricks, estructurado como un Grafo Acíclico Dirigido (DAG). Este mapa permite a los usuarios rastrear visualmente qué activos consumen o alimentan una tabla:

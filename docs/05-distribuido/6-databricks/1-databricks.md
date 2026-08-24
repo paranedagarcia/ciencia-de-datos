@@ -1,9 +1,16 @@
 ---
 id: databricks-intro
-title: "Databricks"
-sidebar_label: "Databricks"
+title: "Introducción a Databricks"
+sidebar_label: "Introducción"
 description: "Procesamiento Distribuido con Apache Spark en el Ecosistema Databricks"
 ---
+
+<center>
+<figure>
+![](img/databricks.png)
+<figcaption></figcaption>
+</figure>
+</center>
 
 ## **¿Qué es?**
 
@@ -43,24 +50,24 @@ La **arquitectura de medallón** (también conocida como *arquitectura multi-hop
 
 Esta arquitectura se divide en tres capas fundamentales:
 
-### Capa Bronze (Datos Crudos / Raw Ingestion)
+#### Capa Bronze (Datos Crudos / Raw Ingestion)
 *   **Su función:** Es el punto de partida de la ingesta de datos en el Lakehouse. Aquí se recibe y almacena la información proveniente de los sistemas de origen (como bases de datos transaccionales, archivos planos, logs o colas de mensajería en tiempo real).
 
 *   **Cómo opera:** Los datos se guardan en su formato original y más puro, sin aplicarles transformaciones ni modificaciones. Al actuar como una réplica exacta de las fuentes, la capa Bronze garantiza que no haya pérdida de información, lo que simplifica la auditoría, asegura la trazabilidad (*data lineage*) y permite recrear o corregir las tablas siguientes si ocurre un error en el futuro.
 
-### Capa Silver (Datos Limpios e Integrados / Cleansed & Enriched)
+#### Capa Silver (Datos Limpios e Integrados / Cleansed & Enriched)
 *   **Su función:** En esta etapa intermedia, los datos crudos de la capa Bronze se someten a procesos intensivos de transformación para mejorar sustancialmente su calidad y utilidad analítica.
 
 *   **Cómo opera:** Se aplican tareas de **limpieza, normalización, validación y eliminación de duplicados**. Además, es la etapa donde ocurre la **integración de datos**: se cruzan y enriquecen distintas tablas (por ejemplo, uniendo una tabla de transacciones con un catálogo maestro de clientes) para ofrecer una visión consolidada, coherente y confiable de la operación.
 
-### Capa Gold (Datos de Negocio / Curated & Aggregated)
+#### Capa Gold (Datos de Negocio / Curated & Aggregated)
 *   **Su función:** Es la capa final del medallón, donde la información alcanza su estado más refinado, estructurado y listo para el consumo del usuario de negocio.
 
 *   **Cómo opera:** En lugar de detallar registros individuales, las tablas de esta capa contienen **datos agregados, consolidados y resumidos** para responder a necesidades estratégicas de la empresa (como reportes de ingresos mensuales, indicadores clave de rendimiento [KPIs] o perfiles consolidados de clientes). Los datos se organizan en esquemas optimizados para lecturas rápidas (*read-optimized*), alimentando directamente herramientas de Business Intelligence (BI), tableros interactivos o flujos de modelado para Machine Learning e Inteligencia Artificial.
 
----
 
-### Ventajas del sistema medallón:
+
+### Ventajas del sistema medallón
 1.  **Simplicidad y claridad:** Proporciona un modelo de datos intuitivo y fácil de mantener al separar los roles de cada tabla en la canalización.
 2.  **Reconstrucción robusta:** Si se detecta un error de lógica en las capas avanzadas, no es necesario volver a extraer datos de las fuentes originales externas; basta con eliminar las tablas afectadas y reprocesar el flujo de datos completo a partir de la información histórica e inmutable de la capa Bronze.
 3.  **Cómputo incremental:** Facilita la carga y actualización de datos a medida que llegan, reduciendo costes y tiempos de procesamiento al evitar reprocesamientos totales innecesarios.
@@ -261,4 +268,93 @@ Databricks integra **Unity Catalog** para la gobernanza centralizada y **Spark C
 **Capa de Valor:** Estas características transforman el rol del ingeniero de datos, permitiéndole evolucionar de la micro-gestión manual de parámetros a la arquitectura de flujos de valor automatizados y de alto rendimiento.
 
 **Conclusión Técnica:** El procesamiento distribuido alcanza su cénit cuando la arquitectura lógica del DAG y la evaluación perezosa convergen con la potencia del motor vectorizado Photon y la inteligencia adaptativa de AQE en Databricks. Esta alineación garantiza la máxima eficiencia operativa y escalabilidad en el procesamiento de datos a escala planetaria.
+
+## **Databricks vs Snowflake**
+
+La comparación entre **Databricks** y **Snowflake** dentro del paradigma **Data Lakehouse** constituye uno de los debates de arquitectura de datos más representativos de la informática distribuida contemporánea. Ambos sistemas persiguen el mismo fin: unificar la escalabilidad de almacenamiento de bajo costo del *data lake* con el rendimiento, consistencia y gobierno transaccional del *data warehouse*. Sin embargo, sus filosofías de diseño, orígenes de ingeniería y mecanismos de operación difieren de manera sustancial.
+
+A continuación, se detalla un análisis arquitectónico comparativo estructurado para su comprensión en un nivel académico y profesional.
+
+
+
+### El Núcleo de la Filosofía Lakehouse
+
+La diferencia fundamental entre ambas plataformas radica en la dirección de su evolución (*Bottom-Up* vs. *Top-Down*):
+
+*   **Databricks (*Bottom-Up*):** Nació desde el mundo del Big Data de código abierto (creado por los desarrolladores originales de **Apache Spark**). Su estrategia fue tomar un lago de datos altamente flexible pero desordenado y aplicarle una capa de confiabilidad transaccional in situ (**Delta Lake**).
+*   **Snowflake (*Top-Down*):** Nació como un motor de almacenamiento analítico (*data warehouse*) propietario en la nube. Su estrategia ha sido expandir su base transaccional e indexada hacia el exterior, integrando progresivamente compatibilidad con formatos abiertos para actuar sobre lagos de datos externos.
+
+Ambas plataformas implementan de forma nativa la **separación absoluta de cómputo y almacenamiento**, permitiendo que ambos componentes escalen de manera independiente y elástica para reducir costes operativos.
+
+
+
+### Capa de Almacenamiento y Formatos de Datos
+
+El diseño físico de cómo se persisten y estructuran los archivos define la interoperabilidad de ambos sistemas:
+
+```
+[ ARQUITECTURA DATABRICKS LAKEHOUSE ]
+┌────────────────────────────────────────────────────────┐
+│                        Workspace                       │
+├────────────────────────────────────────────────────────┤
+│                      Unity Catalog                     │
+├────────────────────────────────────────────────────────┤
+│          Cómputo (Spark / Photon C++ Engine)           │
+├────────────────────────────────────────────────────────┤
+│           Delta Lake (ACID sobre Parquet)              │
+├────────────────────────────────────────────────────────┤
+│          Almacenamiento (S3, ADLS Gen2, GCS)           │
+└────────────────────────────────────────────────────────┘
+
+[ ARQUITECTURA SNOWFLAKE HYBRID LAKEHOUSE ]
+┌────────────────────────────────────────────────────────┐
+│                     Snowflake SQL                      │
+├────────────────────────────────────────────────────────┤
+│               Snowflake Horizon Catalog                │
+├────────────────────────────────────────────────────────┤
+│             Cómputo (Virtual Warehouses)               │
+├────────────────────────────────────────────────────────┤
+│      Almacenamiento Interno (Proprietario) / External   │
+│             Tables (Apache Iceberg / Parquet)          │
+└────────────────────────────────────────────────────────┘
+```
+
+#### Databricks (Delta Lake)
+*   **Estructura:** Utiliza por defecto el formato abierto **Delta Lake**, el cual se compone de archivos de datos altamente optimizados en **Apache Parquet** junto con un registro transaccional secuencial basado en archivos JSON (`_delta_log`).
+*   **Garantías:** Provee transacciones **ACID**, consistencia estricta en escrituras concurrentes, validación/enforzamiento de esquemas, y viaje en el tiempo (*Time Travel*).
+*   **Apertura:** Databricks cuenta con el estándar **UniForm (Universal Format)**, el cual genera metadatos compatibles con Apache Iceberg y Apache Hudi al mismo tiempo que escribe Delta. Esto permite que otros motores lean la misma copia física del dato sin duplicarla.
+
+#### Snowflake (Tablas de Almacenamiento e Iceberg)
+*   **Estructura Tradicional:** Almacena los datos en un formato propietario altamente optimizado y cifrado de forma interna, gestionado completamente por los microservicios de Snowflake.
+*   **Soporte de Formatos Abiertos:** Para consolidar su arquitectura Lakehouse sin forzar al usuario a un bloqueo de proveedor (*vendor lock-in*), Snowflake soporta la creación de tablas externas basadas en **Apache Iceberg**.
+*   **Interoperabilidad:** Snowflake puede actuar directamente sobre metadatos de Iceberg alojados en almacenes de objetos del cliente. Además, se integra con el catálogo abierto de Unity Catalog mediante APIs de catálogo REST de Iceberg para leer conjuntos de datos.
+
+
+### Capa de Cómputo e Interoperabilidad de Lenguajes
+
+La flexibilidad para procesar datos es uno de los mayores contrastes técnicos entre ambos proveedores:
+
+*   **Databricks:** Su motor de ejecución principal es un entorno administrado de **Apache Spark**. Para acelerar las cargas de trabajo SQL e igualar el rendimiento de los almacenes analíticos tradicionales, Databricks desarrolló **Photon**, un motor de consultas vectorizado de alto rendimiento escrito completamente en **C++**. Soporta de forma nativa e integrada flujos de desarrollo multilenguaje en **Python (PySpark), SQL, Scala y R**.
+*   **Snowflake:** Utiliza su propio motor SQL cerrado, masivamente paralelo y altamente optimizado para consultas analíticas veloces a gran escala. Aunque históricamente estuvo restringido a SQL, Snowflake ha incorporado soporte para ejecutar Python, Java y Scala a través de **Snowpark**, permitiendo a los desarrolladores estructurar flujos de datos sin salir de su ecosistema de seguridad.
+
+
+### Gobernanza y Seguridad Unificada
+
+La seguridad en un Data Lakehouse debe asegurar tanto las tablas estructuradas como las de tipo no estructurado (como archivos PDF, imágenes o audio) y los modelos de IA:
+
+*   **Databricks (Unity Catalog):** Introduce un gobierno unificado de datos e Inteligencia Artificial. Bajo un espacio de nombres de tres niveles (`catalog.schema.table_or_volume`), Unity Catalog controla accesos tanto a tablas y vistas tradicionales como a archivos crudos en volúmenes lógicos, funciones de usuario y modelos de Machine Learning registrados con **MLflow**. 
+    *   **Lakeguard y Aislamiento:** Mediante la tecnología **Lakeguard**, Databricks aísla el cómputo de los usuarios en contenedores seguros (*sandboxing*) y utiliza **Spark Connect** para habilitar una arquitectura cliente-servidor robusta en clústeres compartidos, eliminando la sobre-exposición de credenciales.
+*   **Snowflake (Horizon):** Ofrece un portal de gobernanza de datos y cumplimiento regulatorio. Permite auditar linaje de datos, control de accesos basados en roles (RBAC) y políticas de enmascaramiento de datos. Se enfoca principalmente en la seguridad del catálogo relacional tradicional de tablas estructuradas y semiestructuradas, extendiéndose recientemente a través de Snowflake Horizon a formatos analíticos abiertos como Iceberg.
+
+
+
+### Resumen Comparativo de Capacidades Técnicas
+
+| Dimensión Técnica | Databricks Lakehouse | Snowflake Hybrid Lakehouse |
+| :--- | :--- | :--- |
+| **Enfoque de Datos** | **Código abierto por defecto.** Delta Lake es open-source, portable y sin vendor lock-in. | **Ecosistema propietario.** Ofrece rendimiento premium con código propietario, adoptando Iceberg para apertura. |
+| **Gobernanza Unificada** | **Unity Catalog** (Gobernanza de Datos, Archivos, APIs y Modelos de ML centralizada). | **Snowflake Horizon** (Seguridad orientada a bases de datos y compartición nativa de datos). |
+| **Casos de Uso Primarios** | Ingesta masiva, pipelines de ETL/ELT complejos, Machine Learning de gran escala, procesamiento en tiempo real. | Business Intelligence (BI) acelerado, consultas SQL analíticas ad-hoc ágiles, compartición de datos comerciales. |
+| **Soporte de IA y ML** | Integración nativa profunda con **MLflow** (Model Registry y Tracking), y optimización para PyTorch/TensorFlow en runtimes dedicados. | Integraciones externas a través de Snowpark y extensiones nativas SQL de Machine Learning para científicos de datos. |
+| **Intercambio de Datos** | **Delta Sharing:** Protocolo de intercambio de datos aberto, seguro, multicloud y multiplataforma sin copia física. | **Snowflake Data Sharing:** Extremadamente robusto e inmediato, pero tradicionalmente restringido a que el receptor pertenezca a la plataforma. |
 

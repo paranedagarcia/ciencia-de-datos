@@ -1,7 +1,7 @@
 ---
 id: delatalake
-title: "Delta Lake"
-sidebar_label: "Delta Lake"
+title: "Introducción a Delta Lake"
+sidebar_label: "Introducción a Delta Lake"
 description: "Delta Lake"
 slug: /deltalake
 ---
@@ -9,9 +9,14 @@ slug: /deltalake
 
 **Delta Lake** es una capa de almacenamiento de código abierto que se ejecuta sobre el almacenamiento de objetos en la nube (como Azure ADLS, Amazon S3 o Google Cloud Storage). Su función principal es **transformar un lago de datos tradicional (Data Lake) en un Data Lakehouse**, combinando la escalabilidad y bajo costo del primero con la confiabilidad, gobernanza y transaccionalidad de un almacén de datos (Data Warehouse).
 
-A continuación se detallan, las ventajas fundamentales de utilizar Delta Lake en el ecosistema de Databricks:
+<center>
+<figure>
+![](img/Data_Lakehouse.webp)
+<figcaption></figcaption>
+</figure>
+</center>
+Las ventajas fundamentales de utilizar Delta Lake en el ecosistema de Databricks son:
 
----
 
 #### 1. Transacciones ACID y Consistencia de Datos
 Los lagos de datos tradicionales operan bajo el modelo **BASE** (consistencia eventual), careciendo de controles transaccionales. Esto suele provocar problemas de archivos corruptos o lecturas sucias si un proceso de carga falla a mitad de camino. 
@@ -54,9 +59,17 @@ Cuando se ejecuta dentro de la plataforma Databricks, Delta Lake se beneficia de
 ---
 
 ### Ejemplo Práctico en PySpark
+
+
+<Tabs>
+<TabItem value="mnp" label="Antecedentes" default>
+<div class="alert alert--primary">
 **Creación, Evolución de Esquema y Time Travel**
 
-El siguiente script de Python ejemplifica cómo un ingeniero de datos puede interactuar con Delta Lake en un entorno de desarrollo para aprovechar estas ventajas:
+El siguiente script de Python ejemplifica cómo se puede interactuar con **Delta Lake** en un entorno de desarrollo para aprovechar estas ventajas:
+</div>
+</TabItem>
+<TabItem value="mnp-python" label="💻 Código">
 
 ```python showLineNumbers
 from pyspark.sql import SparkSession
@@ -112,3 +125,7 @@ df_historico.show()
 # Detener la sesión de Spark de forma segura
 spark.stop()
 ```
+</TabItem>
+</Tabs>
+
+

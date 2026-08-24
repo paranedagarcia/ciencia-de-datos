@@ -1,6 +1,6 @@
 ---
 id: docker
-title: "Producción con Docker"
+title: "​📦 Producción con Docker"
 sidebar_label: "​📦 Docker"
 description: "Despliegue con Docker"
 slug: /docker
