@@ -171,3 +171,24 @@ Explícame cómo configurar un Secrets Backend para mayor seguridad
 ¿Qué es el data skipping?
 ¿Cómo se integra dbt con Airflow?
 ¿Qué es el Training-Serving Skew?
+
+## bigquery
+
+Explicar particionamiento
+Ejemplos de funciones SQL
+
+### ML
+
+Dame un ejemplo de SQL para entrenar un modelo
+Explícame cómo funciona ML.PREDICT con datos nuevos
+¿Qué tipos de modelos de clasificación soporta?
+
+Enséñame un ejemplo con redes neuronales
+¿Cómo funcionan las funciones SAFE?
+
+¿Cómo funcionan las funciones geográficas en BigQuery?
+
+¿Qué es una función analítica?
+Ejemplos de GEOGRAPHY
+Ver ejemplo con TIMESTAMP
+Diferencia entre DATE y DATETIME
