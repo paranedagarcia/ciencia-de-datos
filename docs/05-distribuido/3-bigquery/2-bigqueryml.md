@@ -1,54 +1,9 @@
 ---
-id: bigquery
+id: bigqueryml
 title: ""
-sidebar_label: "💻 BigQuery"
-sidebar_position: 1
-description: "BigQuery "
+sidebar_label: "💻 BigQuery ML"
+description: "BigQuery orientado específicamente a procesar modelos de aprendizaje automático (Machine Learning)"
 ---
-
-## **BigQuery**
-
-**BigQuery** es un almacén de datos (data warehouse) empresarial de bajo costo, altamente escalable y completamente administrado (serverless) dentro de Google Cloud Platform (GCP). Está diseñado para que cualquier analista o ingeniero pueda procesar y analizar volúmenes masivos de datos (terabytes en segundos y petabytes en minutos) usando consultas de SQL estándar, sin tener que preocuparse por configurar o gestionar bases de datos, discos o servidores físicos.
-
-Para entenderlo de forma simple, imagina que en lugar de leer una tabla fila por fila (como en una base de datos tradicional o en un Excel), BigQuery lee los datos columna por columna. Esto significa que si tienes una tabla con cientos de columnas pero solo necesitas saber la fecha de compra y el monto, BigQuery leerá únicamente esas dos columnas, ahorrando muchísimo tiempo y dinero. Además, separa por completo el "cerebro" que procesa las consultas de los "discos" donde se guardan los datos, lo que le permite coordinar miles de computadoras en segundos para resolver una sola pregunta de manera extremadamente eficiente.
-
-
-### Operación
-
-Para lograr un rendimiento ultra rápido a escala de petabytes sin necesidad de índices o mantenimiento, BigQuery se apoya en una arquitectura distribuida única y en varias tecnologías patentadas de Google:
-
-#### 1. Arquitectura de Alto Nivel
-*   **Separación de Cómputo y Almacenamiento**: BigQuery separa físicamente el procesamiento de la persistencia de los datos. El almacenamiento se centraliza en **Colossus** (el sistema de archivos distribuido de Google), mientras que el cómputo se escala dinámicamente mediante **"slots"** (cada slot representa un hilo de ejecución que equivale aproximadamente a medio núcleo de CPU y 1 GB de RAM). Esto permite pagar únicamente por los segundos de procesamiento utilizados.
-
-*   **Almacenamiento Columnar y Formato Capacitor**: Los datos dentro de Colossus se guardan estructurados en un formato columnar llamado **Capacitor**. Al organizar los registros por columnas, las consultas analíticas leen exclusivamente los campos necesarios, reduciendo de forma masiva las operaciones de entrada/salida (I/O). Capacitor también utiliza sofisticadas heurísticas para reordenar filas sobre la marcha y lograr relaciones de compresión extraordinarias.
-
-*   **Red de Alta Velocidad (Jupiter)**: La conexión entre los discos en Colossus y los procesadores que ejecutan la consulta se realiza mediante la red **Jupiter** de Google, la cual ofrece un ancho de banda de bisección de 1 petabit por segundo dentro del centro de datos (equivalente a 100,000 servidores comunicándose simultáneamente a 10 Gb/s). Gracias a Jupiter, la transferencia de datos entre el cómputo y el almacenamiento es instantánea, lo que evita cuellos de botella al realizar operaciones de **Shuffle** (redistribución intermedia de datos entre las etapas de una consulta).
-
-*   **Motor de Consultas Dremel X**: El motor SQL distribuido detrás de BigQuery es **Dremel**. Divide la ejecución de las consultas en varias etapas organizadas dinámicamente en un árbol de cómputo:
-    *   **Query Master**: Analiza la consulta, verifica los metadatos de las tablas, realiza la poda de particiones (ignora los datos fuera de los filtros) y genera el plan de ejecución.
-    *   **Scheduler (Planificador)**: Asigna y redistribuye los slots de cómputo de manera proporcional entre las consultas concurrentes para garantizar un entorno multi-inquilino justo.
-    *   **Worker Shards (Nodos de trabajo)**: Ejecutan las tareas de cómputo en paralelo utilizando contenedores gestionados por **Borg** (el sistema de orquestación de infraestructura de Google).
-
-#### 2. Mecanismo de Operación y Flujo de Datos
-BigQuery gestiona el ciclo de vida de los datos mediante tres flujos principales:
-*   **Mecanismos de Ingesta de Datos**:
-    *   *Cargas por lotes (Batch loads)*: Los datos se pueden cargar de forma gratuita en múltiples formatos como **Avro** (el formato binario más eficiente y expresivo), Parquet, ORC, JSON delimitado por líneas y CSV.
-    *   *Inserciones en streaming (Streaming inserts)*: Permite el flujo continuo de filas una a una directamente a través de su API de REST o pipelines con Cloud Dataflow. Los datos ingresados están disponibles para consulta de inmediato (en segundos), aunque tardan hasta 90 minutos en estar habilitados para operaciones de copia o exportación.
-*   **Consultas Federadas (Fuentes Externas)**: BigQuery puede consultar datos 'en su lugar de origen' sin necesidad de cargarlos a su almacenamiento nativo. Es compatible con archivos en Google Cloud Storage, bases de datos NoSQL en **Cloud Bigtable**, hojas de cálculo en **Google Drive** o bases de datos relacionales en **Cloud SQL** (a través de `EXTERNAL_QUERY` en tiempo real).
-
-*   **Transacciones ACID y Time Travel**: A pesar de ser una base de datos analítica, las operaciones de BigQuery son completamente ACID. Toda la información está encriptada automáticamente en reposo y tránsito. Además, gracias a la inmutabilidad de sus archivos de almacenamiento (storage sets), BigQuery mantiene un historial de cambios de hasta 7 días en el pasado (**Time Travel**), permitiendo consultar instantáneas históricas de las tablas.
-
-#### 3. Optimización y Capacidades Avanzadas
-Para optimizar el rendimiento y disminuir drásticamente los costos de escaneo (que se cobran a razón de \$5 por TB en esquemas de pago bajo demanda), BigQuery ofrece características de primer nivel:
-*   **Particionamiento de Tablas**: Segmenta físicamente las tablas en partes más pequeñas basadas en fechas, timestamps de ingesta o rangos de enteros. Al filtrar por la columna de partición en una cláusula `WHERE`, BigQuery lee únicamente las secciones necesarias y evita escanear el resto de la tabla.
-
-*   **Clustering (Agrupamiento)**: Clasifica y ordena semisorteadamente los datos de las particiones según el valor de hasta cuatro columnas clave. Esto optimiza drásticamente las consultas con filtros muy específicos o agregaciones frecuentes.
-*   **Estructuras de Datos Jerárquicas (Arrays y Structs)**: BigQuery permite almacenar datos complejos y anidados mediante tipos **STRUCT** y **ARRAY** sin necesidad de aplanar la información (denormalización estructurada). Esto incrementa enormemente el rendimiento y evita tener que realizar costosos `JOIN` entre tablas de hechos y dimensiones.
-
-*   **BigQuery ML e integración de Inteligencia Artificial**: Permite a analistas y científicos de datos entrenar, evaluar y predecir modelos de machine learning (incluyendo regresión lineal, clasificación logística, agrupamiento k-means y modelos personalizados de TensorFlow) directamente en la base de datos utilizando comandos extendidos de SQL.
-
-*   **Sistemas de Información Geográfica (GIS)**: Soporta de forma nativa análisis geoespacial, permitiendo realizar topologías sobre puntos, líneas y polígonos representados bajo el elipsoide de referencia WGS84.
-
 
 ## **BigQuery ML**
 
