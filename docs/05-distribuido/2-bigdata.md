@@ -12,7 +12,7 @@ A continuación, se detallan las tecnologías y herramientas más relevantes seg
 ### 1. Frameworks de Procesamiento y Almacenamiento
    - Apache Hadoop: Es el pilar del Big Data. Permite el procesamiento distribuido de grandes conjuntos de datos en clústeres de computadoras. Utiliza HDFS para el almacenamiento y MapReduce para el procesamiento.
 
-   - **[Apache Spark](spark.ipynb)**: Conocido por su velocidad, procesa datos in-memory, lo que lo hace mucho más rápido que Hadoop para tareas iterativas y análisis en tiempo real.
+   - **[Apache Spark](/docs/spark)**: Conocido por su velocidad, procesa datos in-memory, lo que lo hace mucho más rápido que Hadoop para tareas iterativas y análisis en tiempo real.
 
    - Apache Flink: Ideal para el procesamiento de flujos de datos (streaming) en tiempo real con alta disponibilidad y precisión. 
 

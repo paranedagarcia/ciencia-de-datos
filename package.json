@@ -5,7 +5,7 @@
   "scripts": {
     "docusaurus": "docusaurus",
     "start": "docusaurus start",
-    "build": "docusaurus build",
+    "build": "DOCUSAURUS_IGNORE_SSG_WARNINGS=true docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
     "postbuild": "node scripts/deploy-ftp.js",
@@ -21,7 +21,7 @@
     "@docusaurus/theme-mermaid": "^3.10.2",
     "@mdx-js/react": "^3.0.0",
     "@mermaid-js/layout-elk": "^0.1.9",
-    "basic-ftp": "^5.0.0",
+    "basic-ftp": "^5.3.1",
     "clsx": "^2.0.0",
     "prism-react-renderer": "^2.3.0",
     "react": "^19.0.0",

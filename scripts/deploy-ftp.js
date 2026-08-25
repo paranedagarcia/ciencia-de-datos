@@ -35,18 +35,22 @@ function resolveSecureMode(value) {
 }
 
 function buildAccessOptions(overrides = {}) {
+  const secureOptions = {
+    minVersion: 'TLSv1.2',
+    maxVersion: 'TLSv1.2',
+    rejectUnauthorized: FTP_SECURE_REJECT_UNAUTHORIZED,
+    servername: FTP_SECURE_SERVERNAME || FTP_HOST,
+    ...(overrides.secureOptions || {})
+  }
+
   return {
     host: FTP_HOST,
     port: FTP_PORT,
     user: FTP_USER,
     password: FTP_PASSWORD,
     secure: resolveSecureMode(FTP_SECURE_RAW),
-    secureOptions: {
-      minVersion: 'TLSv1.2',
-      rejectUnauthorized: FTP_SECURE_REJECT_UNAUTHORIZED,
-      servername: FTP_SECURE_SERVERNAME || FTP_HOST,
-    },
     ...overrides,
+    secureOptions,
   }
 }
 
