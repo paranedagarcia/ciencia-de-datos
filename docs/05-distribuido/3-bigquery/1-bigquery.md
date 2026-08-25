@@ -74,6 +74,13 @@ Para optimizar el rendimiento y disminuir drásticamente los costos de escaneo (
 
 *   **Sistemas de Información Geográfica (GIS)**: Soporta de forma nativa análisis geoespacial, permitiendo realizar topologías sobre puntos, líneas y polígonos representados bajo el elipsoide de referencia WGS84.
 
+La optimizacion dentro de BigQuery funciona en base a dos técnicas principales consistentes en dividir los grandes volumenes de datos en secciones más manejables, particionamiento y clustering.
+<center>
+<figure>
+![](img/particion.jpg)
+<figcaption></figcaption>
+</figure>
+</center>
 
 ## **Particionamiento**
 
@@ -84,7 +91,7 @@ Cuando ejecutas una consulta que filtra por el campo de partición, BigQuery rea
 
 ### Cómo funciona
 
-*   **Abstracción de Tabla Ligera**: Bajo el capó, cada partición funciona prácticamente como una tabla física independiente, con su propio espacio de almacenamiento en Colossus y su correspondiente conjunto de metadatos.
+*   **Abstracción de Tabla Ligera**: Cada partición funciona prácticamente como una tabla física independiente, con su propio espacio de almacenamiento en Colossus y su correspondiente conjunto de metadatos.
 
 *   **Filtrado a nivel de Metadatos (Spanner)**: En BigQuery, los metadatos del almacenamiento (como las ubicaciones de los archivos y los tamaños de campo) se guardan en una base de datos distribuida (Google Spanner). Las particiones se representan en estos metadatos mediante conjuntos de almacenamiento (*storage sets*) etiquetados con un **Partition ID**.
 
@@ -458,7 +465,12 @@ En el diseño de bases de datos relacionales tradicionales, representar relacion
 
 **BigQuery revoluciona este enfoque al permitir almacenar datos jerárquicos y complejos en su estado nativo y semiestructurado**. Esto se logra mediante el soporte de campos **anidados (`STRUCT`)** y **repetidos (`ARRAY`)**, gestionados eficientemente por su motor de almacenamiento columnar **Capacitor**.
 
-
+<center>
+<figure>
+![](img/desnormalizacion.jpg)
+<figcaption>**Desnormalización**: Estructuras anidadas y repetidas. Para evitar los costosos JOIN de los modelos relacionales a escala de petabytes, BigQuery soporta datos jerárquicos de forma nativa mediante tipos RECORD (Structs) y ARRAY (Repetidos), con un soporte de hasta 15 niveles de anidación.</figcaption>
+</figure>
+</center>
 
 ### El tipo `STRUCT` (Campos Anidados)
 Un **`STRUCT`** (representado como un tipo de dato `RECORD` en el esquema físico de la tabla) es un **contenedor ordenado de campos tipados con nombre**. 
