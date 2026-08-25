@@ -192,3 +192,12 @@ Enséñame un ejemplo con redes neuronales
 Ejemplos de GEOGRAPHY
 Ver ejemplo con TIMESTAMP
 Diferencia entre DATE y DATETIME
+
+## GIS
+
+¿Qué es el elipsoide WGS84?
+Ejemplos de funciones GIS
+¿Cómo se usa UNNEST con GIS?
+Diferencia entre GEOGRAPHY y STRING
+
+¿Cómo se importan datos GeoJSON a BigQuery?

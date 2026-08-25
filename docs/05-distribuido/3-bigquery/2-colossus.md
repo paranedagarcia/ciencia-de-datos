@@ -1,7 +1,7 @@
 ---
 id: colossus
 title: ""
-sidebar_label: "📚 Colossus"
+sidebar_label: "Colossus"
 description: "Sistema de archivos distribuido de Google que sirve como la capa de almacenamiento subyacente para Google Cloud BigQuery."
 ---
 

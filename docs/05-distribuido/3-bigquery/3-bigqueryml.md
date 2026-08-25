@@ -1,7 +1,7 @@
 ---
 id: bigqueryml
 title: ""
-sidebar_label: "💻 BigQuery ML"
+sidebar_label: "BigQuery ML"
 description: "BigQuery orientado específicamente a procesar modelos de aprendizaje automático (Machine Learning)"
 ---
 
