@@ -12,7 +12,7 @@ TASK:
 Crea un diagrama tipo radar utilizando mermaid, para comparar el nivel de uso de cada rol
 
 <details>
-<summary>💻 Código</summary>
+<summary>💻 </summary>
 
 </details>
 
@@ -201,3 +201,26 @@ Ejemplos de funciones GIS
 Diferencia entre GEOGRAPHY y STRING
 
 ¿Cómo se importan datos GeoJSON a BigQuery?
+
+## dbt
+
+¿qué son y Cómo se definen los modelos de staging e intermedios en dbt?
+¿Cómo ayuda dbt a implementar una arquitectura de datos modular?
+
+
+¿Cómo aplicarías el concepto de 'Data Spine' en dbt?
+
+¹Cómo se usa ref() para el linaje?
+Comparativa de rendimiento dbt
+Ejemplos de Jinja en dbt
+
+Ejemplo de macro con dbt_utils
+¿Cómo instalar paquetes?
+
+Diseña una prueba para Northwind
+¿Cómo gestionar el linaje en dbt?
+Explica la capa de Staging
+
+Ejemplos de consultas recursivas en dbt
+¿Cómo se integra dbt_utils en el DAG?
+Comparar materialización table vs view en dbt
