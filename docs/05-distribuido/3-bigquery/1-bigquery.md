@@ -1,9 +1,10 @@
 ---
-id: bigquery
+id: bigquery-intro
 title: ""
 sidebar_label: "Presentación"
 description: "Almacén de datos (data warehouse) empresarial y completamente administrado (serverless) dentro de Google Cloud Platform (GCP)"
 ---
+
 <center>
 <figure>
 ![](img/google-big-query.png)

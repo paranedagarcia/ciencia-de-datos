@@ -14,7 +14,7 @@ A continuación se detalla su funcionamiento, componentes y características pri
 <center>
 <figure>
 ![](img/gis-tipos.jpg)
-<figcaption>Arquitectura de ingestioin: de texto a tipos nativos.</figcaption>
+<figcaption>Arquitectura de ingestión: de texto a tipos nativos.</figcaption>
 </figure>
 </center>
 

@@ -1,9 +1,9 @@
 ---
-id: dbt
+id: dbt-intro
 title: "Data Build Tool"
 sidebar_label: "📄 Data Build Tool"
 description: "La herramienta para transformar los datos. Está enfocado exclusivamente en la etapa de Transformaciòn de un proceso 'ELT'."
-slug: /dbt
+slug: /dbt-intro
 ---
 
 ## **DBT**
