@@ -3,6 +3,10 @@ export const links = [
   title: 'Otros cursos de la serie',
   items: [
     {
+      label: 'Ingeniería Informática',
+      href: 'https://patricioaraneda.cl/informatica/',
+    },
+    {
       label: 'Programación en Python',
       href: 'https://patricioaraneda.cl/python/',
     },
