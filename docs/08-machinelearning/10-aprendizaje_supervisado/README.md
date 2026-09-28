@@ -6,6 +6,8 @@ sidebar_position: 1
 description: "Introducción al aprendizaje supervisado"
 ---
 
+![](img/mls-infografia.jpg)
+
 El **Machine Learning Supervisado** es una rama del aprendizaje automático en la que un modelo es entrenado utilizando un conjunto de datos etiquetados, es decir, datos en los que cada ejemplo de entrada está asociado a una salida o respuesta conocida. El objetivo principal es que el modelo aprenda la relación entre las variables de entrada (características o *features*) y la variable de salida (etiqueta o *label*), de modo que pueda predecir la salida correspondiente para nuevas entradas no vistas.
 
 En el aprendizaje supervisado, el proceso de entrenamiento implica ajustar los parámetros internos del modelo para minimizar el error entre las predicciones del modelo y las respuestas reales del conjunto de entrenamiento. Una vez entrenado, el modelo puede generalizar y realizar predicciones sobre datos nuevos.
