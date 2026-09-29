@@ -1,7 +1,7 @@
 ---
 id: delatalake
-title: "Introducción a Delta Lake"
-sidebar_label: "Introducción a Delta Lake"
+title: "Delta Lake"
+sidebar_label: "📄 Introducción a Delta Lake"
 description: "Delta Lake"
 slug: /deltalake
 ---
@@ -33,7 +33,9 @@ Con Delta Lake, esta arquitectura se unifica drásticamente. Delta permite que *
 
 #### 3. Validación y Evolución del Esquema (*Schema-on-Write*)
 Los lagos de datos convencionales son *schema-on-read* (esquema en la lectura), lo que significa que permiten escribir cualquier archivo corrupto o con tipos de datos incorrectos, trasladando el fallo al analista final.
+
 * **Schema Enforcement (Validación de Esquema):** Delta Lake es de tipo **schema-on-write**; comprueba de forma estricta que cualquier DataFrame que intente escribir en la tabla sea compatible con el esquema registrado a nivel de metadatos. Si hay un conflicto de tipos de datos, la operación se aborta inmediatamente para evitar la corrupción de la tabla.
+
 * **Schema Evolution (Evolución de Esquema):** Si el cambio de esquema es legítimo (por ejemplo, la adición de una nueva columna en el origen), Delta permite la migración automática y segura del esquema simplemente configurando la opción `.option("mergeSchema", "true")` en la escritura. Los registros históricos que no contaban con esa columna se completarán automáticamente con valores `null`.
 
 #### 4. Viaje en el Tiempo (*Time Travel*) y Rollbacks
@@ -56,7 +58,6 @@ Cuando se ejecuta dentro de la plataforma Databricks, Delta Lake se beneficia de
 
 * **Caché del Delta Log en memoria:** Unity Catalog y el runtime de Databricks pueden cachear el log de transacciones directamente en memoria para evitar latencias de red al consultar el almacenamiento de objetos de la nube.
 
----
 
 ### Ejemplo Práctico en PySpark
 

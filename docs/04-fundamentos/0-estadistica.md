@@ -1,7 +1,7 @@
 ---
 id: estadistica
 title: "📊 Fundamentos de Estadística"
-sidebar_label: "💻 Estadística"
+sidebar_label: "📚 Estadística"
 description: "Estadística básica y probabilidades"
 slug: /estadistica
 ---

@@ -16,6 +16,17 @@ Crea un diagrama tipo radar utilizando mermaid, para comparar el nivel de uso de
 
 </details>
 
+--- columnas
+<div class="container">
+  <div class="row">
+    <div class="col col--7">
+    </div>
+    <div class="col col--5">
+    </div>
+  </div>
+</div>
+----
+
 <center>
 <figure>
 ![](img)

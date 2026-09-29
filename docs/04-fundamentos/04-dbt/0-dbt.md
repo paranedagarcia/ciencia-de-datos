@@ -76,7 +76,6 @@ models:
 #### D. Documentación y Linaje Autogenerados
 Al ejecutar el comando `dbt docs generate`, la herramienta analiza tu código SQL, las dependencias inyectadas con Jinja y las descripciones del YAML para compilar un portal web interactivo. Este portal proporciona un **mapa interactivo del linaje de datos (Data Lineage)**, permitiendo a cualquier consumidor rastrear de dónde proviene una columna analítica y qué transformaciones sufrió a lo largo de todo el pipeline.
 
----
 
 ### Función de dbt en Ingeniería de Datos y MLOps
 
@@ -266,7 +265,9 @@ La capa **Intermediate** (Intermediate Models) representa la zona de transición
 
 #### Materialización Recomendada:
 Para evitar contaminar el esquema público del motor de base de datos analítica con tablas transicionales que el usuario final no debe ver, dbt recomienda materializar estos modelos como **efímeros (`ephemeral`)**.
+
 *   **Mapeo como CTEs:** Un modelo efímero no crea ninguna estructura física (vista o tabla) en la base de datos. En su lugar, dbt interpola su código SQL directamente dentro de los modelos aguas abajo (*downstream*) que lo referencian como si fuera una Expresión de Tabla Común (CTE).
+
 *   **Compromiso (*Trade-off*) de Depuración:** Aunque la materialización `ephemeral` mantiene limpia la base de datos, dificulta el proceso de depuración analítica (*debugging*) porque no puedes consultar la tabla intermedia de manera aislada. Si el volumen de datos o la complejidad del query penalizan el rendimiento del compilador, se pueden materializar temporalmente como vistas (`view`) en un esquema personalizado de base de datos fuera del esquema de producción principal.
 
 <details>
@@ -421,6 +422,7 @@ Con la incorporación de los Marts, el pipeline de datos adquiere una estructura
 <figcaption>Ciclo de vida Kimball.</figcaption>
 </figure>
 </center>
+
 El modelado dimensional, introducido originalmente por Ralph Kimball en su célebre obra *The Data Warehouse Toolkit* en 1996, constituye uno de los hitos metodológicos más significativos en la historia de la inteligencia de negocios y la analítica de datos. A diferencia del enfoque corporativo centralizado en tercera forma normal (3NF) propuesto por Bill Inmon, Kimball diseñó un paradigma pragmático de abajo hacia arriba (*bottom-up*) basado en *Data Marts* departamentales y en el uso de un bus de información para facilitar la exploración intuitiva y directa de datos por parte de las herramientas de Business Intelligence (BI) y los analistas finales.
 
 En un esquema de estrella (*Star Schema*) —el diseño Kimball por excelencia— las entidades se dividen rigurosamente en dos tipos lógicos: **tablas de hechos** (*fact tables*), que capturan mediciones numéricas u observaciones transaccionales bajo una granularidad bien definida, y **tablas de dimensiones** (*dimension tables*), que contienen los atributos de texto descriptivo encargados de proveer el contexto cualitativo (el *quién, qué, dónde y cuándo*) de dichos eventos.
