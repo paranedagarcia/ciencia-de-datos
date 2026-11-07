@@ -147,7 +147,7 @@ flowchart TD
 El siguiente script ilustra y compara cómo se construyen en Python las tres metodologías principales (Bagging con Random Forest, Boosting con Gradient Boosting y Stacking mediante un meta-clasificador):
 
 <details>
-<summary>💻 Código</summary>
+<summary>🖥️ Código</summary>
 
 ```python showLineNumbers
 """
@@ -208,14 +208,21 @@ print(f"3. Stacking (Heterogéneo):       {acc_stack * 100:.2f}%")
 ```
 </details>
 
+### Aplicaciones comunes
+
+Gradient Boosting se utiliza ampliamente en tareas de regresión y clasificación, como predicción de precios, scoring crediticio, detección de fraudes y competiciones de ciencia de datos (por ejemplo, XGBoost, LightGBM y CatBoost son variantes populares). 
+
+Su fortaleza radica en su alta precisión y capacidad para manejar datos heterogéneos y relaciones complejas.
 
 ### Resumen 
 
 1.  **Definición:** Un ensamble es un meta-modelo que integra un colectivo de estimadores base para minimizar el error de generalización de forma más efectiva que un modelo aislado.
+
 2.  **Mecanismos:** 
     *   **Bagging** entrena en paralelo sobre muestras con reemplazo y promedia, **reduciendo la varianza**.
     *   **Boosting** entrena en secuencia corrigiendo iterativamente los errores previos, **reduciendo el sesgo**.
     *   **Stacking** utiliza un segundo nivel de modelado para aprender la combinación óptima de modelos diversos.
+    
 3.  **Compromiso de Ingeniería:** Aunque los ensambles suelen ganar competencias de Machine Learning debido a su alta precisión, introducen mayor costo computacional en entrenamiento e inferencia, y una menor interpretabilidad en comparación con modelos lineales o árboles individuales.
 
 
@@ -248,10 +255,9 @@ print("Predicciones:", y_pred)
     Predicciones: [2.00411646 4.00125883 4.99461973 4.00475908 4.9952459 ]
 
 
-**Aplicaciones comunes:**  
-Gradient Boosting se utiliza ampliamente en tareas de regresión y clasificación, como predicción de precios, scoring crediticio, detección de fraudes y competiciones de ciencia de datos (por ejemplo, XGBoost, LightGBM y CatBoost son variantes populares). Su fortaleza radica en su alta precisión y capacidad para manejar datos heterogéneos y relaciones complejas.
 
-Ejemplo de clasificacion con gradient boosting (breast cancer)
+
+### Clasificacion (breast cancer)
 
 
 ```python showLineNumbers
