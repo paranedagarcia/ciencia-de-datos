@@ -1,7 +1,7 @@
 ---
 id: mlns
 title: "Introducción"
-sidebar_label: "Introducción"
+sidebar_label: "📄 Introducción"
 
 description: "Introducción al aprendizaje supervisado"
 ---

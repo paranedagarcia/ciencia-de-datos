@@ -1,7 +1,7 @@
 ---
 id: dl-fundamentos
 title: "Fundamentos de Deep Learning"
-sidebar_label: "Introducción"
+sidebar_label: "📄 Introducción"
 description: "Fundamentos de Deep Learning"
 ---
 

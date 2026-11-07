@@ -11,6 +11,16 @@ utiliza un rango de 0 a 100 para establecer el nivel comparativo de uso. Agrega 
 TASK:
 Crea un diagrama tipo radar utilizando mermaid, para comparar el nivel de uso de cada rol
 
+```mermaid
+---
+config:
+  theme: 'redux-color'
+  themeVariables:
+     fontSize: 16px
+---
+
+```
+
 <details>
 <summary>💻 </summary>
 

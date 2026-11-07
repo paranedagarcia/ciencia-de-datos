@@ -56,6 +56,12 @@ Para estimar $f$, el algoritmo selecciona una hipótesis dentro de un espacio de
 El Machine Learning se clasifica fundamentalmente en función de la naturaleza de la señal de supervisión provista al sistema:
 
 ```mermaid
+---
+config:
+  theme: 'forest'
+  themeVariables:
+     fontSize: 18px
+---
 flowchart TD
     ML[Machine Learning]
     ML --> SUP[Aprendizaje<br> supervisado]
@@ -248,7 +254,40 @@ print(classification_report(y_test, y_pred, target_names=raw_data.target_names))
 4.  **Meta primordial:** El objetivo cardinal de cualquier sistema de Machine Learning no es ajustar de memoria los datos de entrenamiento, sino alcanzar una **óptima capacidad de generalización** ante datos inéditos en producción.
 
 ***
+```mermaid
+---
+config:
+  theme: 'forest'
+  themeVariables:
+     fontSize: 18px
+---
+mindmap
+  root((Machine<br>Learning))
+    **Supervisado**
+      Clasificación
+        Regresión<br>Logística
+        Árboles <br>de Decisión
+        SVM
+        Random Forest
+        Gradient Boosting
+      Regresión
+        Regresión Lineal
+        Ridge/Lasso
+        Soporte<br>Vectorial
+    **No Supervisado**
+      Clustering
+        K-Means
+        DBSCAN
+      Reducc.dimen
+        PCA
+        t-SNE
+      Detección
+        
+    **Semi-supervisado**
+      Pen and paper
+      Mermaid
 
-📊 En tu panel de **Studio** cuentas con artefactos visuales como la infografía **"Guía de Aprendizaje No Supervisado"** y la presentación **"Descifrando el Machine Learning"**. ¿Te gustaría que diseñe un cuestionario interactivo de opción múltiple (Quiz) para evaluar y consolidar la comprensión de tus alumnos sobre el dilema sesgo-varianza, las diferencias matemáticas entre regresión y clasificación, y la prevención de fugas de datos en el preprocesamiento?
-
-
+    **Refuerzo**
+      Agentes
+      Markov (MDP)
+```

@@ -1,6 +1,6 @@
 ---
-id: tsne
-title: "t-SNE"
-sidebar_label: "t-SNE"
+id: pca
+title: "PCA"
+sidebar_label: "📄 PCA"
 description: "Análisis de Componentes Principales}"
 ---

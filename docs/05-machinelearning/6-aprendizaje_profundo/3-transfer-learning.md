@@ -1,7 +1,7 @@
 ---
 id: transfer-learning
 title: "Transfer Learning"
-sidebar_label: "Transfer Learning"
+sidebar_label: "📄 Transfer Learning"
 description: "Transfer Learning"
 ---
 
