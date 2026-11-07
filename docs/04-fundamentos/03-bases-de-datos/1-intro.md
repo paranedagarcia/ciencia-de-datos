@@ -1,7 +1,7 @@
 ---
 id: bd-intro
 title: "Introducción"
-sidebar_label: "💻 Introducción"
+sidebar_label: "📄 Introducción"
 sidebar_position: 1
 description: "Introducción"
 ---

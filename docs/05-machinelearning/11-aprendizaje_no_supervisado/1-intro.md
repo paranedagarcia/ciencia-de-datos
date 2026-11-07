@@ -8,6 +8,8 @@ description: "Introducción al aprendizaje supervisado"
 
 # Aprendizaje No Supervisado
 
+![](img/aprendizaje_no_supervisado.jpg)
+
 El *machine learning no supervisado* es una rama de la inteligencia artificial donde los algoritmos analizan datos sin que les diga cuál es la respuesta correcta. Es decir, no se les da una "respuesta" o etiqueta previa, sino que el sistema debe encontrar patrones, similitudes o estructuras por sí mismo.
 
 En términos simples, imagina que tienes una caja llena de botones de diferentes colores y tamaños, pero no sabes nada sobre ellos. El machine learning no supervisado sería como pedirle a una máquina que agrupe los botones según sus características, sin decirle cómo hacerlo. La máquina podría agruparlos por color, tamaño o forma, dependiendo de lo que encuentre en los datos.
@@ -58,7 +60,7 @@ El análisis de componentes principales (PCA, por sus siglas en inglés) es una 
 - **Aplicaciones**: Detección de anomalías, eliminación de ruido en imágenes, compresión de datos.
 
 
-### Aplicaciones cotidianas del Aprendizaje No Supervisado
+### Aplicaciones
 El aprendizaje no supervisado tiene un impacto significativo en múltiples aspectos de la vida diaria, aunque muchas veces de manera transparente para el usuario final. Algunos ejemplos incluyen:
 
 - **Recomendación de contenido**: Plataformas como Netflix o Spotify utilizan algoritmos de clustering para agrupar usuarios con preferencias similares y sugerir películas o canciones.

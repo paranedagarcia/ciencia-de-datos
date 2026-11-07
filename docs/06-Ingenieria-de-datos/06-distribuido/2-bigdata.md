@@ -1,7 +1,7 @@
 ---
 id: bd-intro
 title: "Big Data"
-sidebar_label: "💻 Big Data"
+sidebar_label: "📄 Big Data"
 sidebar_position: 1
 description: "Big Data"
 ---

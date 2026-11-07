@@ -1,7 +1,7 @@
 ---
 id: sql
 title: "SQL"
-sidebar_label: "💻 SQL"
+sidebar_label: "📄 SQL"
 sidebar_position: 3
 description: "SQL y T-SQL"
 slug: /sql

@@ -1,10 +1,11 @@
 ---
 id: ml-arboles
 title: "Árboles de decisión"
-sidebar_label: "Árboles de decisión"
+sidebar_label: "📄 Árboles de decisión"
 description: "Los modelos de árboles de decisión se engloban dentro de una clase conocida como algoritmos **CART** (Classification and Regression Trees)"
 ---
 
+## **Árboles**
 
 Los **árboles de decisión** son modelos predictivos utilizados tanto para tareas de clasificación como de regresión en el aprendizaje supervisado. Su estructura se asemeja a un árbol, donde cada nodo interno representa una pregunta o condición sobre una variable de entrada, cada rama corresponde a una respuesta posible, y cada hoja representa una predicción o resultado final.
 
@@ -55,7 +56,7 @@ Argumentos de la Fórmula:
 
 - Proceso: Al calcular el Gini para cada posible división, el algoritmo elige la característica y el valor de corte que resulten en la mayor reducción de la impureza (es decir, el menor valor de Gini ponderado en los nodos hijos)
 
-### **Formalización matemática:**
+### Formalización matemática
 
 Para clasificación, el árbol busca particiones que minimicen una función de impureza $I$ en cada nodo $t$:
 
@@ -74,7 +75,7 @@ donde $N_t$ es el número de muestras en el nodo $t$ y $\bar{y}_t$ es el valor m
 
 El árbol se construye de manera recursiva hasta que se cumple un criterio de parada (profundidad máxima, número mínimo de muestras, etc.).
 
-## Ventajas 
+### Ventajas 
 **Fácil Interpretación**: Pueden visualizarse como diagramas de flujo simples, lo que facilita explicar el resultado a personas sin conocimientos técnicos.
 
 **No Paramétrico**: No se hacen suposiciones sobre la distribución subyacente de los datos.
@@ -83,7 +84,8 @@ El árbol se construye de manera recursiva hasta que se cumple un criterio de pa
 
 **Manejo de Datos**: Pueden manejar datos categóricos y numéricos eficientemente y son útiles incluso con conjuntos de datos incompletos.
 
-## Desventajas
+### Desventajas
+
 **Propenso al Sobreajuste (Overfitting)**: Si el árbol crece demasiado (mucha profundidad), puede memorizar el ruido y los detalles específicos del conjunto de entrenamiento y fallar al generalizar.
 
 **Sensibilidad**: Pequeños cambios en los datos de entrada pueden causar grandes cambios en la estructura del árbol, afectando las predicciones.
@@ -286,3 +288,5 @@ Los árboles de decisión son la base de algoritmos más avanzados como Random F
 
 ---
 
+***
+## 🖥️ **Ejemplos**

@@ -1,12 +1,12 @@
 ---
 id: xgboost
 title: "XGBoost"
-sidebar_label: "XGBoost"
+sidebar_label: "📄 XGBoost"
 description: ""
 ---
 
 
-## XGBoost (Extreme Gradient Boosting)
+## **Extreme Gradient Boosting**
 
 XGBoost es una implementación avanzada del gradient boosting que lleva esta metodología un paso más allá.
 - **Gradientes de Segundo Orden**: XGBoost utiliza aproximaciones más detalladas al calcular los gradientes de segundo orden de la función de pérdida para minimizarla.
@@ -14,6 +14,10 @@ XGBoost es una implementación avanzada del gradient boosting que lleva esta met
 - **Regularización Avanzada**: Incorpora técnicas de regularización avanzada (L1 y L2) para reducir el sobreajuste (overfitting), lo que mejora el rendimiento y la capacidad de generalización del modelo.
 - **Modelo Destacado**: Tanto XGBoost como LightGBM son modelos basados en árboles que han demostrado en ciertos casos ser capaces de superar incluso a las redes neuronales.
 
+
+## **Ejemplos**
+
+### Clasificación (breast cancer)
 
 ```python showLineNumbers
 # Ejemplo completo de clasificación con XGBoost (sklearn API) usando el dataset breast cancer

@@ -1,7 +1,7 @@
 ---
 id: gradient-boosting
 title: "Gradient Boosting"
-sidebar_label: "Gradient Boosting"
+sidebar_label: "📄 Gradient Boosting"
 description: ""
 ---
 
@@ -15,7 +15,7 @@ La característica distintiva del gradient boosting es su enfoque de **ensamblad
 
 1. **Construcción Serial**: Los árboles de decisión se construyen uno tras otro.
 **
-2. **Corrección de Errores: Cada nuevo árbol que se añade al modelo intenta corregir los errores o las debilidades del árbol construido inmediatamente anterior.
+2. **Corrección de Errores**: Cada nuevo árbol que se añade al modelo intenta corregir los errores o las debilidades del árbol construido inmediatamente anterior.
 
 3. **Minimización de la Pérdida**: El método utiliza el concepto de **gradiente** (que es la pendiente de una función) para determinar la dirección en la que deben ajustarse los parámetros del modelo, con el objetivo de minimizar la función de pérdida. Este proceso es similar a cómo el algoritmo de Descenso de Gradiente (Gradient Descent) se utiliza en redes neuronales para optimizar los pesos.
 
@@ -30,7 +30,8 @@ Dos parámetros clave para sintonizar este modelo son:
 Los algoritmos de gradient boosting se encuentran frecuentemente entre las soluciones ganadoras de las competiciones de aprendizaje automático y se utilizan ampliamente en la industria debido a su alta precisión.
 
 
-### Definición matemática: 
+### Definición matemática
+
 Gradient Boosting busca minimizar una función de pérdida $L(y, F(x))$ (por ejemplo, el error cuadrático para regresión o la log-loss para clasificación) mediante la construcción de un modelo aditivo:
 
 $$
@@ -50,6 +51,11 @@ r_{im} = -\left[ \frac{\partial L(y_i, F(x_i))}{\partial F(x_i)} \right]_{F(x) =
 $$
 
 El nuevo modelo $h_m(x)$ se entrena para predecir estos residuos.
+
+***
+## **Ejemplos**
+
+### Regresión
 
 **Ejemplo de uso en Python (regresión):**
 
@@ -182,6 +188,7 @@ plt.show()
 ![png](img/Arboles_20_2.png)
     
 
+### Regresión (diabetes)
 
 Ejemplo de regresion con gradient boosting (diabetes)
 

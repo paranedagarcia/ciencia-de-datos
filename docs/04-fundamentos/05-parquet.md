@@ -11,7 +11,11 @@ https://parquet.apache.org/
 
 ## **¿Qué es Apache Parquet?**
 
-Apache Parquet es un formato de archivo de código abierto, gratuito y orientado a columnas, diseñado específicamente para ofrecer un alto rendimiento en consultas analíticas rápidas. Se ha consolidado como un estándar en ecosistemas de Big Data y es la opción de almacenamiento por defecto para motores de procesamiento distribuido como Apache Spark.
+![](img/apache-parquet.webp)
+
+Apache Parquet es un formato de archivo binario de código abierto, gratuito y orientado a columnas, diseñado específicamente para ofrecer un alto rendimiento en consultas analíticas rápidas. Se ha consolidado como un estándar en ecosistemas de Big Data y es la opción de almacenamiento por defecto para motores de procesamiento distribuido como Apache Spark.
+
+Es un formato diseñado para optimizar el procesamiento analítico de grandes volúmenes de datos. Al organizar la información por columns, reduce espacio, agiliza lecturas complejas y minimiza costes.
 
 Debido a sus capacidades técnicas, Parquet juega un rol fundamental en la construcción de arquitecturas modernas de *Data Lakes*.
 

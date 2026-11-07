@@ -1,7 +1,7 @@
 ---
 id: mongodb
 title: "MongoDB"
-sidebar_label: "💻 MongoDB"
+sidebar_label: "📄 MongoDB"
 sidebar_position: 3
 description: "MongoDB"
 ---

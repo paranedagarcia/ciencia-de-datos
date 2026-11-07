@@ -1,7 +1,7 @@
 ---
 id: random-forest
 title: "Random Forest"
-sidebar_label: "Random Forest"
+sidebar_label: "📄 Random Forest"
 description: ""
 ---
 
@@ -63,6 +63,10 @@ Una vez que se ha construido el "bosque" de n árboles, el algoritmo combina sus
 
 - **Para problemas de Regresión**: Las salidas de todos los árboles se promedian para determinar el valor predicho final.
 
+***
+## **Ejemplos**
+
+### Clasificación (sklearn)
 
 ```python showLineNumbers
 # Random Forest - clasificación sobre el dataset breast cancer (sklearn)
@@ -192,7 +196,7 @@ plt.show()
 ![png](img/Arboles_12_3.png)
     
 
-
+### Clasificación (Titanic)
 
 ```python showLineNumbers
 # Random Forest - clasificación sobre el dataset titanic
@@ -267,6 +271,5 @@ for i, passenger in enumerate(sample_passengers):
     30 años y sexo masculino: No Sobrevive
     40 años y sexo masculino: No Sobrevive
     35 años y sexo femenino: Sobrevive
-
 
 ---
