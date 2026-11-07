@@ -58,12 +58,13 @@ El Machine Learning se clasifica fundamentalmente en función de la naturaleza d
 ```mermaid
 ---
 config:
-  theme: 'forest'
+  theme: 'redux-color'
+  look: 'neo'
   themeVariables:
      fontSize: 18px
 ---
 flowchart TD
-    ML[Machine Learning]
+    ML(Machine Learning)
     ML --> SUP[Aprendizaje<br> supervisado]
     ML --> NOSUP[Aprendizaje<br> no supervisado]
     ML --> SEMI[Aprendizaje <br>semi-supervisado]
@@ -263,31 +264,31 @@ config:
 ---
 mindmap
   root((Machine<br>Learning))
-    **Supervisado**
+    Supervisado[Supervisado]
       Clasificación
-        Regresión<br>Logística
-        Árboles <br>de Decisión
-        SVM
-        Random Forest
-        Gradient Boosting
+        REG((Regresión<br>Logística))
+        AD((Árboles de<br>Decisión))
+        SVM((SVM))
+        RF((Random<br> Forest))
+        GB((Gradient<br> Boosting))
       Regresión
-        Regresión Lineal
-        Ridge/Lasso
-        Soporte<br>Vectorial
-    **No Supervisado**
-      Clustering
-        K-Means
-        DBSCAN
-      Reducc.dimen
-        PCA
-        t-SNE
-      Detección
-        
-    **Semi-supervisado**
-      Pen and paper
-      Mermaid
+        RL((Regresión<br> Lineal))
+        RID((Ridge<br>Lasso))
+        SV((Soporte<br>Vectorial))
 
-    **Refuerzo**
-      Agentes
-      Markov (MDP)
+    No-Supervisado[No supervisado]
+      Clustering
+        KM((K-Means))
+        DBSCAN((DBSCAN))
+      Reducc.dimen
+        PCA((PCA))
+        t-SNE((t-SNE))
+      Detección
+
+
+    Refuerzo[Refuerzo]
+      Agentes((Agentes))
+      MDP((Markov))
+
+
 ```

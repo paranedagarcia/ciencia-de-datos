@@ -12,7 +12,7 @@ description: "Herramientas simples y efectivas para análisis predictivo de dato
 **Scikit-learn** (frecuentemente importada en código como `sklearn`) es la biblioteca estándar de código abierto más popular y exhaustiva de Python para el desarrollo de algoritmos tradicionales de **Machine Learning** y minería de datos. Concebida originalmente como una extensión del ecosistema de computación científica de **SciPy**, está construida sobre los cimientos matemáticos de **NumPy** (para operaciones matriciales vectorizadas de alto rendimiento) y se integra de forma directa con **Matplotlib** y **Pandas**.
 
 
-La biblioteca fue creada originalmente por **David Cournapeau en 2007** como parte de un proyecto de Google Summer of Code. Desde entonces, ha sido liderada por un equipo de investigadores del Instituto Francés de Investigación en Informática y Automática (**Inria**) y, más recientemente, por Probabl.ai. 
+La biblioteca fue creada originalmente por **David Cournapeau en 2007** como parte de un proyecto de Google Summer of Code. Desde entonces, ha sido liderada por un equipo de investigadores del [Instituto Francés de Investigación en Informática y Automática (**Inria**)](https://www.inria.fr/fr) y, más recientemente, por **[Probabl.ai](https://www.probabl.ai/)**. 
 
 Se ha consolidado como un estándar en la industria gracias a su **documentación extensa y de alta calidad**, así como a una comunidad activa de desarrolladores que aseguran su constante mejora y fiabilidad mediante pruebas automatizadas. Scikit-learn no está diseñado para el procesamiento de "Big Data" en clústeres distribuidos, sino que se centra en algoritmos eficientes para una sola máquina, integrándose perfectamente con el ecosistema científico de Python.
 

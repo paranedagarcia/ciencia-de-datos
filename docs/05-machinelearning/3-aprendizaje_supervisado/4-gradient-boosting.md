@@ -52,8 +52,176 @@ $$
 
 El nuevo modelo $h_m(x)$ se entrena para predecir estos residuos.
 
+
+## **Tecnica de ensemble**
+
+Una **técnica de ensamblado** (*ensemble learning* o método de ensamble) es un paradigma donde **se combinan estratégicamente las predicciones de múltiples modelos de aprendizaje (denominados estimadores base o *base learners*) para construir un meta-modelo o predictor consolidado con un rendimiento y capacidad de generalización superiores a los de cualquiera de sus modelos individuales por separado**.
+
+
+
+### Fundamento Teórico y Matemático
+**La «Sabiduría de las Masas»**
+
+El principio fundamental detrás del ensamble descansa en la analogía de la **sabiduría de las masas** (*wisdom of the crowd*: *el juicio colectivo de un comité diverso e independiente suele cometer menos errores que un único experto aislado*.
+
+Desde la perspectiva estadística, consideremos un problema de clasificación binaria abordado por un comité de $n$ clasificadores independientes, cada uno con una tasa de error base $\epsilon < 0.5$ (es decir, ligeramente mejor que el azar). La predicción final se toma por votación mayoritaria. El error del ensamble ocurre solo cuando la mayoría de los modelos fallan simultáneamente, lo cual se modela mediante la función de masa de probabilidad de una distribución binomial:
+
+```math
+P(\text{error del ensamble}) = \sum_{k = \lceil n/2 \rceil}^{n} \binom{n}{k} \epsilon^k (1 - \epsilon)^{n - k}
+```
+
+*   **Ejemplo analítico:** Si combinamos $n = 11$ clasificadores independientes con una probabilidad de error individual de $\epsilon = 0.25$ (25%), la probabilidad de que al menos 6 de ellos fallen al mismo tiempo se reduce drásticamente a **$0.034$ (3.4%)**.
+*   **Condición crítica de diversidad:** Para que esta reducción teórica del error funcione, los modelos deben ser **lo más diversos e incorrelacionados posible**. Si todos los modelos fuesen idénticos o cometieran exactamente los mismos errores, el ensamble no ofrecería ningún beneficio frente a un modelo individual.
+
+
+
+### Descomposición del Error
+**Sesgo y Varianza**
+
+El error de generalización en Machine Learning se descompone en **Sesgo** (*Bias*), **Varianza** (*Variance*) y **Ruido Irreducible**:
+
+```math
+\text{Error Total} = \text{Sesgo}^2 + \text{Varianza} + \sigma^2
+```
+
+Las técnicas de ensamblado atacan de manera diferenciada estos dos componentes clave:
+*   **Reducción de Varianza:** Busca suavizar la inestabilidad de estimadores complejos que sufren de sobreajuste (*overfitting*).
+*   **Reducción de Sesgo:** Busca enriquecer y flexibilizar estimadores muy simples o rígidos que sufren de subajuste (*underfitting*).
+
+
+
+### Las Tres Familias Principales de Ensamblado
+
+Existen tres arquitecturas o metodologías fundamentales para construir ensambles:
+
+```mermaid
+---
+config:
+  theme: 'redux-color'
+  themeVariables:
+     fontSize: 16px
+---
+
+flowchart TD
+    A(Técnicas de ensamblado)
+    A --> B(Bagging<br/>En paralelo)
+    A --> C(Boosting<br/>En secuencia)
+    A --> D(Stacking<br/>Por capas)
+
+    B --> B1[Reduce varianza]
+    B1 --- B2[Bootstrap sampling]
+    B2 --- B3[Ejemplo: Random Forest]
+
+    C --> C1[Reduce sesgo]
+    C1 --- C2[Pondera instancias y errores]
+    C2 --- C3[Ejemplos: AdaBoost, XGBoost, LightGBM]
+
+    D --> D1[Aprende a combinar]
+    D1 --- D2[Predictores de nivel 1]
+    D2 --- D3[Meta-aprendiz de nivel 2]
+
+    style B fill:#a6d8f1
+    style C fill:#a6d8f1
+    style D fill:#a6d8f1
+```
+
+#### A. Bagging (*Bootstrap Aggregating* - Entrenamiento en Paralelo)
+*   **Mecánica:** A partir del conjunto original de $N$ observaciones, se generan múltiples subconjuntos de datos mediante **muestreo aleatorio con reemplazo** (*bootstrapping*). En cada subconjunto se entrena un estimador base de forma independiente y paralela. Finalmente, las predicciones se consolidan por **voto de mayoría/moda** (en clasificación) o por **promedio aritmético** (en regresión).
+*   **Impacto Teórico:** **Reduce primordialmente la varianza** sin incrementar el sesgo, siendo ideal para algoritmos inestables y propensos al sobreajuste como los árboles de decisión no podados.
+*   **Algoritmo Emblemático:** **Random Forest**, el cual añade a Bagging una segunda fuente de aleatoriedad al muestrear aleatoriamente un subconjunto de características (*features*) en cada nodo de división para descorrelacionar aún más los árboles.
+
+#### B. Boosting (Entrenamiento en Secuencia Adaptativa)
+*   **Mecánica:** Los estimadores base (usualmente aprendices débiles o *weak learners*, como árboles poco profundos o *stumps*) se entrenan de manera **estrictamente secuencial e iterativa**. Cada nuevo modelo se enfoca en corregir los errores o residuos cometidos por los modelos predecesores:
+    *   *AdaBoost:* Ajusta y amplifica los pesos de las observaciones mal clasificadas en cada iteración.
+    *   *Gradient Boosting (GBM, XGBoost, LightGBM):* Cada nuevo árbol se ajusta directamente a los gradientes negativos (residuos) de la función de pérdida diferenciable.
+*   **Impacto Teórico:** **Reduce drásticamente el sesgo** del modelo construyendo un estimador fuerte a partir de componentes simples. Suelen ser los modelos tabulares más competitivos en la práctica y en competiciones de ciencia de datos.
+
+#### C. Stacking (*Stacked Generalization* - Aprendizaje por Capas)
+*   **Mecánica:** En lugar de emplear reglas fijas de votación o promedio, entrena un **meta-modelo** (*blender*) que aprende de forma supervisada a ponderar las predicciones emitidas por un grupo de modelos base heterogéneos (por ejemplo, combinando un SVM, una Regresión Logística y un Random Forest).
+*   **Prevención de Fuga de Información:** Para entrenar el meta-aprendiz sin causar sobreajuste, las predicciones de los modelos base deben generarse mediante esquemas estrictos de **validación cruzada** (*out-of-fold predictions*).
+
+
+
+### Implementación Práctica (Scikit-Learn)
+
+El siguiente script ilustra y compara cómo se construyen en Python las tres metodologías principales (Bagging con Random Forest, Boosting con Gradient Boosting y Stacking mediante un meta-clasificador):
+
+<details>
+<summary>💻 Código</summary>
+
+```python showLineNumbers
+"""
+Módulo Universitario: Implementación Comparativa de Técnicas de Ensamblado.
+"""
+
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.metrics import accuracy_score
+
+# Estimadores base y ensambles
+from sklearn.ensemble import (
+    RandomForestClassifier,        # Bagging optimizado
+    GradientBoostingClassifier,    # Boosting basado en residuos
+    StackingClassifier             # Stacking heterogéneo
+)
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.tree import DecisionTreeClassifier
+
+# 1. Carga de datos y partición en Train / Test
+X, y = load_breast_cancer(return_X_y=True)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42, stratify=y
+)
+
+# 2. ENFOQUE A: BAGGING (Random Forest)
+# Reduce la varianza promediando múltiples árboles independientes
+rf_ensemble = RandomForestClassifier(n_estimators=100, max_features='sqrt', random_state=42)
+rf_ensemble.fit(X_train, y_train)
+acc_rf = accuracy_score(y_test, rf_ensemble.predict(X_test))
+
+# 3. ENFOQUE B: BOOSTING (Gradient Boosting)
+# Reduce el sesgo entrenando árboles secuenciales que corrigen los residuos
+gb_ensemble = GradientBoostingClassifier(n_estimators=100, learning_rate=0.1, max_depth=3, random_state=42)
+gb_ensemble.fit(X_train, y_train)
+acc_gb = accuracy_score(y_test, gb_ensemble.predict(X_test))
+
+# 4. ENFOQUE C: STACKING (Modelos Heterogéneos + Meta-Estimador)
+# Un meta-clasificador aprende a combinar las predicciones de modelos de distinta naturaleza
+base_learners = [
+    ('dt', DecisionTreeClassifier(max_depth=4, random_state=42)),
+    ('svc', SVC(probability=True, kernel='linear', random_state=42))
+]
+stacking_ensemble = StackingClassifier(
+    estimators=base_learners,
+    final_estimator=LogisticRegression(),
+    cv=5
+)
+stacking_ensemble.fit(X_train, y_train)
+acc_stack = accuracy_score(y_test, stacking_ensemble.predict(X_test))
+
+# Resultados comparativos
+print("=== EXACTITUD EN EL CONJUNTO DE PRUEBA ===")
+print(f"1. Bagging (Random Forest):      {acc_rf * 100:.2f}%")
+print(f"2. Boosting (Gradient Boosting): {acc_gb * 100:.2f}%")
+print(f"3. Stacking (Heterogéneo):       {acc_stack * 100:.2f}%")
+```
+</details>
+
+
+### Resumen 
+
+1.  **Definición:** Un ensamble es un meta-modelo que integra un colectivo de estimadores base para minimizar el error de generalización de forma más efectiva que un modelo aislado.
+2.  **Mecanismos:** 
+    *   **Bagging** entrena en paralelo sobre muestras con reemplazo y promedia, **reduciendo la varianza**.
+    *   **Boosting** entrena en secuencia corrigiendo iterativamente los errores previos, **reduciendo el sesgo**.
+    *   **Stacking** utiliza un segundo nivel de modelado para aprender la combinación óptima de modelos diversos.
+3.  **Compromiso de Ingeniería:** Aunque los ensambles suelen ganar competencias de Machine Learning debido a su alta precisión, introducen mayor costo computacional en entrenamiento e inferencia, y una menor interpretabilidad en comparación con modelos lineales o árboles individuales.
+
+
+
 ***
-## **Ejemplos**
+## 🖥️ **Ejemplos**
 
 ### Regresión
 
