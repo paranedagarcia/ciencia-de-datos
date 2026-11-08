@@ -3,7 +3,6 @@ id: mlflow
 title: "MLflow"
 sidebar_label: "📄 MLflow"
 description: "Plataforma de código abierto para gestionar el ciclo de vida completo del aprendizaje automático y de aplicaciones de inteligencia artificial"
-slug: /mlflow
 ---
 
 <center>

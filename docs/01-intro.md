@@ -404,7 +404,7 @@ En el día a día, el ML Engineer utiliza herramientas como **MLflow** para inte
 Este enfoque estructurado e industrializado garantiza que el ciclo de vida del aprendizaje automático sea elástico, auditable y robusto frente a los desafíos inherentes a operar modelos a gran escala.
 </div>
 </TabItem>
-<TabItem value="mnp-python" label="💻 Código">
+<TabItem value="mnp-python" label="🖥️ Código">
 
 ```python showLineNumbers
 """
