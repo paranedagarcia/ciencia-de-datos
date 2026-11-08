@@ -1,5 +1,5 @@
 ---
-id: bd-intro
+id: ruta
 title: "Ruta de Aprendizaje"
 sidebar_label: "📄 Ruta de Aprendizaje"
 sidebar_position: 2

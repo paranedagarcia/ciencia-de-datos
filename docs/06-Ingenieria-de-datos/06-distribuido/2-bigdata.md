@@ -1,5 +1,5 @@
 ---
-id: bd-intro
+id: bigdata
 title: "Big Data"
 sidebar_label: "📄 Big Data"
 sidebar_position: 1
