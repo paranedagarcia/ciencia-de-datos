@@ -271,5 +271,5 @@ Esta es la ruta propuesta para el cumplimiento de un aprendizaje integrado en Ci
 
 - **Ciencia de Datos**
 - **Ingeniería**
-  - [Medallon System](/docs/medallon)
-  - [MLflow](/docs/mlflow)
+  - Medallon
+  - MLFlow
