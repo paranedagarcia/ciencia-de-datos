@@ -37,7 +37,6 @@ function resolveSecureMode(value) {
 function buildAccessOptions(overrides = {}) {
   const secureOptions = {
     minVersion: 'TLSv1.2',
-    maxVersion: 'TLSv1.2',
     rejectUnauthorized: FTP_SECURE_REJECT_UNAUTHORIZED,
     servername: FTP_SECURE_SERVERNAME || FTP_HOST,
     ...(overrides.secureOptions || {})
@@ -54,13 +53,9 @@ function buildAccessOptions(overrides = {}) {
   }
 }
 
-function shouldRetryWithImplicitFtps(err) {
+function shouldRetryWithExplicitFtps(err) {
   const message = String(err && err.message ? err.message : err).toLowerCase()
   return message.includes('cleartext sessions') || message.includes('tls security mechanisms')
-}
-
-function shouldRetryWithoutCertificateValidation(err) {
-  return err && err.code === 'ERR_TLS_CERT_ALTNAME_INVALID'
 }
 
 if (!FTP_HOST || !FTP_USER || !FTP_PASSWORD) {
@@ -88,16 +83,15 @@ async function connectClient(client) {
   try {
     await client.access(buildAccessOptions())
   } catch (err) {
-    if (!shouldRetryWithImplicitFtps(err) || FTP_SECURE_RAW === 'implicit') {
+    if (!shouldRetryWithExplicitFtps(err) || resolveSecureMode(FTP_SECURE_RAW) !== false) {
       throw err
     }
 
     client.close()
-    console.warn('Explicit FTPS was rejected by the server. Retrying with implicit FTPS.')
+    console.warn('The server requires TLS. Retrying with explicit FTPS on the configured port.')
     await client.access(
       buildAccessOptions({
-        secure: 'implicit',
-        port: FTP_PORT === 21 ? 990 : FTP_PORT,
+        secure: true,
       })
     )
   }
@@ -122,29 +116,8 @@ async function deployBuild(client) {
     await connectClient(client)
     await deployBuild(client)
   } catch (err) {
-    if (shouldRetryWithoutCertificateValidation(err) && FTP_SECURE_REJECT_UNAUTHORIZED) {
-      try {
-        client.close()
-        console.warn(
-          'The FTP server certificate does not match the configured host. Retrying with certificate validation disabled.'
-        )
-        await client.access(
-          buildAccessOptions({
-            secureOptions: {
-              minVersion: 'TLSv1.2',
-              rejectUnauthorized: false,
-              servername: FTP_SECURE_SERVERNAME || FTP_HOST,
-            },
-          })
-        )
-
-        await deployBuild(client)
-        return
-      } catch (retryErr) {
-        console.error('FTP upload failed:', retryErr)
-        process.exitCode = 1
-        return
-      }
+    if (err && err.code === 'ERR_TLS_CERT_ALTNAME_INVALID') {
+      console.error('The FTP certificate does not match the configured host. Use the hostname provided by your FTP provider or configure FTP_SECURE_SERVERNAME to a hostname covered by the certificate.')
     }
 
     console.error('FTP upload failed:', err)

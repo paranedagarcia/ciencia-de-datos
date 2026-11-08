@@ -15,7 +15,6 @@ No se puede esperar que un profesional diseñe un pipeline de Machine Learning a
 
 Se detalla a continuacion la **ruta de aprendizaje secuencial**, estructurada en **5 módulos progresivos**.
 
----
 
 
 ```
@@ -83,7 +82,7 @@ reporte_ventas = df_cleaned.groupby("Country")["TotalAmount"].sum().reset_index(
 print(reporte_ventas)
 ```
 
----
+
 
 ### Módulo 2: Cómputo Distribuido 
 **e Infraestructura Lakehouse**
@@ -271,5 +270,5 @@ Esta es la ruta propuesta para el cumplimiento de un aprendizaje integrado en Ci
 
 - **Ciencia de Datos**
 - **Ingeniería**
-  - [Arquitectura Medallon](/docs/ingenieria-de-datos/medallon)
-  - [MLFlow](/docs/ingenieria-de-datos/mlflow)
+  - [Arquitectura Medallon](/docs/ingenieria-datos/medallon)
+  - [MLFlow](/docs/ingenieria-datos/mlflow)
