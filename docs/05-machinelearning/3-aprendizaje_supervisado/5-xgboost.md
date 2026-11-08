@@ -15,7 +15,7 @@ XGBoost es una implementación avanzada del gradient boosting que lleva esta met
 - **Modelo Destacado**: Tanto XGBoost como LightGBM son modelos basados en árboles que han demostrado en ciertos casos ser capaces de superar incluso a las redes neuronales.
 
 
-## **Ejemplos**
+## 🖥️ **Ejemplos**
 
 ### Clasificación (breast cancer)
 

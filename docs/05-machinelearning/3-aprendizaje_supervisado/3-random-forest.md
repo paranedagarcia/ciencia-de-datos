@@ -64,7 +64,7 @@ Una vez que se ha construido el "bosque" de n árboles, el algoritmo combina sus
 - **Para problemas de Regresión**: Las salidas de todos los árboles se promedian para determinar el valor predicho final.
 
 ***
-## **Ejemplos**
+## 🖥️ **Ejemplos**
 
 ### Clasificación (sklearn)
 

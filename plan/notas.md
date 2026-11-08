@@ -22,7 +22,7 @@ config:
 ```
 
 <details>
-<summary>💻 </summary>
+<summary>🖥️ </summary>
 
 </details>
 
@@ -52,7 +52,7 @@ config:
 **Distribución t de Student**
 </div>
 </TabItem>
-<TabItem value="mnp-python" label="💻 Código">
+<TabItem value="mnp-python" label="🖥️ Código">
 ```python showLineNumbers
 # Implementación en Python
 ```
@@ -245,3 +245,8 @@ Explica la capa de Staging
 Ejemplos de consultas recursivas en dbt
 ¿Cómo se integra dbt_utils en el DAG?
 Comparar materialización table vs view en dbt
+
+
+Muéstrame cómo se calcula el Coeficiente de Silueta
+¿Cómo maneja K-means los valores atípicos?
+Cuéntame sobre algoritmos alternativos como DBSCAN
