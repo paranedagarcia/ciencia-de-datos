@@ -8,6 +8,8 @@ hide_title: true
 
 ## **Regresión lineal**
 
+![](img/regresion_lineal_info.jpg)
+
 La **Regresión Lineal** es uno de los métodos supervisados más clásicos y utilizados para predecir variables cuantitativas continuas ($Y$) a partir de un conjunto de variables explicativas o características ($X$). 
 
 Bajo la formulación lineal estándar, el modelo asume que el valor esperado de la variable respuesta es una combinación lineal ponderada de las características de entrada, la respuesta es lineal sujeta a un término de error o ruido estocástico $\epsilon$:
@@ -127,7 +129,7 @@ El siguiente código contrasta el ajuste de **OLS**, **Ridge** y **Lasso** sobre
 
 ```python showLineNumbers
 """
-Módulo de Estudio: Regresión Lineal y Regularización (OLS vs. Ridge vs. Lasso).
+Regresión Lineal y Regularización (OLS vs. Ridge vs. Lasso).
 Demostración pedagógica del encogimiento y dispersión de coeficientes.
 """
 
@@ -246,7 +248,7 @@ Al observar la salida de este código, se comprueba cómo **Ridge** reduce unifo
 ***
 ## **Casos**
 
-### Progresion de diabetes
+### Progresión de diabetes
 
 Utilizaremos el **conjunto de datos de progresión de la diabetes** (*Diabetes Dataset* de Efron et al., disponible en `sklearn.datasets`), ampliamente reconocido en la literatura econométrica y bioestadística para el estudio de regularización. 
 
@@ -267,7 +269,7 @@ El siguiente flujo de trabajo:
 
 ```python showLineNumbers
 """
-Laboratorio de Ciencia de Datos: Comparación Rigurosa de Regularización Lineal
+Comparación Rigurosa de Regularización Lineal
 Dataset: Diabetes Progression (con expansión polinómica de características)
 """
 
@@ -407,4 +409,267 @@ OLS no aplica ningún castigo a la complejidad. Al haber 65 variables correlacio
 2.  **Ridge** es la regularización analíticamente más óptima cuando existe **alta multicolinealidad** y la mayoría de las variables aportan información distribuida.
 3.  **Lasso** es la regularización más óptima cuando se sospecha la presencia de **variables espurias o redundantes** y se exige una representación dispersa (*sparse*) para selección de características e interpretabilidad.
 4.  **ElasticNet** actúa como la solución de compromiso ideal cuando se requiere la capacidad de selección de Lasso pero sin descartar arbitrariamente variables pertenecientes a un mismo bloque correlacionado.
+
+
+
+
+<br/>
+
+### Caso comparacion de regularizacion
+<Tabs>
+<TabItem value="mnp" label="Ejemplo" default>
+<div class="alert alert--primary">
+
+Se integra todo el pipeline experimental: la carga del conjunto de datos de progresión de la diabetes, la inducción de multicolinealidad mediante expansión polinómica, el ajuste y sintonización mediante validación cruzada de **OLS**, **Ridge**, **ElasticNet** y **Lasso**, y la **generación de los cuatro gráficos diagnósticos**.
+
+Antes de ejecutar el análisis gráfico, formalizamos las métricas de evaluación del rendimiento:
+
+**A. Raíz del Error Cuadrático Medio (RMSE - Root Mean Squared Error)**
+
+Cuantifica la magnitud promedio de los residuos en las mismas unidades físicas que la variable objetivo $y$:
+
+```math
+\text{RMSE} = \sqrt{\frac{1}{N_{\text{test}}} \sum_{i=1}^{N_{\text{test}}} \big(y^{(i)} - \hat{y}^{(i)}\big)^2}
+```
+
+*   **Argumentos:** $N_{\text{test}}$ es el número de observaciones del conjunto de prueba; $y^{(i)}$ es la progresión observada del paciente; $\hat{y}^{(i)}$ es el valor predicho por el modelo lineal regularizado. Al elevar las diferencias al cuadrado, penaliza desproporcionadamente los errores grandes o atípicos antes de calcular la raíz.
+
+**B. Coeficiente de Determinación ($R^2$)**
+
+Mide la proporción de la varianza total de la variable dependiente que es explicada por las variables predictoras del modelo:
+
+```math
+R^2 = 1 - \frac{\text{SS}_{\text{res}}}{\text{SS}_{\text{tot}}} = 1 - \frac{\sum_{i=1}^{N_{\text{test}}} (y^{(i)} - \hat{y}^{(i)})^2}{\sum_{i=1}^{N_{\text{test}}} (y^{(i)} - \bar{y})^2}
+```
+
+*   **Argumentos:** $\text{SS}_{\text{res}}$ es la suma residual de cuadrados (error no explicado); $\text{SS}_{\text{tot}}$ es la suma total de cuadrados proporcional a la varianza muestral de $y$; $\bar{y}$ es la media empírica de los datos de prueba. Un $R^2 = 1.0$ indica ajuste perfecto, mientras que un valor de $0.0$ equivale a un modelo ingenuo que solo predice la media constante.
+
+</div>
+</TabItem>
+<TabItem value="mnp-python" label="🖥️ Código">
+
+#### Script Completo en Python (Modelado y Graficación)
+
+```python showLineNumbers
+# Implementación en Python
+"""
+Evaluación Comparativa de Regularizaciones.
+Genera el ajuste de OLS, Ridge, ElasticNet y Lasso, y visualiza:
+  1. Error Cuadrático Medio (RMSE en Test)
+  2. Coeficiente de Determinación (R² en Test)
+  3. Parsimonia y Dispersión (Variables Activas vs. Anuladas a Cero)
+  4. Alineación: Valores Reales vs. Predichos (OLS vs. Lasso frente a la Recta 1:1)
+"""
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_diabetes
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler, PolynomialFeatures
+from sklearn.linear_model import LinearRegression, RidgeCV, LassoCV, ElasticNetCV
+from sklearn.metrics import mean_squared_error, r2_score
+
+# ==============================================================================
+# 1. Carga de Datos y Expansión Polinómica (Inducción de Multicolinealidad)
+# ==============================================================================
+X_raw, y = load_diabetes(return_X_y=True)
+
+# Expandimos de 10 variables clínicas basales a 65 características (términos cruzados x_i * x_j)
+poly = PolynomialFeatures(degree=2, include_bias=False)
+X_poly = poly.fit_transform(X_raw)
+
+# ==============================================================================
+# 2. Partición Rigurosa y Preprocesamiento
+# ==============================================================================
+# Separamos el 25% para el conjunto de prueba independiente (held-out test set)
+X_train, X_test, y_train, y_test = train_test_split(
+    X_poly, y, test_size=0.25, random_state=42
+)
+
+# REGLA METODOLÓGICA: fit exclusivamente sobre X_train para evitar data leakage
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# ==============================================================================
+# 3. Entrenamiento y Sintonización de Hiperparámetros vía Cross-Validation (5-Folds)
+# ==============================================================================
+# A. Mínimos Cuadrados Ordinarios (Línea base sin penalización)
+ols = LinearRegression().fit(X_train_scaled, y_train)
+
+# B. Regresión Ridge (Penalización L2)
+ridge = RidgeCV(cv=5).fit(X_train_scaled, y_train)
+
+# C. Regresión ElasticNet (Híbrido L1 + L2)
+elastic = ElasticNetCV(
+    cv=5, l1_ratio=[0.1, 0.5, 0.7, 0.9], random_state=42, max_iter=10000
+).fit(X_train_scaled, y_train)
+
+# D. Regresión Lasso (Penalización L1 con selección automática)
+lasso = LassoCV(cv=5, random_state=42, max_iter=10000).fit(X_train_scaled, y_train)
+
+# ==============================================================================
+# 4. Cálculo y Consolidación de Métricas en el Conjunto de Prueba
+# ==============================================================================
+modelos_dict = {
+    'OLS (Sin reg.)': ols,
+    f'Ridge (α={ridge.alpha_:.1f})': ridge,
+    f'ElasticNet (α={elastic.alpha_:.2f})': elastic,
+    f'Lasso (α={lasso.alpha_:.2f})': lasso
+}
+
+nombres_modelos = list(modelos_dict.keys())
+lista_rmse = []
+lista_r2 = []
+lista_activos = []
+lista_anulados = []
+predicciones = {}
+
+total_features = X_poly.shape[1]
+
+for nombre, m in modelos_dict.items():
+    y_pred = m.predict(X_test_scaled)
+    predicciones[nombre] = y_pred
+    
+    rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+    r2 = r2_score(y_test, y_pred)
+    
+    # Tolerancia numérica para identificar coeficientes nulos (w_j = 0)
+    coefs = m.coef_
+    n_ceros = np.sum(np.isclose(coefs, 0.0, atol=1e-4))
+    n_activos = total_features - n_ceros
+    
+    lista_rmse.append(rmse)
+    lista_r2.append(r2 * 100) # En porcentaje
+    lista_activos.append(n_activos)
+    lista_anulados.append(n_ceros)
+
+# ==============================================================================
+# 5. Generación de Gráficos Diagnósticos (Fondo Blanco Plano y Paleta Accesible)
+# ==============================================================================
+fig, axes = plt.subplots(2, 2, figsize=(15, 11), facecolor='white')
+fig.suptitle(
+    'Evaluación Experimental de Regularizaciones: OLS vs. Ridge vs. ElasticNet vs. Lasso',
+    fontsize=16, fontweight='bold', y=0.98
+)
+
+# Paleta Okabe-Ito accesible y colores neutros
+colores_barras = ['#d55e00', '#0072b2', '#e69f00', '#009e73']
+
+# ------------------------------------------------------------------------------
+# Panel 1 (Superior Izquierdo): Error Cuadrático Medio (RMSE)
+# ------------------------------------------------------------------------------
+ax1 = axes[0, 0]
+ax1.set_facecolor('white')
+barras_rmse = ax1.bar(nombres_modelos, lista_rmse, color=colores_barras, width=0.55, edgecolor='none')
+ax1.set_title('1. Error de Generalización (RMSE en Test Set)', fontsize=12, fontweight='bold', pad=10)
+ax1.set_ylabel('RMSE (Menor es mejor)', fontsize=11)
+ax1.set_ylim(45, 60)
+ax1.grid(axis='y', linestyle=':', alpha=0.6)
+ax1.spines['top'].set_visible(False)
+ax1.spines['right'].set_visible(False)
+
+for b, val in zip(barras_rmse, lista_rmse):
+    ax1.text(b.get_x() + b.get_width() / 2, val + 0.35, f'{val:.2f}', ha='center', va='bottom', fontweight='bold', fontsize=10)
+
+# ------------------------------------------------------------------------------
+# Panel 2 (Superior Derecho): Coeficiente de Determinación (R²)
+# ------------------------------------------------------------------------------
+ax2 = axes[0, 1]
+ax2.set_facecolor('white')
+barras_r2 = ax2.bar(nombres_modelos, lista_r2, color=colores_barras, width=0.55, edgecolor='none')
+ax2.set_title('2. Capacidad Explicativa (R² en Test Set)', fontsize=12, fontweight='bold', pad=10)
+ax2.set_ylabel('Varianza Explicada R² (%)', fontsize=11)
+ax2.set_ylim(35, 60)
+ax2.grid(axis='y', linestyle=':', alpha=0.6)
+ax2.spines['top'].set_visible(False)
+ax2.spines['right'].set_visible(False)
+
+for b, val in zip(barras_r2, lista_r2):
+    ax2.text(b.get_x() + b.get_width() / 2, val + 0.45, f'{val:.1f}%', ha='center', va='bottom', fontweight='bold', fontsize=10)
+
+# ------------------------------------------------------------------------------
+# Panel 3 (Inferior Izquierdo): Principio de Parsimonia y Dispersión (Sparsity)
+# ------------------------------------------------------------------------------
+ax3 = axes[1, 0]
+ax3.set_facecolor('white')
+ancho_barras = 0.55
+indices = np.arange(len(nombres_modelos))
+
+# Barras apiladas: variables activas vs variables anuladas
+b_act = ax3.bar(indices, lista_activos, width=ancho_barras, label='Variables Activas (w ≠ 0)', color='#0072b2')
+b_anu = ax3.bar(indices, lista_anulados, width=ancho_barras, bottom=lista_activos, label='Variables Anuladas a Cero (w = 0)', color='#cccccc')
+
+ax3.set_title('3. Parsimonia: Complejidad y Selección de Variables', fontsize=12, fontweight='bold', pad=10)
+ax3.set_ylabel('Número de Características (de 65)', fontsize=11)
+ax3.set_xticks(indices)
+ax3.set_xticklabels(nombres_modelos)
+ax3.set_ylim(0, 75)
+ax3.grid(axis='y', linestyle=':', alpha=0.6)
+ax3.spines['top'].set_visible(False)
+ax3.spines['right'].set_visible(False)
+ax3.legend(frameon=True, facecolor='white', loc='upper right')
+
+for idx, (act, anu) in enumerate(zip(lista_activos, lista_anulados)):
+    ax3.text(idx, act / 2, f'{act}', ha='center', va='center', color='white', fontweight='bold', fontsize=10)
+    if anu > 0:
+        ax3.text(idx, act + (anu / 2), f'{anu}', ha='center', va='center', color='#333333', fontweight='bold', fontsize=10)
+
+# ------------------------------------------------------------------------------
+# Panel 4 (Inferior Derecho): Alineación (Valores Reales vs. Predichos)
+# ------------------------------------------------------------------------------
+ax4 = axes[1, 1]
+ax4.set_facecolor('white')
+
+# Comparación directa de dispersión: OLS (sin regularizar) frente a Lasso (óptimo)
+pred_ols = predicciones['OLS (Sin reg.)']
+pred_lasso = predicciones[f'Lasso (α={lasso.alpha_:.2f})']
+
+ax4.scatter(y_test, pred_ols, color='#d55e00', alpha=0.55, s=40, label=f'OLS (RMSE: {lista_rmse[0]:.2f})')
+ax4.scatter(y_test, pred_lasso, color='#009e73', alpha=0.75, s=40, label=f'Lasso (RMSE: {lista_rmse[-1]:.2f})')
+
+# Línea de identidad ideal (y_real == y_pred)
+min_val = min(y_test.min(), pred_lasso.min(), pred_ols.min()) - 10
+max_val = max(y_test.max(), pred_lasso.max(), pred_ols.max()) + 10
+ax4.plot([min_val, max_val], [min_val, max_val], color='#333333', linestyle='--', linewidth=1.5, label='Alineación Ideal (1:1)')
+
+ax4.set_title('4. Alineación: Valores Reales vs. Predichos', fontsize=12, fontweight='bold', pad=10)
+ax4.set_xlabel('Valor Real de Progresión de Diabetes (y_test)', fontsize=11)
+ax4.set_ylabel('Valor Predicho por el Modelo (y_pred)', fontsize=11)
+ax4.set_xlim(min_val, max_val)
+ax4.set_ylim(min_val, max_val)
+ax4.grid(True, linestyle=':', alpha=0.6)
+ax4.spines['top'].set_visible(False)
+ax4.spines['right'].set_visible(False)
+ax4.legend(frameon=True, facecolor='white', loc='upper left')
+
+plt.tight_layout()
+plt.show()
+```
+</TabItem>
+</Tabs>
+
+![](img/regresionlineal.png)
+
+
+
+**Interpretación de los Gráficos**
+
+1.  **Panel 1 (Error Cuadrático Medio - RMSE):**
+    *   **Observación:** Se evidencia la caída monotónica del error conforme se incorporan mecanismos de regularización: OLS registra el error más alto (**56,42**), Ridge y ElasticNet lo atenúan, y Lasso alcanza el mínimo global (**50,89**).
+    *   **Conclusión:** La penalización previene la inflación de la varianza en las predicciones cuando existen variables correlacionadas.
+
+2.  **Panel 2 (Coeficiente de Determinación - $R^2$):**
+    *   **Observación:** La capacidad explicativa se incrementa en casi 11 puntos porcentuales, pasando de **42,4%** en OLS a **53,2%** en Lasso.
+    *   **Conclusión:** Al penalizar los pesos espurios, el modelo deja de ajustar ruido y se enfoca en la varianza explicativa genuina del fenómeno biológico.
+
+3.  **Panel 3 (Parsimonia y Dispersión):**
+    *   **Observación:** OLS y Ridge mantienen las 65 variables activas (complejidad máxima). Lasso, por el contrario, **anula a cero 51 características redundantes**, resolviendo el problema con apenas **14 variables activas**.
+    *   **Conclusión:** Demuestra visualmente la propiedad de selección de características de la norma $L_1$, produciendo un modelo parsimonioso, explicable y de bajo costo computacional.
+
+4.  **Panel 4 (Alineación Real vs. Predicho):**
+    *   **Observación:** Los puntos verdes de Lasso se agrupan con menor dispersión y mayor cercanía a la diagonal discontinua de 45° (línea 1:1) en comparación con los puntos naranjas de OLS, que muestran una mayor desviación en los valores extremos.
+    *   **Conclusión:** Valida que las predicciones de Lasso mantienen una calibración más robusta y consistente a lo largo de todo el espectro clínico evaluado.
+
 

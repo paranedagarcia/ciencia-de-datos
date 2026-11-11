@@ -22,7 +22,7 @@ config:
 ```
 
 <details>
-<summary>🖥️ </summary>
+<summary>🖥️ Código</summary>
 
 </details>
 
@@ -251,6 +251,11 @@ Muéstrame cómo se calcula el Coeficiente de Silueta
 ¿Cómo maneja K-means los valores atípicos?
 Cuéntame sobre algoritmos alternativos como DBSCAN
 
-ML supervisado
-reresion lineal
+## ML supervisado
+### regresion lineal
 sobre las diferencias geométricas entre las restricciones de bola \\(L_2\\) y diamante \\(L_1\\), y la optimización de \\(\alpha\\) mediante `RidgeCV` y `LassoCV`?
+
+### regresion logistica
+¿Cómo se aplica la regularización en la regresión logística?
+¿Qué métricas se usan para evaluar la clasificación?
+¿Cómo funciona el algoritmo Softmax?
