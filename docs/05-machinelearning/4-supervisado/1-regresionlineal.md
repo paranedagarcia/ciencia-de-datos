@@ -673,3 +673,288 @@ plt.show()
     *   **Conclusión:** Valida que las predicciones de Lasso mantienen una calibración más robusta y consistente a lo largo de todo el espectro clínico evaluado.
 
 
+
+<br/>
+### Predicción de valor de vivienda
+<Tabs>
+<TabItem value="mnp" label="Antecedentes" default>
+<div class="alert alert--primary">
+
+En el sector de **bienes raíces (*Real Estate Analytics*)**, predecir el valor de mercado de los inmuebles representa uno de los problemas fundacionales de la econometría y el aprendizaje automático supervisado. 
+
+En un escenario real de ingeniería de datos inmobiliarios, los modelos se enfrentan habitualmente a tres desafíos simultáneos:
+1. **Atributos fundamentales con señal causal real:** Superficie construida (m²), número de dormitorios, distancia al distrito financiero (CBD), antigüedad física de la propiedad y calidad de los acabados.
+2. **Alta multicolinealidad estructural:** Métricas duplicadas por ingesta de múltiples portales (p. ej., superficie en pies cuadrados correlacionada en $r \approx 1,0$ con metros cuadrados; año de construcción frente a antigüedad; y tiempos de traslado en coche correlacionados con la distancia física).
+3. **Variables espurias o ruidosas:** Ruido ambiental y mediciones irrelevantes que no aportan valor explicativo al precio de la propiedad.
+
+
+#### Formulación de los Modelos y Métricas
+
+La meta es predecir el precio continuo de la propiedad $y \in \mathbb{R}$ (expresado en miles de dólares, **\$K USD**) a partir del vector de características $x \in \mathbb{R}^p$:
+
+#### A. Funciones de Pérdida
+*   **OLS (Sin regularizar):**
+    No introduce restricciones sobre $w$. Ante colinealidad severa (p. ej., metros cuadrados y pies cuadrados juntos), la matriz $X^T X$ se aproxima a la singularidad, provocando que los pesos se inflen artificialmente con varianza extrema.
+*   **Ridge (Penalización $L_2$):**
+    Estabiliza la inversión matricial mediante $(X^T X + \alpha I)^{-1}$, contrayendo uniformemente todos los pesos hacia cero sin anularlos de forma exacta (solución densa).
+*   **Lasso (Penalización $L_1$):**
+    Debido a los vértices afilados de la región factible $L_1$, Lasso fija los coeficientes de las variables redundantes o de ruido en **exactamente cero**, ejecutando **selección automática de variables** (*sparsity*).
+*   **ElasticNet (Híbrido $L_1 + L_2$):**
+    Combina la capacidad de selección de Lasso con la estabilidad de Ridge ante grupos de variables colineales.
+
+#### B. Métricas de Evaluación
+*   **Raíz del Error Cuadrático Medio (RMSE):**
+    ```math
+    \text{RMSE} = \sqrt{\frac{1}{N_{\text{test}}} \sum_{i=1}^{N_{\text{test}}} (y^{(i)} - \hat{y}^{(i)})^2}
+    ```
+    Mide el error promedio en las mismas unidades físicas del problema (\$K USD).
+*   **Coeficiente de Determinación ($R^2$):**
+    ```math
+    R^2 = 1 - \frac{\sum_{i=1}^{N_{\text{test}}} (y^{(i)} - \hat{y}^{(i)})^2}{\sum_{i=1}^{N_{\text{test}}} (y^{(i)} - \bar{y})^2}
+    ```
+    Indica la proporción de variabilidad de los precios de venta explicada por el modelo.
+
+</div>
+</TabItem>
+<TabItem value="mnp-python" label="🖥️ Código">
+
+El siguiente script en Python ejecuta el flujo completo, preprocesa los datos evitando fugas de información, ajusta los cuatro estimadores y genera los gráficos diagnósticos con fondo blanco plano y paleta accesible:
+
+```python showLineNumbers
+# Implementación en Python
+"""
+Predicción de Bienes Raíces y Regularización en Python.
+Evalúa OLS, Ridge, ElasticNet y Lasso con gráficos de diagnóstico en cuadrícula 2x2.
+"""
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression, RidgeCV, LassoCV, ElasticNetCV
+from sklearn.metrics import mean_squared_error, r2_score
+
+# ==============================================================================
+# 1. Simulación del Conjunto de Datos de Bienes Raíces (N = 500 propiedades)
+# ==============================================================================
+np.random.seed(42)
+N = 500
+
+# Variables estructurales reales
+superficie_m2 = np.random.uniform(50, 320, size=N)        # Superficie construida
+habitaciones = np.random.choice([1, 2, 3, 4, 5], size=N, p=[0.1, 0.25, 0.35, 0.2, 0.1])
+distancia_centro_km = np.random.uniform(1.0, 25.0, size=N) # Distancia al centro financiero
+antiguedad_anios = np.random.uniform(0, 45, size=N)       # Antigüedad de la edificación
+calidad_acabados = np.random.uniform(1, 10, size=N)       # Índice de calidad 1-10
+
+# Precio real de mercado (en miles de USD - $K) con una ligera convexidad de lujo
+precio_base = (
+    85.0 
+    + 1.85 * superficie_m2 
+    + 14.0 * habitaciones 
+    - 4.2 * distancia_centro_km 
+    - 1.1 * antiguedad_anios 
+    + 9.5 * calidad_acabados
+    + 0.003 * (superficie_m2 ** 2)
+)
+ruido_mercado = np.random.normal(0, 22.0, size=N)
+y = precio_base + ruido_mercado
+
+# Atributos redundantes / colineales (ingesta de portales duplicados)
+superficie_sqft = superficie_m2 * 10.7639 + np.random.normal(0, 0.5, size=N) # Colineal a m²
+banios_aprox = 0.6 * habitaciones + np.random.normal(0, 0.3, size=N)
+tiempo_traslado_min = distancia_centro_km * 2.8 + np.random.normal(0, 1.5, size=N) # Colineal a distancia
+anio_construccion = 2026 - antiguedad_anios # Colineal inversa perfecta
+
+# Atributos espurios (ruido ambiental sin capacidad predictiva)
+ruido_1 = np.random.normal(50, 15, size=N)
+ruido_2 = np.random.uniform(100, 200, size=N)
+ruido_3 = np.random.choice([0, 1], size=N)
+
+# Matriz de diseño con 12 características
+df_inmuebles = pd.DataFrame({
+    'Superficie_m2': superficie_m2,
+    'Habitaciones': habitaciones,
+    'Distancia_Centro_km': distancia_centro_km,
+    'Antiguedad_anios': antiguedad_anios,
+    'Calidad_Acabados': calidad_acabados,
+    'Superficie_sqft': superficie_sqft,
+    'Banios_estimados': banios_aprox,
+    'Tiempo_traslado_min': tiempo_traslado_min,
+    'Anio_construccion': anio_construccion,
+    'Ruido_sensor_1': ruido_1,
+    'Ruido_sensor_2': ruido_2,
+    'Ruido_indicador_lote': ruido_3
+})
+
+X = df_inmuebles.values
+
+# ==============================================================================
+# 2. Partición Rigurosa y Preprocesamiento
+# ==============================================================================
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42
+)
+
+# Estandarización Z-score ajustada exclusivamente sobre entrenamiento
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# ==============================================================================
+# 3. Ajuste y Optimización de Hiperparámetros vía Validación Cruzada (5-Folds)
+# ==============================================================================
+ols = LinearRegression().fit(X_train_scaled, y_train)
+ridge = RidgeCV(cv=5).fit(X_train_scaled, y_train)
+lasso = LassoCV(cv=5, random_state=42, max_iter=10000).fit(X_train_scaled, y_train)
+elastic = ElasticNetCV(
+    cv=5, l1_ratio=[0.1, 0.5, 0.7, 0.9], random_state=42, max_iter=10000
+).fit(X_train_scaled, y_train)
+
+modelos_dict = {
+    'OLS (Sin regularizar)': ols,
+    f'Ridge (L2, α={ridge.alpha_:.2f})': ridge,
+    f'ElasticNet (α={elastic.alpha_:.2f})': elastic,
+    f'Lasso (L1, α={lasso.alpha_:.2f})': lasso
+}
+
+# ==============================================================================
+# 4. Evaluación de Métricas de Generalización
+# ==============================================================================
+nombres, rmses, r2s, activos, anulados = [], [], [], [], []
+predicciones = {}
+
+for nombre, m in modelos_dict.items():
+    pred = m.predict(X_test_scaled)
+    predicciones[nombre] = pred
+    rmse = np.sqrt(mean_squared_error(y_test, pred))
+    r2 = r2_score(y_test, pred)
+    
+    coefs = m.coef_
+    n_ceros = np.sum(np.isclose(coefs, 0.0, atol=1e-3))
+    n_activos = X.shape[1] - n_ceros
+    
+    nombres.append(nombre)
+    rmses.append(rmse)
+    r2s.append(r2 * 100)
+    activos.append(n_activos)
+    anulados.append(n_ceros)
+    
+    print(f"{nombre:<32} | RMSE: ${rmse:.2f}K | R²: {r2*100:.2f}% | Variables activas: {n_activos}/12")
+
+# ==============================================================================
+# 5. Generación de Gráficos Diagnósticos (2x2 con Fondo Blanco Plano)
+# ==============================================================================
+fig, axes = plt.subplots(2, 2, figsize=(15, 11), facecolor='white')
+fig.suptitle(
+    'Evaluación de Modelos Lineales para Tasación Inmobiliaria (N=500)',
+    fontsize=16, fontweight='bold', y=0.98
+)
+
+paleta = ['#d55e00', '#0072b2', '#e69f00', '#009e73']
+
+# Panel 1: Error Cuadrático Medio (RMSE)
+ax1 = axes[0, 0]
+ax1.set_facecolor('white')
+barras_rmse = ax1.bar(nombres, rmses, color=paleta, width=0.52)
+ax1.set_title('1. Error de Predicción (RMSE en Test Set)', fontsize=12, fontweight='bold', pad=10)
+ax1.set_ylabel('RMSE ($K USD)', fontsize=11)
+ax1.set_ylim(0, max(rmses) * 1.25)
+ax1.grid(axis='y', linestyle=':', alpha=0.6)
+ax1.spines['top'].set_visible(False)
+ax1.spines['right'].set_visible(False)
+for b, val in zip(barras_rmse, rmses):
+    ax1.text(b.get_x() + b.get_width()/2, val + 0.6, f'${val:.2f}K', ha='center', va='bottom', fontweight='bold', fontsize=10)
+
+# Panel 2: Coeficiente de Determinación (R²)
+ax2 = axes[0, 1]
+ax2.set_facecolor('white')
+barras_r2 = ax2.bar(nombres, r2s, color=paleta, width=0.52)
+ax2.set_title('2. Varianza Explicada (R² en Test Set)', fontsize=12, fontweight='bold', pad=10)
+ax2.set_ylabel('R² (%)', fontsize=11)
+ax2.set_ylim(85, 100)
+ax2.grid(axis='y', linestyle=':', alpha=0.6)
+ax2.spines['top'].set_visible(False)
+ax2.spines['right'].set_visible(False)
+for b, val in zip(barras_r2, r2s):
+    ax2.text(b.get_x() + b.get_width()/2, val + 0.3, f'{val:.1f}%', ha='center', va='bottom', fontweight='bold', fontsize=10)
+
+# Panel 3: Principio de Parsimonia
+ax3 = axes[1, 0]
+ax3.set_facecolor('white')
+idx = np.arange(len(nombres))
+b_act = ax3.bar(idx, activos, width=0.52, label='Variables Activas (w ≠ 0)', color='#0072b2')
+b_anu = ax3.bar(idx, anulados, width=0.52, bottom=activos, label='Variables Descartadas a Cero (w = 0)', color='#cccccc')
+ax3.set_title('3. Parsimonia: Variables Activas vs. Anuladas', fontsize=12, fontweight='bold', pad=10)
+ax3.set_ylabel('Número de Atributos (Total: 12)', fontsize=11)
+ax3.set_xticks(idx)
+ax3.set_xticklabels(nombres, rotation=10, ha='right', fontsize=9.5)
+ax3.set_ylim(0, 15)
+ax3.grid(axis='y', linestyle=':', alpha=0.6)
+ax3.spines['top'].set_visible(False)
+ax3.spines['right'].set_visible(False)
+ax3.legend(frameon=True, facecolor='white', loc='upper right')
+for i, (act, anu) in enumerate(zip(activos, anulados)):
+    ax3.text(i, act/2, f'{act}', ha='center', va='center', color='white', fontweight='bold')
+    if anu > 0:
+        ax3.text(i, act + anu/2, f'{anu}', ha='center', va='center', color='#333333', fontweight='bold')
+
+# Panel 4: Alineación Real vs. Predicho (OLS vs. Lasso)
+ax4 = axes[1, 1]
+ax4.set_facecolor('white')
+p_ols = predicciones['OLS (Sin regularizar)']
+nombre_lasso = f'Lasso (L1, α={lasso.alpha_:.2f})'
+p_lasso = predicciones[nombre_lasso]
+rmse_ols = rmses[nombres.index('OLS (Sin regularizar)')]
+rmse_lasso = rmses[nombres.index(nombre_lasso)]
+
+ax4.scatter(y_test, p_ols, color='#d55e00', alpha=0.5, s=35, label=f'OLS (RMSE: ${rmse_ols:.2f}K)')
+ax4.scatter(y_test, p_lasso, color='#009e73', alpha=0.75, s=35, label=f'Lasso (RMSE: ${rmse_lasso:.2f}K)')
+
+lim_inf = min(y_test.min(), p_ols.min(), p_lasso.min()) - 20
+lim_sup = max(y_test.max(), p_ols.max(), p_lasso.max()) + 20
+ax4.plot([lim_inf, lim_sup], [lim_inf, lim_sup], color='#333333', linestyle='--', linewidth=1.5, label='Alineación Ideal (1:1)')
+ax4.set_title('4. Alineación: Valor Real vs. Predicción', fontsize=12, fontweight='bold', pad=10)
+ax4.set_xlabel('Precio Real de Venta ($K USD)', fontsize=11)
+ax4.set_ylabel('Precio Predicho por el Modelo ($K USD)', fontsize=11)
+ax4.set_xlim(lim_inf, lim_sup)
+ax4.set_ylim(lim_inf, lim_sup)
+ax4.grid(True, linestyle=':', alpha=0.6)
+ax4.spines['top'].set_visible(False)
+ax4.spines['right'].set_visible(False)
+ax4.legend(frameon=True, facecolor='white', loc='upper left')
+
+plt.tight_layout()
+plt.show()
+```
+</TabItem>
+</Tabs><br />
+
+
+
+#### Resultados Obtenidos en el Conjunto de Prueba (*Test Set*)
+
+Los modelos se evaluaron sobre una partición independiente del 25% (125 inmuebles de prueba nunca vistos en el entrenamiento):
+
+| Modelo Evaluado | Hiperparámetro Óptimo | RMSE en Test (↓) | $R^2$ en Test (↑) | Variables Retenidas ($w \neq 0$) | Variables Anuladas ($w = 0$) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **OLS (Sin regularizar)** | Ninguno | **\$28,64K** | 98,62% | **12 / 12** | 0 |
+| **Ridge ($L_2$)** | $\alpha = 0,10$ | \$28,77K | 98,60% | **12 / 12** | 0 |
+| **ElasticNet ($L_1 + L_2$)** | $\alpha = 0,26$ ($\rho = 0,5$) | \$29,66K | 98,52% | **11 / 12** | 1 |
+| **Lasso ($L_1$)** | $\alpha = 0,82$ | **\$29,21K** | **98,56%** | **9 / 12** | **3** |
+
+*Diagnóstico de ingeniería:* Aunque OLS y Ridge obtienen un RMSE marginalmente menor (\$28,64K frente a \$29,21K, una diferencia despreciable del 1,9%), lo hacen reteniendo los 12 atributos (incluyendo los sensores ruidosos y las columnas duplicadas). **Lasso resulta la opción más óptima y parsimoniosa para producción**: anula por completo las variables espurias a cero exacto, reteniendo únicamente las variables causales reales del mercado sin comprometer la precisión.
+
+
+
+#### Lectura de los Gráficos de Predicción
+
+![](img/precios_vivienda.png)
+
+Los gráficos muestran:
+
+1. **Panel 1 — Error de Predicción (RMSE):** Refleja la estabilidad del error en todos los modelos, situándose en el rango de los **\$28K a \$29K USD**, lo cual representa una desviación residual baja sobre viviendas cuyos valores oscilan entre \$200K y \$900K USD.
+2. **Panel 2 — Varianza Explicada ($R^2$):** Supera el **98,5%** en todos los algoritmos, validando la sólida capacidad del pipeline para capturar la estructura de precios del mercado inmobiliario.
+3. **Panel 3 — Parsimonia y Selección:** Pone en evidencia la ventaja estructural de **Lasso**, el cual desactiva las 3 variables de ruido puro a cero exacto, manteniendo activas únicamente las 9 variables con señal económica real.
+4. **Panel 4 — Alineación Real vs. Predicho:** Ilustra una dispersión simétrica y homogénea alrededor de la recta ideal de 45° (1:1), demostrando que tanto OLS como Lasso realizan predicciones insesgadas y consistentes a lo largo de todo el espectro de tasación.
