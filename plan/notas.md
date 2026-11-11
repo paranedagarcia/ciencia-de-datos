@@ -250,3 +250,7 @@ Comparar materialización table vs view en dbt
 Muéstrame cómo se calcula el Coeficiente de Silueta
 ¿Cómo maneja K-means los valores atípicos?
 Cuéntame sobre algoritmos alternativos como DBSCAN
+
+ML supervisado
+reresion lineal
+sobre las diferencias geométricas entre las restricciones de bola \\(L_2\\) y diamante \\(L_1\\), y la optimización de \\(\alpha\\) mediante `RidgeCV` y `LassoCV`?

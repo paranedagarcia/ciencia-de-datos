@@ -1,5 +1,5 @@
 ---
-id: ml-arboles
+id: arboles
 title: "Árboles de decisión"
 sidebar_label: "📄 Árboles de decisión"
 description: "Los modelos de árboles de decisión se engloban dentro de una clase conocida como algoritmos **CART** (Classification and Regression Trees)"

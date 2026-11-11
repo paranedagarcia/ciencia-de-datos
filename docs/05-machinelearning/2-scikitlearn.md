@@ -1,5 +1,5 @@
 ---
-id: ml-scikitlearn
+id: scikitlearn
 title: "Introducción a Scikit-Learn"
 sidebar_label: "📦 Scikit-Learn"
 description: "Herramientas simples y efectivas para análisis predictivo de datos"
