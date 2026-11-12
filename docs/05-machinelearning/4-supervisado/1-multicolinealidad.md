@@ -17,7 +17,7 @@ En términos algebraicos, significa que una variable predictora puede expresarse
 
 
 
-### Multicolinealidad Exacta vs. Aproximada
+### Multicolinealidad exacta vs. aproximada
 
 1. **Multicolinealidad Exacta (o Perfecta):**  
    Existe cuando una o más variables son combinaciones lineales deterministas de otras.  
@@ -29,7 +29,7 @@ En términos algebraicos, significa que una variable predictora puede expresarse
 
 
 
-### Fundamentos Matemáticos
+### Fundamentos matemáticos
 **¿Por qué Rompe el Estimador OLS?**
 
 Para comprender el impacto destructivo de la multicolinealidad, debemos analizar la formulación de **Mínimos Cuadrados Ordinarios (OLS)** en álgebra matricial.
@@ -45,7 +45,7 @@ Donde:
 * $y \in \mathbb{R}^N$ es el vector de observaciones de la variable de respuesta.
 * $X^T X \in \mathbb{R}^{p \times p}$ es la matriz de dispersión (proporcional a la matriz de covarianza no centrada de los regresores).
 
-#### Multicolinealidad Perfecta
+#### Multicolinealidad perfecta
 Si una columna de $X$ es combinación lineal de otra, las columnas no son linealmente independientes. Por tanto:
 
 ```math
@@ -54,7 +54,7 @@ Si una columna de $X$ es combinación lineal de otra, las columnas no son lineal
 
 La matriz $X^T X$ es **singular (no invertible)**. El estimador OLS no tiene solución matemática única, existiendo un número infinito de vectores de pesos $\hat{w}$ que minimizan la suma de errores cuadráticos.
 
-#### Multicolinealidad Alta 
+#### Multicolinealidad alta 
 **(Mal Condicionamiento / *Ill-Conditioning*)**
 
 Cuando la colinealidad es alta pero no exacta, $\det(X^T X) \neq 0$ y la matriz técnicamente se puede invertir, pero se vuelve **mal condicionada** (*ill-conditioned*).
@@ -85,7 +85,7 @@ Donde $\sigma^2$ representa la varianza del error irreducible $\epsilon$. Al des
 3. **Sobreajuste Numérico (*Overfitting*):** Aunque las predicciones dentro del conjunto de entrenamiento pueden parecer precisas, el modelo memoriza las redundancias de la muestra y pierde capacidad de generalización ante datos no vistos.
 
 
-### Diagnóstico de la Multicolinealidad
+### Diagnóstico
 
 Para detectar este fenómeno antes de desplegar un modelo analítico, se utilizan tres herramientas diagnósticas:
 
@@ -124,13 +124,13 @@ Calculado a partir de los valores singulares ($\sigma_i$) de la matriz de diseñ
 
 
 
-### Demostración en Python
+### Ejemplo en Python
 
 El siguiente script ilustra el cálculo del **Factor de Inflación de la Varianza (VIF)**, demuestra cómo la multicolinealidad genera inestabilidad numérica en OLS y cómo la **Regresión Ridge** estabiliza el modelo:
 
 ```python
 """
-Módulo de Estudio: Detección y Mitigación de Multicolinealidad en Python
+Detección y Mitigación de Multicolinealidad en Python
 """
 
 import numpy as np
@@ -166,7 +166,7 @@ X_scaled = scaler.fit_transform(df_features)
 vif_data = pd.DataFrame()
 vif_data["Variable"] = df_features.columns
 vif_data["VIF"] = [
-    variance_inflation_factor(X_scaled, i) for i in range(X_scaled.shape)
+    variance_inflation_factor(X_scaled, i) for i in range(X_scaled.shape[1])
 ]
 
 print("=== DIAGNÓSTICO DE MULTICOLINEALIDAD (VIF) ===")
@@ -199,6 +199,24 @@ matriz_dispersion = np.dot(X_scaled.T, X_scaled)
 autovalores = np.linalg.eigvals(matriz_dispersion)
 kappa = np.sqrt(np.max(autovalores) / np.min(autovalores))
 print(f"\nNúmero de Condición del sistema (kappa): {kappa:.2f} (> 30 indica mal condicionamiento)")
+```
+```=== DIAGNÓSTICO DE MULTICOLINEALIDAD (VIF) ===
+    Variable     VIF
+          X1 5053.09
+          X2  640.14
+ X3_colineal 2399.97
+X4_combinada 3030.48
+
+Nota: Valores de VIF > 10 señalan colinealidad crítica.
+
+=== IMPACTO EN LOS PESOS DEL MODELO ===
+    Variable  Coeficiente OLS (Inestable)  Coeficiente Ridge (Regularizado)
+          X1                      -3.2733                            2.4658
+          X2                      -3.9346                           -3.2956
+ X3_colineal                       7.3656                            2.5122
+X4_combinada                       1.8002                            0.7032
+
+Número de Condición del sistema (kappa): 154.68 (> 30 indica mal condicionamiento)
 ```
 
 Al ejecutar este código, el VIF de las variables $X_3$ y $X_4$ superará con creces el umbral de 10 (alcanzando cientos o miles), demostrando que OLS divide arbitrariamente el peso entre las variables colineales asignando valores con signos contrarios e inestables, mientras que la regularización Ridge redistribuye y contrae armónicamente los pesos hacia estimaciones consistentes.
