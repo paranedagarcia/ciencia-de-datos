@@ -26,9 +26,8 @@ Donde:
 La diferencia fundamental entre **OLS (Mínimos Cuadrados Ordinarios)**, **Ridge** y **Lasso** radica en la **función de coste que optimizan durante el entrenamiento** y en el mecanismo empleado para controlar la complejidad y evitar el sobreajuste (*overfitting*) mediante **regularización**.
 
 
-
-### Regresión Lineal Clásica
-**Mínimos Cuadrados Ordinarios (OLS)**
+***
+### Mínimos Cuadrados (OLS)
 
 **Mínimos Cuadrados Ordinarios** (*Ordinary Least Squares*, OLS) es el estimador clásico para ajustar un modelo lineal sin restricciones. Su objetivo es encontrar el vector de parámetros que minimice la **suma de los errores cuadráticos** (SSE / *Residual Sum of Squares*, RSS) entre las observaciones reales ($y^{(i)}$) y las predicciones del modelo ($\hat{y}^{(i)}$) sobre el conjunto de entrenamiento:
 
@@ -50,8 +49,75 @@ Donde:
 
 *   **Limitaciones de OLS:** OLS no posee ningún mecanismo para restringir la complejidad del modelo. Cuando las variables de entrada están altamente correlacionadas ([**multicolinealidad**](/docs/machinelearning/supervisado/multicolinealidad)) o cuando el número de variables supera el número de instancias ($p > N$), la matriz $X^T X$ se vuelve singular o mal condicionada, provocando que los pesos exploten hacia valores extremos de alta varianza y el modelo memorice el ruido de entrenamiento.
 
+#### Supuestos fundamentales
+
+1. **Linealidad**: La relación entre predictores y respuesta es lineal.
+
+2. **Independencia de los errores**
+
+3. **Homoscedasticidad**: Varianza constante de los errores.
+
+4. **Normalidad de los errores**: (importante para inferencia, no para estimar coeficientes).
+
+5. **No multicolinealidad**: Los predictores no deben estar fuertemente correlacionados entre sí.
 
 
+Después de ajustar un modelo OLS, se evalúan:
+
+#### Métricas
+
+* **RMSE**: error promedio.
+* **MAE**: error absoluto medio.
+* **R²**: proporción de variabilidad explicada.
+* **Adjusted R²**: corrige por número de variables.
+
+#### Análisis de residuales
+
+* Distribución normal de residuales.
+* Independencia.
+* Homoscedasticidad (gráfico residuales vs predicción).
+
+```python showLineNumbers
+import numpy as np
+import statsmodels.api as sm
+
+# Datos simulados
+X = np.array([1,2,3,4,5])
+y = np.array([2,4,5,4,5])
+
+# Agregar intercepto
+X = sm.add_constant(X)
+
+modelo = sm.OLS(y, X).fit()
+print(modelo.summary())
+```
+```
+                            OLS Regression Results                            
+==============================================================================
+Dep. Variable:                      y   R-squared:                       0.600
+Model:                            OLS   Adj. R-squared:                  0.467
+Method:                 Least Squares   F-statistic:                     4.500
+Date:                Thu, 12 Nov 2026   Prob (F-statistic):              0.124
+Time:                        00:03:48   Log-Likelihood:                -5.2598
+No. Observations:                   5   AIC:                             14.52
+Df Residuals:                       3   BIC:                             13.74
+Df Model:                           1                                         
+Covariance Type:            nonrobust                                         
+==============================================================================
+                 coef    std err          t      P>|t|      [0.025      0.975]
+------------------------------------------------------------------------------
+const          2.2000      0.938      2.345      0.101      -0.785       5.185
+x1             0.6000      0.283      2.121      0.124      -0.300       1.500
+==============================================================================
+Omnibus:                          nan   Durbin-Watson:                   2.017
+Prob(Omnibus):                    nan   Jarque-Bera (JB):                0.570
+Skew:                           0.289   Prob(JB):                        0.752
+Kurtosis:                       1.450   Cond. No.                         8.37
+==============================================================================
+```
+Metricas a revisar: [Durbin-Watson](/docs/metricas/Durbin-Watson), 
+
+***
 ### Regularización L2 Ridge
 **Regresión Ridge (Tikhonov)**
 

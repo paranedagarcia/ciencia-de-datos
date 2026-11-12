@@ -1,0 +1,10 @@
+{
+  "label": "📁 Métricas",
+  "position": 2,
+  "link": {
+    "type": "generated-index",
+    "description": "Métricas estadisticas y probabilisticas",
+    "slug": "/metricas"
+    
+  }
+}
