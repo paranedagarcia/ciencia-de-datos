@@ -6,7 +6,7 @@ description: "Estadística básica y probabilidades"
 slug: /estadistica
 ---
 
-![](img/estadistica.webp)
+```![](img/estadistica.webp)```
 
 
 :::info

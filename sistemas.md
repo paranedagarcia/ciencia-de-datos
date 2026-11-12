@@ -7,6 +7,7 @@ Para cumplir con tu solicitud, he **diseñado un curso completo de 17 sesiones (
 El formato está en tablas Markdown, listas para **copiar y pegar directamente en Microsoft Word**, donde se convertirán automáticamente manteniendo la estructura profesional.
 
 ---
+DOCUSAURUS_IGNORE_SSG_WARNINGS=true 
 
 # GUÍA DE APRENDIZAJE 2026 (Unificada y Actualizada)
 

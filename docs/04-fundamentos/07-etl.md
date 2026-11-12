@@ -9,7 +9,7 @@ slug: /etl
 
 Los procesos de integración y preparación de datos son fundamentales en cualquier arquitectura de datos moderna. A continuación, se detallan los significados, las diferencias operativas y las herramientas de uso actual para los enfoques **ETL** y **ELT**.
 
-![](img/ETL_1.png) 
+```![](img/ETL_1.png)``` 
 
 
 ### ¿Qué es el proceso ETL?

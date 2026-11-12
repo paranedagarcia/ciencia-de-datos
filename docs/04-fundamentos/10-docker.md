@@ -356,7 +356,7 @@ Este flujo de trabajo asegura que tus imágenes estén siempre actualizadas con 
 
 <center>
 <figure>
-![](img/docker-azure.webp)
+```![](img/docker-azure.webp)```
 <figcaption>Despliegue de una aplicación Python en Web app service.</figcaption>
 </figure>
 </center>
