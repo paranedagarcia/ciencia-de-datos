@@ -9,6 +9,8 @@ sidebar_position: 2
 
 ## **Multicolinealidad**
 
+![](img/multicolinealidad.jpg)
+
 La **multicolinealidad** es una condición estadística y numérica que ocurre en modelos de regresión multivariada cuando **dos o más variables explicativas o predictoras (características / *features*) presentan una correlación lineal alta o exacta entre sí**. 
 
 En términos algebraicos, significa que una variable predictora puede expresarse o aproximarse de manera precisa como una combinación lineal de las demás variables independientes del conjunto de datos.
