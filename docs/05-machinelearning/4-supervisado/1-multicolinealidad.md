@@ -128,7 +128,7 @@ Calculado a partir de los valores singulares ($\sigma_i$) de la matriz de diseñ
 
 El siguiente script ilustra el cálculo del **Factor de Inflación de la Varianza (VIF)**, demuestra cómo la multicolinealidad genera inestabilidad numérica en OLS y cómo la **Regresión Ridge** estabiliza el modelo:
 
-```python
+```python showLineNumbers
 """
 Detección y Mitigación de Multicolinealidad en Python
 """

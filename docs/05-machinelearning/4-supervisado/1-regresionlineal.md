@@ -10,7 +10,18 @@ hide_title: true
 
 ![](img/regresion_lineal_info.jpg)
 
+Imagina que tienes un gráfico de puntos donde cada punto representa una situación real: por ejemplo, la estatura de una persona frente a su peso, o los metros cuadrados de una vivienda frente a su precio de venta. Los puntos no están perfectamente alineados, sino dispersos en el espacio formando una tendencia general.
+
+La **regresión lineal** consiste en **encontrar la mejor línea recta (o plano) que atraviese ese conjunto de puntos**.
+* El objetivo es que la distancia vertical entre cada punto real y la recta sea lo más pequeña posible. Esa distancia o desviación se conoce como **residuo o error**.
+
+* Una vez trazada esa recta óptima, el modelo funciona como una regla matemática de predicción: si conoces un dato nuevo en el eje horizontal (por ejemplo, el tamaño de una casa que acaba de salir al mercado), puedes proyectarlo sobre la recta para estimar su valor en el eje vertical (su precio esperado).
+
+En palabras cotidianas: es el método estadístico para **estimar una cantidad continua a partir de una o varias pistas, asumiendo que la relación entre ellas sigue una proporción lineal directa**.
+
 La **Regresión Lineal** es uno de los métodos supervisados más clásicos y utilizados para predecir variables cuantitativas continuas ($Y$) a partir de un conjunto de variables explicativas o características ($X$). 
+
+En el paradigma del **aprendizaje automático supervisado**, la regresión lineal es un modelo que aproxima la relación condicional entre una variable escalar dependiente y continua $y \in \mathbb{R}$ (denominada respuesta o *target*) y un vector de $p$ variables explicativas o predictoras $x = [x_1, x_2, \dots, x_p]^T \in \mathbb{R}^p$ (*features* o regresores).
 
 Bajo la formulación lineal estándar, el modelo asume que el valor esperado de la variable respuesta es una combinación lineal ponderada de las características de entrada, la respuesta es lineal sujeta a un término de error o ruido estocástico $\epsilon$:
 
@@ -21,7 +32,7 @@ y = w_0 + w_1 x_1 + w_2 x_2 + \dots + w_p x_p + \epsilon = w_0 + w^T x + \epsilo
 Donde:
 *   $w_0$ (frecuentemente denotado como $b$ o $\beta_0$) es el **término de sesgo** o intersección con el eje (*intercept*).
 *   $w = [w_1, w_2, \dots, w_p]^T$ es el vector de **pesos o coeficientes de regresión**, los cuales representan la pendiente o tasa de cambio marginal en la variable de respuesta por cada unidad de cambio en la característica asociada.
-*   $\epsilon$ es el término de error no observable, comúnmente asumido con media cero e independiente e idénticamente distribuido (i.i.d.) con distribución gaussiana de varianza $\sigma^2$.
+*   **$\epsilon$** Es la variable aleatoria no observable que captura el ruido intrínseco, los errores de medición y la variabilidad no explicada por el espacio de características.
 
 La diferencia fundamental entre **OLS (Mínimos Cuadrados Ordinarios)**, **Ridge** y **Lasso** radica en la **función de coste que optimizan durante el entrenamiento** y en el mecanismo empleado para controlar la complejidad y evitar el sobreajuste (*overfitting*) mediante **regularización**.
 
@@ -32,13 +43,13 @@ La diferencia fundamental entre **OLS (Mínimos Cuadrados Ordinarios)**, **Ridge
 **Mínimos Cuadrados Ordinarios** (*Ordinary Least Squares*, OLS) es el estimador clásico para ajustar un modelo lineal sin restricciones. Su objetivo es encontrar el vector de parámetros que minimice la **suma de los errores cuadráticos** (SSE / *Residual Sum of Squares*, RSS) entre las observaciones reales ($y^{(i)}$) y las predicciones del modelo ($\hat{y}^{(i)}$) sobre el conjunto de entrenamiento:
 
 ```math
-J_{\text{OLS}}(w) = \sum_{i=1}^{N} \left(y^{(i)} - \hat{y}^{(i)}\right)^2 = \sum_{i=1}^{N} \left(y^{(i)} - (w_0 + w^T x^{(i)})\right)^2 = \|y - X w\|_2^2
+J(w) = \frac{1}{2N} \sum_{i=1}^{N} \Big(y^{(i)} - w^T x^{(i)}\Big)^2 = \frac{1}{2N} \|y - Xw\|_2^2
 ```
 
 Donde:
 *   $X \in \mathbb{R}^{N \times (p+1)}$ es la **matriz de diseño**, cuyas filas contienen las instancias de entrenamiento (incluyendo habitualmente una primera columna de unos para absorber el sesgo $w_0$).
 *   $y \in \mathbb{R}^N$ es el vector de valores reales observados.
-*   $\|\cdot\|_2$ denota la **norma euclidiana** en $\mathbb{R}^N$.
+*   $\|\cdot\|_2$ denota la **norma euclidiana** en $\mathbb{R}^N$. Elevar los residuos al cuadrado evita la cancelación entre errores positivos y negativos y penaliza de forma convexa los desvíos grandes.
 
 #### Solución Matemática: La Ecuación Normal
 * **Solución analítica exacta:** Derivando la función convexa $J_{\text{OLS}}(w)$ respecto a $w$ e igualando el gradiente al vector cero, se obtiene una solución cerrada analítica conocida como la **Ecuación Normal**:
@@ -51,25 +62,34 @@ Donde:
 
 #### Supuestos fundamentales
 
-1. **Linealidad**: La relación entre predictores y respuesta es lineal.
+Para que el estimador OLS sea el **Mejor Estimador Lineal Insesgado** (BLUE, *Best Linear Unbiased Estimator*) con mínima varianza, deben cumplirse los supuestos de Gauss-Márkov sobre las perturbaciones:
+1. **Linealidad en los parámetros:** La relación entre las variables dependientes e independientes es lineal en sus coeficientes ponderados.
 
-2. **Independencia de los errores**
+2. **Exogeneidad estricta:** $\mathbb{E}[\epsilon \mid X] = 0$. El valor esperado de los errores condicionado a las características de entrada es cero (no hay correlación entre las características y el error).
 
-3. **Homoscedasticidad**: Varianza constante de los errores.
+3. **Homocedasticidad:** $\text{Var}(\epsilon_i \mid X) = \sigma^2$. La varianza del error es constante para cualquier observación.
 
-4. **Normalidad de los errores**: (importante para inferencia, no para estimar coeficientes).
+4. **No autocorrelación serial:** $\text{Cov}(\epsilon_i, \epsilon_j \mid X) = 0 \quad (\forall i \neq j)$. Los errores de distintas observaciones son estadísticamente independientes entre sí.
 
-5. **No multicolinealidad**: Los predictores no deben estar fuertemente correlacionados entre sí.
+5. **Rango completo (ausencia de multicolinealidad perfecta):** $\text{rango}(X) = p + 1 \le N$. La matriz $X^T X$ tiene rango completo y es estrictamente invertible.
 
-
+:::info[]
+* **Nota adicional:** Si además se asume que los errores siguen una distribución normal $\epsilon \sim \mathcal{N}(0, \sigma^2 I)$, el estimador OLS coincide exactamente con el estimador de Máxima Verosimilitud (MLE) y alcanza la cota inferior de varianza de Cramér-Rao.*
+:::
 Después de ajustar un modelo OLS, se evalúan:
 
-#### Métricas
+#### Evaluación del modelo
 
-* **RMSE**: error promedio.
-* **MAE**: error absoluto medio.
-* **R²**: proporción de variabilidad explicada.
-* **Adjusted R²**: corrige por número de variables.
+El ajuste global del modelo suele cuantificarse mediante el **coeficiente de determinación ($R^2$)**:
+
+```math
+R^2 = 1 - \frac{\sum_{i=1}^N (y^{(i)} - \hat{y}^{(i)})^2}{\sum_{i=1}^N (y^{(i)} - \bar{y})^2} = 1 - \frac{\text{MSE}}{\text{Var}(y)}
+```
+El cual mide la fracción de variabilidad total de $y$ que logra explicar el modelo frente a la simple predicción de la media.
+
+Cuando se viola el supuesto de rango completo debido a alta correlación entre variables predictoras (multicolinealidad) o cuando el número de variables supera a las observaciones ($p > N$), OLS sufre de inestabilidad numérica extrema y sobreajuste. En tales circunstancias se recurre a técnicas de **regularización**:
+* **Ridge ($L_2$):** Penaliza la norma $\|w\|_2^2$ de los coeficientes, contrayéndolos uniformemente hacia cero para reducir la varianza sin anularlos.
+* **Lasso ($L_1$):** Penaliza la norma $\|w\|_1$, forzando a que las variables irrelevantes o colineales tengan pesos de exactamente cero, actuando como un mecanismo automático de selección de variables y parsimonia.
 
 #### Análisis de residuales
 
@@ -165,6 +185,146 @@ Donde:
 
 * **Optimización numérica:** La función de coste de Lasso no es diferenciable en cero. Por ello, no cuenta con una solución cerrada matricial y requiere algoritmos de optimización convexa como descenso por coordenadas (*coordinate descent*) o subgradientes.
 
+
+### Diferencias L1 y L2
+
+La diferencia fundamental entre **Mínimos Cuadrados Ordinarios (OLS)** y la **Regresión Ridge** radica en la **función de coste que optimizan** y en la incorporación de un término de **regularización $L_2$** para controlar la complejidad del modelo, reducir la varianza y mitigar los problemas de [multicolinealidad](/docs/machinelearning/supervisado/multicolinealidad).
+
+
+#### Formulación Matemática de las Funciones de Coste
+
+Dado un conjunto de entrenamiento con $N$ observaciones y $p$ características predictoras, representados por la matriz de diseño $X \in \mathbb{R}^{N \times p}$ y el vector de etiquetas continuas $y \in \mathbb{R}^N$:
+
+#### A. Mínimos Cuadrados Ordinarios (OLS)
+OLS busca el vector de pesos $w$ que minimiza exclusivamente la **suma de los errores cuadráticos** (SSE / RSS) en los datos de entrenamiento:
+
+```math
+J_{\text{OLS}}(w) = \sum_{i=1}^{N} \Big(y^{(i)} - (w_0 + w^T x^{(i)})\Big)^2 = \|y - Xw\|_2^2
+```
+
+* **Explicación de argumentos:** $y^{(i)}$ es la observación real; $w^T x^{(i)}$ es la predicción lineal; $\|\cdot\|_2^2$ representa la norma euclidiana al cuadrado. OLS **no tiene hiperparámetros de penalización**.
+
+#### B. Regresión Ridge (Regularización $L_2$ o Tikhonov)
+Ridge añade una restricción penalizando la suma de los coeficientes elevados al cuadrado (la norma $L_2$ al cuadrado del vector de pesos):
+
+```math
+J_{\text{Ridge}}(w) = \sum_{i=1}^{N} \Big(y^{(i)} - (w_0 + w^T x^{(i)})\Big)^2 + \alpha \sum_{j=1}^{p} w_j^2 = \|y - Xw\|_2^2 + \alpha \|w\|_2^2
+```
+
+* **Explicación de argumentos:** $\alpha \ge 0$ (en literatura matemática a menudo denotado $\lambda$) es el **hiperparámetro de regularización** que controla el balance entre el ajuste a los datos y la simplicidad del modelo. El término independiente o sesgo ($w_0$) **no se penaliza** para no hacer el procedimiento dependiente del origen de coordenadas de $y$.
+
+---
+
+#### Solución Analítica: Estabilidad Numérica y Multicolinealidad
+
+Ambos modelos admiten una solución analítica en forma cerrada a través de la Ecuación Normal:
+
+* **Solución OLS:**
+  ```math
+  \hat{w}_{\text{OLS}} = (X^T X)^{-1} X^T y
+  ```
+* **Solución Ridge:**
+  ```math
+  \hat{w}_{\text{Ridge}} = (X^T X + \alpha I)^{-1} X^T y
+  ```
+
+#### El impacto sobre la matriz de dispersión $X^T X$:
+* **Fallo de OLS ante multicolinealidad o $p > N$:** Si las variables explicativas están fuertemente correlacionadas entre sí o si existen más variables que datos ($p > N$), la matriz $X^T X$ se vuelve singular o mal condicionada (*ill-conditioned*). Esto provoca que la inversa $(X^T X)^{-1}$ sea computacionalmente inestable y que los coeficientes $w$ exploten hacia magnitudes extremas con varianzas descontroladas.
+
+* **Estabilización en Ridge:** Al sumar el término escalar $\alpha I$ a la diagonal principal de $X^T X$, la matriz $(X^T X + \alpha I)$ pasa a ser estrictamente definida positiva e invertible para cualquier $\alpha > 0$. Esto garantiza una **solución única y numéricamente estable** incluso en presencia de multicolinealidad severa.
+
+
+
+#### El Dilema Sesgo-Varianza (*Bias-Variance Tradeoff*)
+
+* **OLS es un estimador insesgado:** Bajo los supuestos clásicos de Gauss-Márkov, OLS es el estimador de varianza mínima insesgado (BLUE). Sin embargo, al no restringir la complejidad del modelo, tiende a sobreajustar (*overfitting*) el conjunto de entrenamiento memorizando el ruido muestral, lo que degrada su capacidad de generalización en datos de prueba.
+
+* **Ridge introduce sesgo controlado para desplomar la varianza:** Ridge contrae los pesos hacia cero (*shrinkage*). Aunque esto genera un estimador ligeramente sesgado en entrenamiento, **reduce sustancialmente la varianza de predicción**, logrando en la mayoría de los casos un Error Cuadrático Medio total ($\text{MSE} = \text{Sesgo}^2 + \text{Varianza}$) menor en el conjunto de prueba que el obtenido por OLS.
+
+
+
+#### Cuadro Comparativo Resumido
+
+| Dimensión Técnica | Mínimos Cuadrados Ordinarios (OLS) | Regresión Ridge ($L_2$) |
+| :--- | :--- | :--- |
+| **Función de coste** | Suma de errores cuadráticos: $\|y - Xw\|_2^2$ | Error cuadrático + penalización: $\|y - Xw\|_2^2 + \alpha \|w\|_2^2$ |
+| **Hiperparámetros** | Ninguno (cero parámetros de ajuste de complejidad) | $\alpha$ (o $\lambda \ge 0$), sintonizado típicamente por validación cruzada |
+| **Ecuación cerrada** | $\hat{w} = (X^T X)^{-1} X^T y$ | $\hat{w} = (X^T X + \alpha I)^{-1} X^T y$ |
+| **Comportamiento de pesos** | Sin restricción; pueden crecer arbitrariamente con colinealidad | Encogimiento uniforme hacia cero (magnitudes pequeñas, pero no nulas) |
+| **Sensibilidad al escalado** | Invariante a la escala de las variables | **Muy sensible**; requiere estandarización previa obligatoria (p. ej., `StandardScaler`) |
+| **Manejo de multicolinealidad** | Pésimo; coeficientes inestables y varianza inflada | **Excelente**; estabiliza la matriz y agrupa el efecto de variables correlacionadas |
+| **Condición $p > N$** | Falla analíticamente (matriz no invertible) | Funciona sin problemas gracias a $\alpha I$ |
+
+
+#### Demostración en Python
+
+El siguiente script ilustra cómo `LinearRegression` (OLS) genera coeficientes desmedidos cuando se inducen variables colineales, mientras que `Ridge` los mantiene acotados y mejora la generalización en el conjunto de prueba:
+
+<details>
+<summary>🖥️ Código</summary>
+
+```python showLineNumbers
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression, Ridge
+from sklearn.metrics import mean_squared_error, r2_score
+
+# 1. Simulación con multicolinealidad inducida
+np.random.seed(42)
+N = 100
+x1 = np.random.normal(loc=10, scale=2, size=N)
+# x2 y x3 son casi idénticas a x1 (colinealidad severa)
+x2 = x1 * 1.05 + np.random.normal(0, 0.05, size=N)
+x3 = x1 * 0.95 + np.random.normal(0, 0.05, size=N)
+
+# Variable objetivo continua y
+y = 2.5 * x1 + np.random.normal(0, 1.0, size=N)
+X = np.column_stack([x1, x2, x3])
+
+# 2. Partición Train / Test
+X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=0.3, random_state=42)
+
+# 3. Estandarización obligatoria para modelos regularizados
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# 4. Ajuste OLS vs. Ridge
+ols = LinearRegression().fit(X_train_scaled, y_train)
+ridge = Ridge(alpha=10.0, random_state=42).fit(X_train_scaled, y_train)
+
+# 5. Comparativa de coeficientes y métricas
+df_res = pd.DataFrame({
+    'Variable': ['x1', 'x2 (colineal)', 'x3 (colineal)'],
+    'Pesos OLS (Inestables)': ols.coef_,
+    'Pesos Ridge (Contracción L2)': ridge.coef_
+})
+
+print("=== COMPARACIÓN DE COEFICIENTES ESTIMADOS ===")
+print(df_res.round(3).to_string(index=False))
+
+rmse_ols = np.sqrt(mean_squared_error(y_test, ols.predict(X_test_scaled)))
+rmse_ridge = np.sqrt(mean_squared_error(y_test, ridge.predict(X_test_scaled)))
+
+print("\n=== RENDIMIENTO EN TEST SET ===")
+print(f"OLS   -> RMSE: {rmse_ols:.4f} | R²: {r2_score(y_test, ols.predict(X_test_scaled)):.4f}")
+print(f"Ridge -> RMSE: {rmse_ridge:.4f} | R²: {r2_score(y_test, ridge.predict(X_test_scaled)):.4f}")
+```
+</details>
+
+```
+=== COMPARACIÓN DE COEFICIENTES ESTIMADOS ===
+     Variable  Pesos OLS (Inestables)  Pesos Ridge (Contracción L2)
+           x1                   8.100                         1.496
+x2 (colineal)                  -3.922                         1.474
+x3 (colineal)                   0.492                         1.488
+
+=== RENDIMIENTO EN TEST SET ===
+OLS   -> RMSE: 0.8271 | R²: 0.9487
+Ridge -> RMSE: 0.8049 | R²: 0.9514
+```
 
 
 ### Cuadro Comparativo
@@ -309,6 +469,152 @@ Lasso    | RMSE: 0.8131 | R²: 0.5003
 ```
 
 Al observar la salida de este código, se comprueba cómo **Ridge** reduce uniformemente la magnitud de todos los coeficientes para mitigar la varianza, mientras que **Lasso** fija coeficientes de variables menos relevantes en exactamente $0$, confirmando su rol dual como regresor y selector de características.
+
+***
+## **ElasticNet**
+
+En el marco de la econometría y el aprendizaje automático, la **regularización ElasticNet** (desarrollada originalmente por Hui Zou y Trevor Hastie en 2005) es un método de regularización lineal que **combina linealmente las penalizaciones de las normas $L_1$ (Lasso) y $L_2$ (Ridge)** en una única función objetivo. 
+
+ElasticNet fue diseñado específicamente para superar las limitaciones teóricas y operativas que experimenta Lasso cuando se trabaja con conjuntos de datos de alta dimensionalidad o con variables fuertemente correlacionadas entre sí.
+
+
+### Formulación Matemática
+
+Consideremos una matriz de diseño $X \in \mathbb{R}^{N \times p}$ con $N$ observaciones y $p$ características predictoras, y un vector de respuesta continua $y \in \mathbb{R}^N$. La función de pérdida que minimiza ElasticNet se formula como la suma del error cuadrático medio más los dos términos de penalización:
+
+```math
+J_{\text{ElasticNet}}(w) = \frac{1}{2N} \|y - Xw\|_2^2 + \alpha \left[ \rho \|w\|_1 + \frac{1 - \rho}{2} \|w\|_2^2 \right]
+```
+
+Desglosando en sus componentes escalares:
+
+```math
+J_{\text{ElasticNet}}(w) = \frac{1}{2N} \sum_{i=1}^{N} \Big(y^{(i)} - w^T x^{(i)}\Big)^2 + \alpha \rho \sum_{j=1}^{p} |w_j| + \frac{\alpha (1 - \rho)}{2} \sum_{j=1}^{p} w_j^2
+```
+
+#### Explicación de los argumentos y parámetros:
+* **$N$ y $p$:** Número de instancias de entrenamiento y número de características predictoras, respectivamente.
+* **$y^{(i)}$ y $w^T x^{(i)}$:** Valor real observado y predicción lineal para la $i$-ésima observación.
+* **$w = [w_1, w_2, \dots, w_p]^T$:** Vector de coeficientes de regresión (los pesos del modelo). Al igual que en Ridge y Lasso, el sesgo o intercepto ($w_0$) no entra en la penalización para no afectar la escala ni el origen de $y$.
+* **$\|w\|_1 = \sum_{j=1}^p |w_j|$:** Norma $L_1$ del vector de pesos (induce dispersión o *sparsity*, anulando coeficientes a cero).
+* **$\|w\|_2^2 = \sum_{j=1}^p w_j^2$:** Cuadrado de la norma euclidiana $L_2$ (induce contracción suave y estabilidad frente a colinealidad).
+* **$\alpha \ge 0$:** Hiperparámetro de **fuerza global de regularización**. Si $\alpha = 0$, el modelo colapsa a Mínimos Cuadrados Ordinarios (OLS).
+* **$\rho \in$ (denominado `l1_ratio` en Scikit-Learn):** Parámetro de **mezcla convexa** que calibra el peso relativo entre ambas regularizaciones:
+  * Si **$\rho = 1$**: La penalización $L_2$ desaparece y el modelo equivale exactamente a **Lasso**.
+  * Si **$\rho = 0$**: La penalización $L_1$ desaparece y el modelo equivale exactamente a **Ridge**.
+  * Si **$0 < \rho < 1$**: El modelo adopta un comportamiento híbrido.
+
+
+
+#### Geometría e Intuición de la Restricción
+
+En el espacio de parámetros $(w_1, w_2)$, la región factible impuesta por ElasticNet es una combinación morfológica entre el diamante con vértices puntiagudos de la norma $L_1$ y el círculo suave de la norma $L_2$:
+* **Conserva esquinas en los ejes coordenados:** Al igual que Lasso, cuando las elipses de contorno del error cuadrático hacen contacto tangencial con los vértices sobre los ejes, los coeficientes se anulan a **cero exacto**, permitiendo **selección automática de variables**.
+* **Superficie estrictamente convexa:** La adición del término cuadrático $L_2$ curva las caras planas del rombo de Lasso, eliminando las aristas planas que causan indeterminación matemática cuando existen predictores colineales.
+
+---
+
+### ¿Cuándo se utiliza?
+
+ElasticNet es la elección recomendada cuando Lasso o Ridge por separado resultan insuficientes. Los escenarios clave para su uso son:
+
+#### A. Presencia de variables altamente correlacionadas en grupo 
+* **Fallo de Lasso:** Si un conjunto de variables explicativas comparten una correlación severa (por ejemplo, $r > 0,90$), Lasso tiende a **seleccionar una variable al azar del grupo y enviar los coeficientes de las demás a cero**, lo cual resulta inestable e indeseable para la interpretabilidad del dominio.
+
+* **Solución de ElasticNet:** Gracias a la curvatura cuadrática de $L_2$, ElasticNet retiene o descarta **todo el grupo de variables correlacionadas en bloque**, distribuyendo de forma estable el peso predictivo entre ellas.
+
+#### B. Problemas con más variables que observaciones ($p > N$)
+* **Fallo de Lasso:** Teóricamente, el algoritmo de optimización de Lasso puede seleccionar como máximo $N$ variables activas antes de saturarse, descartando obligatoriamente el resto aunque contengan información.
+
+* **Solución de ElasticNet:** Puede seleccionar más de $N$ variables activas si la estructura de los datos lo amerita, lo que lo hace indispensable en genómica, procesamiento de lenguaje natural o quimiometría.
+
+#### C. Como Modelo Regularizado por Defecto (*Default Regressor*)
+En problemas complejos donde no se conoce a priori si el fenómeno responde a una representación dispersa (pocas variables fuertes) o densa (muchas variables con efectos marginales pequeños), **`ElasticNetCV` se considera el estándar inicial por excelencia**. Al optimizar conjuntamente $\alpha$ y $\rho$ mediante validación cruzada, el propio algoritmo explora si el problema requiere un comportamiento más cercano a Ridge ($\rho \to 0$) o a Lasso ($\rho \to 1$).
+
+
+
+### Resumen comparativo
+
+| Criterio Técnico | Ridge ($L_2$) | Lasso ($L_1$) | ElasticNet ($L_1 + L_2$) |
+| :--- | :--- | :--- | :--- |
+| **Penalización sobre los pesos** | Cuadrática ($\sum w_j^2$) | Magnitud absoluta ($\sum \|w_j\|$) | Mixta convexa ($\rho L_1 + (1-\rho) L_2$) |
+| **Solución analítica / Optimización** | Ecuación cerrada matricial | Descenso por coordenadas cíclico | Descenso por coordenadas cíclico |
+| **Selección de características** | No (solución densa, $w_j \neq 0$) | **Sí (induce dispersión/sparsity)** | **Sí (parsimonia controlada por $\rho$)** |
+| **Comportamiento ante colineales** | Contrae uniformemente | Selecciona una al azar y anula el resto | **Agrupa y contrae el bloque conjuntamente** |
+| **Capacidad cuando $p > N$** | Funciona sin restricciones | Máximo $N$ variables seleccionadas | Selecciona más de $N$ variables si es preciso |
+
+
+### Implementación en Python
+
+A continuación se muestra cómo sintonizar de manera óptima un modelo ElasticNet utilizando la clase `ElasticNetCV`, la cual busca simultáneamente la mejor combinación de $\alpha$ y `l1_ratio` mediante validación cruzada:
+
+<details>
+<summary>🖥️ Código</summary>
+
+```python
+"""
+Módulo de Estudio: Sintonización de ElasticNet mediante Validación Cruzada
+"""
+
+import numpy as np
+import pandas as pd
+from sklearn.datasets import fetch_california_housing
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import ElasticNetCV
+from sklearn.metrics import mean_squared_error, r2_score
+
+# 1. Ingesta y partición de datos
+datos = fetch_california_housing(as_frame=True)
+X, y = datos.data, datos.target
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42
+)
+
+# 2. Preprocesamiento: Estandarización obligatoria
+# Ambas normas (L1 y L2) dependen de que las variables tengan la misma escala
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# 3. Configuración de la rejilla de búsqueda para ElasticNetCV
+# Se recomienda evaluar valores de l1_ratio cercanos a Ridge (0.01, 0.05)
+# y cercanos a Lasso (0.95, 0.99), además de puntos intermedios
+ratios_mezcla = [0.01, 0.05, 0.1, 0.3, 0.5, 0.7, 0.9, 0.95, 0.99]
+
+modelo_enet = ElasticNetCV(
+    l1_ratio=ratios_mezcla,
+    alphas=np.logspace(-3, 2, 100),
+    cv=5,
+    max_iter=10000,
+    random_state=42,
+    n_jobs=-1
+)
+
+# 4. Ajuste del modelo
+modelo_enet.fit(X_train_scaled, y_train)
+
+# 5. Evaluación de los hiperparámetros óptimos y rendimiento
+y_pred = modelo_enet.predict(X_test_scaled)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred))
+r2 = r2_score(y_test, y_pred)
+
+print("=== PARÁMETROS ÓPTIMOS ENCONTRADOS VIA 5-FOLD CV ===")
+print(f"Alpha global óptimo (α):      {modelo_enet.alpha_:.5f}")
+print(f"Mezcla óptima (l1_ratio ρ):  {modelo_enet.l1_ratio_:.2f}")
+
+# Conteo de coeficientes anulados (Sparsity)
+coeficientes = modelo_enet.coef_
+n_anulados = np.sum(np.isclose(coeficientes, 0.0, atol=1e-4))
+n_activos = len(coeficientes) - n_anulados
+
+print(f"\nVariables activas seleccionadas: {n_activos} de {len(coeficientes)}")
+print(f"Variables anuladas a cero:      {n_anulados}")
+print(f"Rendimiento en Test Set -> RMSE: {rmse:.4f} | R²: {r2*100:.2f}%")
+```
+</details>
+
 
 
 ***
@@ -1024,3 +1330,189 @@ Los gráficos muestran:
 2. **Panel 2 — Varianza Explicada ($R^2$):** Supera el **98,5%** en todos los algoritmos, validando la sólida capacidad del pipeline para capturar la estructura de precios del mercado inmobiliario.
 3. **Panel 3 — Parsimonia y Selección:** Pone en evidencia la ventaja estructural de **Lasso**, el cual desactiva las 3 variables de ruido puro a cero exacto, manteniendo activas únicamente las 9 variables con señal económica real.
 4. **Panel 4 — Alineación Real vs. Predicho:** Ilustra una dispersión simétrica y homogénea alrededor de la recta ideal de 45° (1:1), demostrando que tanto OLS como Lasso realizan predicciones insesgadas y consistentes a lo largo de todo el espectro de tasación.
+
+
+### Validación cruzada con ridge
+
+En el modelado con regularización $L_2$ (Ridge), la elección del hiperparámetro de penalización $\alpha$ (o $\lambda$) es crítica:
+* Si $\alpha \to 0$, el estimador colapsa a **Mínimos Cuadrados Ordinarios (OLS)**, arriesgando alta varianza y sobreajuste (*overfitting*).
+* Si $\alpha \to \infty$, los coeficientes se contraen excesivamente hacia cero, introduciendo un sesgo perjudicial y subajuste (*underfitting*).
+
+Para encontrar el equilibrio exacto que minimice el error de generalización sin incurrir en fuga de datos (*data leakage*), se utiliza **Validación Cruzada K-Fold (*K-Fold Cross-Validation*)**.
+
+
+#### Mecánica Matemática de la Validación Cruzada en Ridge
+
+En una validación cruzada de $K$ pliegues (típicamente $K=5$ o $K=10$):
+1. El conjunto de entrenamiento se divide aleatoriamente en $K$ particiones disjuntas de igual tamaño: $\{D_1, D_2, \dots, D_K\}$.
+2. Para cada candidato $\alpha$ dentro de una rejilla espectral logarítmica (p. ej., $\alpha \in [10^{-2}, 10^4]$):
+   * Se ajusta el estimador Ridge sobre $K-1$ pliegues:
+     ```math
+     \hat{w}_{(-k)}(\alpha) = \left( X_{(-k)}^T X_{(-k)} + \alpha I \right)^{-1} X_{(-k)}^T y_{(-k)}
+     ```
+   * Se evalúa el error cuadrático medio sobre el pliegue restante $D_k$ que se mantuvo oculto:
+     ```math
+     \text{MSE}_k(\alpha) = \frac{1}{|D_k|} \sum_{i \in D_k} \Big( y^{(i)} - X^{(i)} \hat{w}_{(-k)}(\alpha) \Big)^2
+     ```
+3. Se promedia el desempeño a través de los $K$ pliegues:
+   ```math
+   \text{CV}(\alpha) = \frac{1}{K} \sum_{k=1}^K \text{MSE}_k(\alpha)
+   ```
+4. El valor óptimo seleccionado es aquel que minimiza el error promedio:
+   ```math
+   \alpha^* = \arg\min_{\alpha} \text{CV}(\alpha)
+   ```
+
+*(Nota técnica: En Scikit-Learn, la clase `RidgeCV` implementa por defecto una formulación cerrada denominada **Leave-One-Out Cross-Validation (LOOCV)** basada en la descomposición espectral de la matriz sombrero, computando todos los pliegues con la misma complejidad temporal de un único ajuste).*
+
+
+
+#### Implementación en Python
+
+El siguiente código muestra cómo ejecutar la búsqueda de $\alpha$ tanto de forma manual (para registrar y graficar la curva del error de validación) como utilizando la interfaz automatizada `RidgeCV`:
+
+```python
+"""
+Validación Cruzada en Regresión Ridge.
+Incluye:
+  1. Partición Train / Test estricta.
+  2. Estandarización de características sin data leakage.
+  3. Búsqueda y trazado de la curva de validación K-Fold (5 pliegues).
+  4. Uso de la clase especializada RidgeCV de scikit-learn.
+"""
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+from sklearn.datasets import load_diabetes
+from sklearn.model_selection import train_test_split, KFold
+from sklearn.preprocessing import StandardScaler, PolynomialFeatures
+from sklearn.linear_model import Ridge, RidgeCV
+from sklearn.metrics import mean_squared_error, r2_score
+
+# ==============================================================================
+# 1. Preparación de Datos con Multicolinealidad (Expansión Polinómica)
+# ==============================================================================
+X_raw, y = load_diabetes(return_X_y=True)
+
+# Expandimos las 10 variables a 65 (incluyendo interacciones x_i * x_j)
+poly = PolynomialFeatures(degree=2, include_bias=False)
+X_poly = poly.fit_transform(X_raw)
+
+# Separación 75% entrenamiento y 25% prueba (test set independiente)
+X_train, X_test, y_train, y_test = train_test_split(
+    X_poly, y, test_size=0.25, random_state=42
+)
+
+# REGLA METODOLÓGICA: fit exclusivamente sobre X_train
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# ==============================================================================
+# 2. Exploración de Hiperparámetros con K-Fold CV (5 Pliegues)
+# ==============================================================================
+alphas_grid = np.logspace(-2, 4, 60)
+kf = KFold(n_splits=5, shuffle=True, random_state=42)
+
+cv_rmse_scores = []
+cv_rmse_std = []
+
+for a in alphas_grid:
+    fold_rmses = []
+    for train_idx, val_idx in kf.split(X_train_scaled):
+        X_tr, X_val = X_train_scaled[train_idx], X_train_scaled[val_idx]
+        y_tr, y_val = y_train[train_idx], y_train[val_idx]
+        
+        # Ajuste de Ridge en los 4 pliegues de entrenamiento
+        model = Ridge(alpha=a)
+        model.fit(X_tr, y_tr)
+        
+        # Evaluación en el pliegue de validación
+        y_pred_val = model.predict(X_val)
+        fold_rmses.append(np.sqrt(mean_squared_error(y_val, y_pred_val)))
+        
+    cv_rmse_scores.append(np.mean(fold_rmses))
+    cv_rmse_std.append(np.std(fold_rmses))
+
+cv_rmse_scores = np.array(cv_rmse_scores)
+cv_rmse_std = np.array(cv_rmse_std)
+
+# Selección del alfa óptimo
+best_idx = np.argmin(cv_rmse_scores)
+best_alpha_manual = alphas_grid[best_idx]
+min_cv_rmse = cv_rmse_scores[best_idx]
+
+print(f"Alpha óptimo identificado por 5-Fold CV: α = {best_alpha_manual:.2f}")
+print(f"RMSE medio mínimo en validación:       {min_cv_rmse:.2f}\n")
+
+# ==============================================================================
+# 3. Solución Directa en Producción con `RidgeCV`
+# ==============================================================================
+# RidgeCV ejecuta la búsqueda de manera vectorizada y eficiente
+ridge_cv = RidgeCV(alphas=alphas_grid, cv=5, scoring='neg_root_mean_squared_error')
+ridge_cv.fit(X_train_scaled, y_train)
+
+# Evaluación en el conjunto de prueba independiente (nunca visto en CV)
+y_pred_test = ridge_cv.predict(X_test_scaled)
+test_rmse = np.sqrt(mean_squared_error(y_test, y_pred_test))
+test_r2 = r2_score(y_test, y_pred_test)
+
+print("=== EVALUACIÓN FINAL EN DATOS DE PRUEBA (TEST SET) ===")
+print(f"Alpha seleccionado por RidgeCV: α = {ridge_cv.alpha_:.2f}")
+print(f"RMSE en Test Set:              {test_rmse:.2f}")
+print(f"R² en Test Set:                {test_r2 * 100:.2f}%")
+
+# ==============================================================================
+# 4. Graficación de la Curva de Validación Cruzada (Fondo Blanco Plano)
+# ==============================================================================
+fig, ax = plt.subplots(figsize=(10, 5.5), facecolor='white')
+ax.set_facecolor('white')
+
+# Curva de error medio y banda de dispersión (± 1 desviación estándar)
+ax.plot(alphas_grid, cv_rmse_scores, color='#0072b2', linewidth=2.5, label='RMSE medio en Validación (5-Folds)')
+ax.fill_between(alphas_grid, cv_rmse_scores - cv_rmse_std, cv_rmse_scores + cv_rmse_std, color='#0072b2', alpha=0.18, label='Incertidumbre (±1 σ entre pliegues)')
+
+# Punto óptimo mínimo
+ax.axvline(best_alpha_manual, color='#d55e00', linestyle='--', linewidth=1.8, label=f'α óptimo = {best_alpha_manual:.1f}')
+ax.scatter([best_alpha_manual], [min_cv_rmse], color='#d55e00', s=90, zorder=5)
+
+ax.annotate(f'Mínimo CV RMSE: {min_cv_rmse:.1f}\nα = {best_alpha_manual:.1f}',
+            xy=(best_alpha_manual, min_cv_rmse),
+            xytext=(best_alpha_manual * 3.5, min_cv_rmse + 4),
+            arrowprops=dict(facecolor='#222222', shrink=0.08, width=1.2, headwidth=6),
+            fontweight='bold', fontsize=10, color='#222222')
+
+ax.set_xscale('log')
+ax.set_title('Validación Cruzada Revela el Balance Óptimo de Regularización', fontsize=13, fontweight='bold', pad=12)
+ax.set_xlabel('Intensidad de Penalización α (Escala logarítmica)', fontsize=11)
+ax.set_ylabel('RMSE medio de Validación', fontsize=11)
+ax.grid(True, linestyle=':', alpha=0.6)
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.legend(frameon=True, facecolor='white', loc='upper right')
+
+plt.tight_layout()
+plt.show()
+```
+```Alpha óptimo identificado por 5-Fold CV: α = 73.18
+RMSE medio mínimo en validación:       58.14
+
+=== EVALUACIÓN FINAL EN DATOS DE PRUEBA (TEST SET) ===
+Alpha seleccionado por RidgeCV: α = 73.18
+RMSE en Test Set:              52.18
+R² en Test Set:                50.76%
+```
+![](img/cruzada.png)
+
+#### Interpretación de la Curva de Validación
+
+He generado y publicado en tu panel de **Studio** el artefacto gráfico **`curva_validacion_cruzada_ridge.png`**, el cual muestra la clásica curva en forma de "U" del dilema sesgo-varianza:
+
+1. **Zona de Penalización Débil ($\alpha < 1$):**  
+   El modelo se comporta casi idéntico a OLS. Debido a las 65 variables correlacionadas, la varianza es alta y el error en validación es elevado (~60 a 64 RMSE).
+2. **Zona de Mínimo Global ($\alpha \approx 73,2$):**  
+   La regularización $L_2$ contrae la dispersión de los coeficientes de las variables colineales, alcanzando el mínimo de error en validación (**58,14 RMSE**) y permitiendo que el modelo generalice de forma óptima en el conjunto de prueba (**52,18 RMSE** con un $R^2 = 50,7\%$).
+3. **Zona de Sobrepenalización ($\alpha > 500$):**  
+   La penalización es excesiva; los coeficientes se reducen casi a cero, destruyendo la capacidad predictiva del modelo y disparando el error debido al subajuste (alto sesgo).
+
