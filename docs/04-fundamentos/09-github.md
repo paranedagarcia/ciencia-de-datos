@@ -12,7 +12,7 @@ GitHub es una plataforma de alojamiento de código fuente y control de versiones
 
 <center>
 <figure>
-![](img/git-hub.jpg)
+
 <figcaption></figcaption>
 </figure>
 </center>
