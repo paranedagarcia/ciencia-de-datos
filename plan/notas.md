@@ -44,7 +44,7 @@ config:
 </figure>
 </center>
 
-<br />
+<br/>
 #### Ejemplo:
 <Tabs>
 <TabItem value="mnp" label="Antecedentes" default>
@@ -57,7 +57,7 @@ config:
 # Implementación en Python
 ```
 </TabItem>
-</Tabs><br />
+</Tabs><br/>
 
 ## streamlit
 
@@ -255,7 +255,18 @@ Cuéntame sobre algoritmos alternativos como DBSCAN
 ### regresion lineal
 sobre las diferencias geométricas entre las restricciones de bola \\(L_2\\) y diamante \\(L_1\\), y la optimización de \\(\alpha\\) mediante `RidgeCV` y `LassoCV`?
 
+¿Cómo se calcula la ecuación normal en la regresión lineal?
+¿Cuál es la diferencia entre OLS y Ridge?
+Muéstrame un ejemplo de código en Python para evaluar los residuos
+
+¿Cómo se elige el hiperparámetro alfa en Ridge y Lasso?
+Muestra cómo evaluar un modelo de regresión con validación cruzada
+
 ### regresion logistica
 ¿Cómo se aplica la regularización en la regresión logística?
 ¿Qué métricas se usan para evaluar la clasificación?
 ¿Cómo funciona el algoritmo Softmax?
+
+¿Cómo se evalúa el rendimiento con la matriz de confusión?
+¿Qué es la curva ROC-AUC en clasificación?
+¿Cómo funciona la regularización en regresión logística?

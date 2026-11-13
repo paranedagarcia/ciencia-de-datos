@@ -1507,12 +1507,14 @@ R² en Test Set:                50.76%
 
 #### Interpretación de la Curva de Validación
 
-He generado y publicado en tu panel de **Studio** el artefacto gráfico **`curva_validacion_cruzada_ridge.png`**, el cual muestra la clásica curva en forma de "U" del dilema sesgo-varianza:
+Este ejemplo muestra la clásica curva en forma de "U" del dilema sesgo-varianza:
 
 1. **Zona de Penalización Débil ($\alpha < 1$):**  
    El modelo se comporta casi idéntico a OLS. Debido a las 65 variables correlacionadas, la varianza es alta y el error en validación es elevado (~60 a 64 RMSE).
+
 2. **Zona de Mínimo Global ($\alpha \approx 73,2$):**  
    La regularización $L_2$ contrae la dispersión de los coeficientes de las variables colineales, alcanzando el mínimo de error en validación (**58,14 RMSE**) y permitiendo que el modelo generalice de forma óptima en el conjunto de prueba (**52,18 RMSE** con un $R^2 = 50,7\%$).
+   
 3. **Zona de Sobrepenalización ($\alpha > 500$):**  
    La penalización es excesiva; los coeficientes se reducen casi a cero, destruyendo la capacidad predictiva del modelo y disparando el error debido al subajuste (alto sesgo).
 

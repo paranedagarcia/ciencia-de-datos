@@ -1,4 +1,8 @@
 
+## TEMA
+
+explica inicialmente en términos sencillos y simples el tema "regresion logistica" para luego dar paso a una definición más técnica y completa. Las formulas matemáticas que se presenten deben ir acompañadas de una explicación simple y clara de sus componentes. Los ejemplos que se muestren en Python incluyan además visualizacion gráfica.
+
 ## infografia
 
 crea una infografía educativa horizontal 16:9 sobre "TEMA", dirigida a estudiantes universitarios. Utiliza un ejemplo distinto a vehiculo. Usa un título corto, llamativo y fácil de leer, acompañado de iconos, ilustraciones e imágenes relacionadas directamente con el tema. Incluye los conceptos más importantes de forma visual, clara y resumida, con diseño moderno, colores atractivos, buena distribución y texto grande y legible. Evita saturar la infografía con texto. No incluyas el titular dentro de la infografia.
