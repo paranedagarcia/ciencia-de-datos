@@ -44,8 +44,8 @@ config:
 </figure>
 </center>
 
+### 🖥️ Implementación
 <br/>
-#### Ejemplo:
 <Tabs>
 <TabItem value="mnp" label="Antecedentes" default>
 <div class="alert alert--primary">

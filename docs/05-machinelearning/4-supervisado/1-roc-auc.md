@@ -107,8 +107,8 @@ Se calcula como la integral de Riemann de la curva $\text{TPR}$ respecto a $\tex
 **Recordatorio importante:** cuando las clases presentan un desbalance extremo —como 99% negativos y 1% positivos—, la curva ROC suele ser excesivamente optimista debido al gran número de verdaderos negativos en el denominador de $\text{FPR}$; en esos escenarios, la curva Precision-Recall (PR-AUC) es la métrica de referencia adecuada.
 :::
 
-### Implementación
 
+### 🖥️ Implementación
 <br/>
 <Tabs>
 <TabItem value="mnp" label="Antecedentes" default>
@@ -285,10 +285,8 @@ La curva PR reemplaza el $\text{FPR}$ por la **Precisión** (*Valor Predictivo P
 
 
 
-### Código en Python 
-
-<br/>
-#### Ejemplo:
+### 🖥️ Implementación
+#### Comparación Experimental en Desbalance Severo
 <Tabs>
 <TabItem value="mnp" label="Antecedentes" default>
 <div class="alert alert--primary">
@@ -296,10 +294,16 @@ La curva PR reemplaza el $\text{FPR}$ por la **Precisión** (*Valor Predictivo P
 
 El siguiente código reproduce exactamente este fenómeno: genera un conjunto de datos con un **99% de clase negativa y solo un 1% de clase positiva** (10.000 muestras) y grafica ambas curvas lado a lado:
 
+```
+ROC-AUC Score: 0.7426  (Aparenta ser casi perfecto)
+PR-AUC Score:  0.1913  (Refleja la degradación por falsos positivos)
+Prevalencia de clase positiva: 1.53%
+```
+![](img/roc-evaluacion.png)
 
 **Lectura del gráfico**
 
-He generado y publicado en tu panel de **Studio** el artefacto gráfico **`roc_vs_pr_desbalance.png`**, el cual muestra la discrepancia diagnóstica sobre el mismo modelo y los mismos datos:
+El gráfico muestra la discrepancia diagnóstica sobre el mismo modelo y los mismos datos:
 
 1. **Panel Izquierdo (Curva ROC — Aparenta un éxito engañoso):**  
    El modelo exhibe un **$\text{ROC-AUC} = 0,845$**, curvándose hacia la esquina superior izquierda. La presencia de 2.970 Verdaderos Negativos amortigua el $\text{FPR}$, haciendo creer al ingeniero que el clasificador está listo para producción.
@@ -443,11 +447,40 @@ Existen dos formas de calcular el área bajo la curva PR en `scikit-learn`:
 
 
 
-### Implementación
+### 🖥️ Implementación
+#### Precision-Recall
+<br/>
+<Tabs>
+<TabItem value="mnp" label="Antecedentes" default>
+<div class="alert alert--primary">
+**Evaluación de modelos con Precision-Recall AUC (PR-AUC)**
 
 El siguiente código simula un problema industrial con un **desbalance del 98% clase negativa frente al 2% clase positiva**, entrena un modelo logístico, calcula el **Average Precision (AP)** y la métrica con `auc()`, y traza la visualización utilizando `PrecisionRecallDisplay`:
 
-```python
+```=== EVALUACIÓN DE DESEMPEÑO BAJO DESBALANCE ===
+Prevalencia de clase positiva en test: 2.47%
+Average Precision (AP / PR-AUC oficial): 0.1379
+Área Trapezoidal (auc):                 0.1310
+```
+![](img/roc-pr.png)
+
+**Interpretación de resultados**
+
+1. **Comparación con el Azar:**  
+   Un clasificador ingenuo que asignara probabilidades al azar obtendría un AP de **0,02** (línea discontinua naranja en $y = 0,02$). Si el modelo alcanza un **$\text{AP} \approx 0,65$**, significa que multiplica por más de 30 veces la capacidad de discriminación respecto a una búsqueda aleatoria.
+
+2. **El Compromiso Precisión-Exhaustividad:**  
+   A medida que el *Recall* avanza hacia $1,0$ (intentar detectar el 100% de los fraudes o fallas), la curva decae progresivamente porque el clasificador se ve obligado a relajar el umbral $t$, aceptando un mayor número de falsos positivos (falsas alarmas) que degradan la precisión.
+   
+3. **Criterio de Selección:**  
+   En producción, siempre se debe priorizar **`average_precision_score`** por sobre la aproximación por trapecios `auc(recall, precision)`, ya que esta última genera interpolaciones optimistas que no reflejan fielmente los saltos escalonados de la métrica en datos finitos.
+
+
+</div>
+</TabItem>
+<TabItem value="mnp-python" label="🖥️ Código">
+
+```python showLineNumbers
 """
 Evaluación de Modelos con Precision-Recall AUC (PR-AUC).
 Librería: scikit-learn y matplotlib.
@@ -561,19 +594,13 @@ ax.legend(frameon=True, facecolor='white', loc='upper right', fontsize=9.5)
 plt.tight_layout()
 plt.show()
 ```
+</TabItem>
+</Tabs><br/>
 
 
 
-#### Interpretación de resultados
 
-1. **Comparación con el Azar:**  
-   Un clasificador ingenuo que asignara probabilidades al azar obtendría un AP de **0,02** (línea discontinua naranja en $y = 0,02$). Si el modelo alcanza un **$\text{AP} \approx 0,65$**, significa que multiplica por más de 30 veces la capacidad de discriminación respecto a una búsqueda aleatoria.
 
-2. **El Compromiso Precisión-Exhaustividad:**  
-   A medida que el *Recall* avanza hacia $1,0$ (intentar detectar el 100% de los fraudes o fallas), la curva decae progresivamente porque el clasificador se ve obligado a relajar el umbral $t$, aceptando un mayor número de falsos positivos (falsas alarmas) que degradan la precisión.
-   
-3. **Criterio de Selección:**  
-   En producción, siempre se debe priorizar **`average_precision_score`** por sobre la aproximación por trapecios `auc(recall, precision)`, ya que esta última genera interpolaciones optimistas que no reflejan fielmente los saltos escalonados de la métrica en datos finitos.
 
 
 
