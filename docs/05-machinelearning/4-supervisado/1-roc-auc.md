@@ -10,23 +10,164 @@ hide_title: true
 
 ![](img/roc-info.jpg)
 
-La curva ROC (Receiver Operating Characteristic o Característica Operativa del Receptor) es una herramienta gráfica fundamental para evaluar y comparar el rendimiento de clasificadores binarios.
+Cuando un modelo de clasificación (por ejemplo, una regresión logística que detecta si una transacción es fraudulenta o legítima) evalúa un caso, no responde con un «sí» o un «no» tajante, sino que calcula una probabilidad continua entre 0% y 100%.
 
-La mayoría de los modelos de clasificación (como la regresión logística) no devuelven directamente un "Sí" o un "No", sino una **probabilidad continua entre 0% y 100%**. Por convención, solemos fijar el punto de corte en **0,5** (50%): si la probabilidad supera 0,5, clasificamos como positivo; si no, como negativo.
+Para tomar una decisión operativa, se debe fijar un umbral de corte (habitualmente el 50% o 0,5): si la probabilidad supera 0,5, se clasifica como positivo (fraude); si no, como negativo (legítimo).
 
-Sin embargo, ese umbral del 50% es arbitrario:
-* En la detección de enfermedades graves o fraude bancario, preferimos bajar el umbral (por ejemplo a 0,2) para detectar a casi todos los casos positivos reales, aunque cometamos el error de generar falsas alarmas.
+Sin embargo, fijar el umbral en 0,5 es arbitrario:
+* Si bajas el umbral a 0,2, el modelo se vuelve muy sensible y detecta casi todos los fraudes reales, pero comete el error de generar muchas falsas alarmas.
 
-* En un filtro de correo spam, preferimos subir el umbral (por ejemplo a 0,8) para evitar enviar por error un correo legítimo e importante a la papelera.
+* Si subes el umbral a 0,8, el modelo se vuelve muy estricto y apenas produce falsas alarmas, pero dejará escapar fraudes reales (falsos negativos).
 
-La curva ROC es el gráfico que muestra este compromiso (trade-off) continuo entre los aciertos reales y las falsas alarmas a lo largo de TODOS los umbrales de decisión posibles (desde 0,0 hasta 1,0).
+**La curva ROC (Receiver Operating Characteristic o Característica Operativa del Receptor)** es el gráfico que dibuja el balance entre los aciertos verdaderos y las falsas alarmas al probar TODOS los umbrales de decisión posibles (desde 0,0 hasta 1,0), mostrando el intercambio (*trade-off*) continuo entre los **aciertos reales** y las **falsas alarmas**.
 
+Cuanto más se curve la línea hacia la esquina superior izquierda (más pegada al techo y a la izquierda), mejor es el modelo, ya que logra capturar la mayoría de los casos reales sin disparar falsas alarmas.
+
+
+<center>
+<figure>
 ![](img/roc-objetivo.jpg)
+<figcaption></figcaption>
+</figure>
+</center>
 
-**¿Qué es la curva ROC?**  
 
-Es un gráfico que evalúa el rendimiento del clasificador a través de **todos los umbrales de decisión posibles** (desde 0,0 hasta 1,0), mostrando el intercambio (*trade-off*) continuo entre los **aciertos reales** y las **falsas alarmas**.
 
+### Matriz de confusión
+
+Cuando un modelo de clasificación emite predicciones, solo decir que *"acertó el 90% de las veces"* resulta muy ambiguo y peligroso. Por ejemplo, si en un control de calidad industrial el 95% de las piezas producidas son perfectas y solo el 5% presentan defectos, un modelo defectuoso que prediga ciegamente que *"todas las piezas son perfectas"* obtendrá un 95% de aciertos generales, pero **habrá fallado en detectar el 100% de las piezas defectuosas**.
+
+La **matriz de confusión** (o tabla de contingencia) es una tabla de doble entrada que **desglosa exactamente en qué acierta y en qué se equivoca un modelo clasificador**. 
+* Cruza la **realidad** (lo que verdaderamente era cada caso) con la **predicción** (lo que el modelo creyó que era).
+
+* Permite observar de forma transparente no solo los aciertos correctos, sino también **el tipo exacto de error cometido**: si se generó una *falsa alarma* (falso positivo) o si el modelo *dejó escapar un caso crítico* (falso negativo).
+
+
+En el aprendizaje automático supervisado, la matriz de confusión para un problema de clasificación binaria particiona el conjunto de evaluación $N_{\text{test}}$ en una matriz cuadrada de dimensión $2 \times 2$. 
+
+Siguiendo la convención matemática y de librerías como `scikit-learn`, las **filas representan la clase real observada (*ground truth*)** y las **columnas representan la clase predicha por el estimador**:
+
+```
+                                  Clase Predicha (Prediction)
+                             Negativo (0)            Positivo (1)
+                       ┌───────────────────────┬───────────────────────┐
+         Negativo (0)  │ Verdadero Negativo    │ Falso Positivo        │
+                       │         (TN)          │         (FP)          │
+Clase Real             ├───────────────────────┼───────────────────────┤
+(Ground Truth)         │ Falso Negativo        │ Verdadero Positivo    │
+         Positivo (1)  │         (FN)          │         (TP)          │
+                       └───────────────────────┴───────────────────────┘
+```
+
+#### Los Cuatro Cuadrantes Fundamentales:
+1. **Verdaderos Positivos (TP - *True Positives*):** Casos donde la condición real era positiva ($y = 1$) y el modelo predijo correctamente positivo ($\hat{y} = 1$). *Ejemplo:* Una falla crítica que el sensor detectó con éxito.
+
+2. **Verdaderos Negativos (TN - *True Negatives*):** Casos donde la condición real era negativa ($y = 0$) y el modelo predijo correctamente negativo ($\hat{y} = 0$). *Ejemplo:* Operación normal que el sistema catalogó como normal.
+
+3. **Falsos Positivos (FP - *False Positives* o Error Tipo I):** Casos negativos reales ($y = 0$) catalogados erróneamente como positivos ($\hat{y} = 1$). *Ejemplo:* Una falsa alarma; se detiene la línea de producción sin que exista avería real.
+
+4. **Falsos Negativos (FN - *False Negatives* o Error Tipo II):** Casos positivos reales ($y = 1$) que el modelo omitió clasificándolos como negativos ($\hat{y} = 0$). *Ejemplo:* Una falla real que el modelo no detectó, provocando una detención no planificada.
+
+:::info
+**Propiedad geométrica:** **Los aciertos se concentran exclusivamente sobre la diagonal principal** (de arriba-izquierda a abajo-derecha: $\text{TN} + \text{TP}$). Todos los valores fuera de dicha diagonal representan errores de clasificación.
+:::
+
+
+
+#### Fórmulas matemáticas
+
+A partir de los cuatro recuentos de la matriz, se calculan las métricas que gobiernan la toma de decisiones en ingeniería de datos:
+
+#### A. Exactitud Global (*Accuracy*)
+
+```math 
+\text{Accuracy} = \frac{\text{TP} + \text{TN}}{\text{TP} + \text{TN} + \text{FP} + \text{FN}}
+```
+*   **Componentes:** El numerador es la suma de todas las decisiones correctas; el denominador es el tamaño total de la muestra.
+*   **Interpretación:** Mide la fracción general de aciertos. Es útil únicamente cuando las clases están perfectamente equilibradas, pero **sumamente engañosa ante desbalance de clases**.
+
+#### B. Precisión (*Precision* o Valor Predictivo Positivo - PPV)
+```math 
+\text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}}
+```
+*   **Componentes:** $\text{TP}$ sobre el total de predicciones positivas realizadas por el modelo (la suma de la columna positiva).
+*   **Interpretación:** ¿Qué porcentaje de las alarmas que emitió el modelo fueron reales? Penaliza las falsas alarmas ($\text{FP}$).
+
+#### C. Exhaustividad / Sensibilidad (*Recall*, *Sensitivity* o Tasa de Verdaderos Positivos - TPR)
+```math 
+\text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}}
+```
+*   **Componentes:** $\text{TP}$ sobre el total de casos positivos reales existentes en los datos (la suma de la fila positiva).
+*   **Interpretación:** ¿Qué porcentaje de los eventos críticos reales fue capaz de capturar el clasificador? Penaliza los casos omitidos ($\text{FN}$).
+
+#### D. Puntuación F1 (*F1-Score*)
+```math 
+F_1 = 2 \cdot \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}} = \frac{\text{TP}}{\text{TP} + \frac{\text{FP} + \text{FN}}{2}}
+```
+*   **Componentes:** Es la **media armónica** entre la precisión y el *recall*.
+*   **Interpretación:** A diferencia de la media aritmética, la media armónica penaliza drásticamente los desequilibrios extremos donde una de las dos métricas es muy baja, siendo el indicador sintético estándar bajo desbalance muestral.
+
+
+
+#### Sensibilidad y Precisión
+
+Aquí radica la distinción técnica más importante en la evaluación de modelos:
+
+#### A. Relación Directa: La Sensibilidad ES el eje vertical de la Curva ROC
+En el gráfico de la curva ROC:
+* **Eje Y (Vertical):** Es exactamente la **Sensibilidad** ($\text{TPR}$).
+* **Eje X (Horizontal):** Es la **Tasa de Falsos Positivos** ($\text{FPR}$).
+
+Por lo tanto, la curva ROC evalúa directamente cómo evoluciona la **sensibilidad** a medida que aceptamos una mayor o menor tasa de falsas alarmas en la población negativa.
+
+<div class="container">
+  <div class="row">
+    <div class="col col--7">
+    ![](img/roc-chart.jpg)
+
+    </div>
+    <div class="col col--5">
+    <br/>
+    **Eje Y: Tasa de verdaderos positivos**. Representa la sensibilidad, midiendo los casos positivos detectados correctamente.
+
+    **Eje X: Tasa de Falsos Positivos**. Representa la tasa de falsa alarma, indicando los casos negativos clasificados erróneamente.
+    </div>
+  </div>
+</div>
+
+#### B. La Precisión NO forma parte de los ejes de la Curva ROC
+La fórmula de la curva ROC ignora por completo la **precisión**. ¿Por qué?
+* La curva ROC compara el comportamiento dentro del grupo de positivos reales (Sensibilidad: $\text{TP}/[\text{TP}+\text{FN}]$) contra el grupo de negativos reales (FPR: $\text{FP}/[\text{FP}+\text{TN}]$).
+* En cambio, la **precisión** cruza ambos grupos en su denominador ($\text{TP}/[\text{TP}+\text{FP}]$), evaluando la mezcla de aciertos y falsas alarmas.
+
+#### C. ¿Qué ocurre cuando las clases están muy desbalanceadas?
+Esta diferencia conceptual tiene un impacto enorme en problemas reales:
+* Si tienes 100.000 operaciones bancarias normales y solo 100 fraudes, un modelo que genere **1.000 falsas alarmas** tendrá un $\text{FPR}$ muy bajo:
+  ```math
+  \text{FPR} = \frac{1.000}{100.000} = 0,01 \quad (1\%)
+  ```
+* En la curva ROC, un 1% se ve excelente (pegado al borde izquierdo). El gráfico ROC mostrará un **AUC muy alto** y una apariencia de éxito casi perfecto.
+* Sin embargo, si revisas la **precisión** con esos mismos datos:
+  ```math
+  \text{Precisión} = \frac{100}{100 + 1.000} \approx 0,09 \quad (9\%)
+  ```
+  ¡El 91% de las alertas que revisará el equipo de seguridad serán falsas alarmas!
+
+Por esta razón, cuando los datos están muy desbalanceados, los científicos de datos complementan la curva ROC con la **curva Precision-Recall (PR)**, que coloca a la **Precisión** en el eje vertical y a la **Sensibilidad (*Recall*)** en el eje horizontal.
+
+![](img/roc-sensibilidad.jpg)
+
+### Resumen
+
+| Concepto | Fórmula | Rol en la Curva ROC | Significado Práctico |
+| :--- | :---: | :--- | :--- |
+| **Sensibilidad (*Recall*)** | $\frac{\text{TP}}{\text{TP} + \text{FN}}$ | **Es el Eje $Y$** | Mide cuántos de los casos reales positivos lograste encontrar. |
+| **Tasa Falsos Positivos (FPR)** | $\frac{\text{FP}}{\text{FP} + \text{TN}}$ | **Es el Eje $X$** | Mide la tasa de falsas alarmas sobre el total de negativos reales. |
+| **Precisión** | $\frac{\text{TP}}{\text{TP} + \text{FP}}$ | **No está en la curva ROC** (pertenece a la curva Precision-Recall) | Mide la confiabilidad de las alertas positivas emitidas por el modelo. |
+
+
+***
+## **AUC**
 **¿Qué es el AUC?**  
 Es el **Área Bajo la Curva** (*Area Under the Curve*). Es un número único entre **0,5 y 1,0** que resume la calidad global del clasificador:
 * **$\text{AUC} = 0,5$:** Equivale a lanzar una moneda al aire (el modelo no tiene ninguna capacidad de discriminación).
@@ -87,6 +228,8 @@ Se calcula como la integral de Riemann de la curva $\text{TPR}$ respecto a $\tex
 * **$> 0,90$:** Discriminación sobresaliente.
 
 
+
+
 ### ¿Para Qué Sirve?
 
 1. **Evaluación Independiente del Umbral (*Threshold-Agnostic*):**  
@@ -106,6 +249,7 @@ Se calcula como la integral de Riemann de la curva $\text{TPR}$ respecto a $\tex
 :::info
 **Recordatorio importante:** cuando las clases presentan un desbalance extremo —como 99% negativos y 1% positivos—, la curva ROC suele ser excesivamente optimista debido al gran número de verdaderos negativos en el denominador de $\text{FPR}$; en esos escenarios, la curva Precision-Recall (PR-AUC) es la métrica de referencia adecuada.
 :::
+
 
 
 ### 🖥️ Implementación
@@ -220,187 +364,6 @@ plt.show()
 
 
 
-
-***
-## **ROC_AUC vs. PR-AUC**
-
-En problemas reales, como la detección de fraudes con tarjetas de crédito, ciberseguridad (detección de intrusiones), diagnóstico de enfermedades raras o mantenimiento predictivo de turbinas industriales, las clases suelen estar **severamente desbalanceadas** (por ejemplo, el 99% o 99,9% de los registros pertenecen a la clase negativa o normal, y solo el 1% o 0,1% corresponde a la clase positiva de interés).
-
-Bajo estas condiciones operativas, confiar ciegamente en la curva **ROC-AUC** puede inducir a un **diagnóstico falsamente optimista**. En su lugar, la curva **Precision-Recall (PR-AUC)** es el estándar de evaluación riguroso.
-
-
-### El Problema Matemático
-**¿Por Qué ROC-AUC Puede Ser Engañosa?**
-
-Examinemos las fórmulas que definen el eje horizontal de cada curva:
-
-#### A. La Tasa de Falsos Positivos (Eje X en la Curva ROC)
-```math
-\text{FPR} = \frac{\text{FP}}{\text{FP} + \text{TN}} = \frac{\text{FP}}{N}
-```
-
-*   **Argumentos:**
-    *   $\text{FP}$: Falsos Positivos (registros normales clasificados erróneamente como fraude o falla).
-
-    *   $\text{TN}$: Verdaderos Negativos (registros normales clasificados correctamente).
-
-    *   $N = \text{FP} + \text{TN}$: Total de observaciones pertenecientes a la **clase negativa real**.
-*   **La distorsión del denominador masivo:**  
-    Si evaluamos 100.000 transacciones bancarias donde 99.000 son legítimas ($N = 99.000$) y 1.000 son fraudulentas ($P = 1.000$), supongamos que el modelo produce **1.980 falsas alarmas** (falsos positivos).  
-    Calculamos el $\text{FPR}$:
-
-    ```math
-    \text{FPR} = \frac{1.980}{99.000} = 0,02 \quad (2\%)
-    ```
-
-    En la curva ROC, un $\text{FPR}$ de apenas el 2% sitúa el punto en el extremo izquierdo del gráfico, dando la ilusión visual de un modelo casi perfecto. Sin embargo, para un equipo de analistas de seguridad, revisar 1.980 falsas alarmas diarias para capturar unos pocos cientos de fraudes representa un colapso operativo inaceptable.
-
-#### B. La Precisión (Eje Y en la Curva Precision-Recall)
-La curva PR reemplaza el $\text{FPR}$ por la **Precisión** (*Valor Predictivo Positivo*), enfocándose estrictamente en la pureza de las predicciones positivas:
-
-```math
-\text{Precisión} = \frac{\text{TP}}{\text{TP} + \text{FP}}
-```
-
-*   **Argumentos:**
-    *   $\text{TP}$: Verdaderos Positivos (fraudes reales detectados con éxito).
-    *   $\text{FP}$: Falsos Positivos.
-    *   **Nótese que $\text{TN}$ no interviene en esta ecuación.**
-*   Si de los 1.000 fraudes el modelo detectó 800 ($\text{TP} = 800$, lo que da un excelente *Recall* de $800/1.000 = 80\%$), la precisión real será:
-    ```math
-    \text{Precisión} = \frac{800}{800 + 1.980} = \frac{800}{2.780} \approx 0,287 \quad (28,7\%)
-    ```
-    Esto significa que **más del 71% de las alertas generadas por el sistema son falsas alarmas**. Mientras la curva ROC oculta este desastre bajo un $\text{FPR} = 2\%$, la curva Precision-Recall lo evidencia de inmediato al caer a un nivel de precisión del 28,7%.
-
-
-### Cuadro Comparativo: ROC-AUC vs. PR-AUC
-
-| Criterio Técnico | Curva ROC-AUC | Curva Precision-Recall (PR-AUC) |
-| :--- | :--- | :--- |
-| **Métricas en los Ejes** | $\text{TPR}$ (*Recall*) vs. $\text{FPR}$ | Precisión vs. $\text{Recall}$ ($\text{TPR}$) |
-| **Presencia de $\text{TN}$ en el cálculo** | **Sí** (en el denominador de $\text{FPR}$) | **No** (solo evalúa $\text{TP}$, $\text{FP}$ y $\text{FN}$) |
-| **Línea base (Clasificador aleatorio)** | **Constante e invariable: $0,50$** (diagonal de 45°) | **Variable: igual a la prevalencia** $\frac{P}{P + N}$ (e.g., $0,01$ o $1\%$) |
-| **Sensibilidad a la prevalencia de clases** | **Invariante:** no cambia si la proporción de negativos aumenta | **Sensible:** penaliza severamente el costo operativo de las falsas alarmas |
-| **¿Cuándo utilizarlo?** | Clases balanceadas o cuando **interesa tanto la detección de negativos como de positivos** | **Desbalance severo** o cuando la clase positiva es rara y las falsas alarmas son costosas |
-
-
-
-### 🖥️ Implementación
-#### Comparación Experimental en Desbalance Severo
-<Tabs>
-<TabItem value="mnp" label="Antecedentes" default>
-<div class="alert alert--primary">
-**Comparación Experimental en Desbalance Severo**
-
-El siguiente código reproduce exactamente este fenómeno: genera un conjunto de datos con un **99% de clase negativa y solo un 1% de clase positiva** (10.000 muestras) y grafica ambas curvas lado a lado:
-
-```
-ROC-AUC Score: 0.7426  (Aparenta ser casi perfecto)
-PR-AUC Score:  0.1913  (Refleja la degradación por falsos positivos)
-Prevalencia de clase positiva: 1.53%
-```
-![](img/roc-evaluacion.png)
-
-**Lectura del gráfico**
-
-El gráfico muestra la discrepancia diagnóstica sobre el mismo modelo y los mismos datos:
-
-1. **Panel Izquierdo (Curva ROC — Aparenta un éxito engañoso):**  
-   El modelo exhibe un **$\text{ROC-AUC} = 0,845$**, curvándose hacia la esquina superior izquierda. La presencia de 2.970 Verdaderos Negativos amortigua el $\text{FPR}$, haciendo creer al ingeniero que el clasificador está listo para producción.
-
-2. **Panel Derecho (Curva Precision-Recall — Revela la realidad operativa):**  
-   La curva cae rápidamente, alcanzando un **$\text{PR-AUC} = 0,195$**. Muestra que para capturar más del 60% de los casos positivos reales (*Recall* > 0,6), la precisión se desploma por debajo del 20%, lo que evidencia una inundación de falsas alarmas que el gráfico ROC había ocultado.
-
-3. **Línea Base Naranja Horizontal:**  
-   En la curva PR, el desempeño aleatorio no es 0,5, sino la prevalencia basal (**1,0%**). Aunque el modelo supera ampliamente el azar puro, el gráfico deja claro que se requiere un ajuste de umbral o técnicas de muestreo (como SMOTE o penalizaciones de coste asimétrico) antes de su puesta en producción.
-</div>
-</TabItem>
-<TabItem value="mnp-python" label="🖥️ Código">
-
-```python showLineNumbers
-"""
-Evaluación Comparativa ROC-AUC vs PR-AUC bajo Desbalance Extremo.
-Dataset: 99% Negativos (Legítimos) vs. 1% Positivos (Fraude).
-"""
-
-import numpy as np
-import matplotlib.pyplot as plt
-from sklearn.datasets import make_classification
-from sklearn.model_selection import train_test_split
-from sklearn.linear_model import LogisticRegression
-from sklearn.metrics import roc_curve, roc_auc_score, precision_recall_curve, auc
-
-# 1. Simulación de datos con 99% negativos y 1% positivos
-X, y = make_classification(
-    n_samples=10000, n_features=15, n_informative=6, n_redundant=3,
-    weights=[0.99, 0.01], random_state=42
-)
-
-X_train, X_test, y_train, y_test = train_test_split(
-    X, y, test_size=0.3, random_state=42, stratify=y
-)
-
-# 2. Ajuste del modelo de Regresión Logística (con ponderación balanceada)
-clf = LogisticRegression(class_weight='balanced', random_state=42)
-clf.fit(X_train, y_train)
-
-# Probabilidades continuas predichas para la clase positiva
-y_probs = clf.predict_proba(X_test)[:, 1]
-
-# 3. Cálculo de métricas ROC y PR
-fpr, tpr, _ = roc_curve(y_test, y_probs)
-roc_auc = roc_auc_score(y_test, y_probs)
-
-precision, recall, _ = precision_recall_curve(y_test, y_probs)
-pr_auc = auc(recall, precision)
-prevalencia = np.mean(y_test)  # Línea base de azar en PR (~0.01)
-
-print(f"ROC-AUC Score: {roc_auc:.4f}  (Aparenta ser casi perfecto)")
-print(f"PR-AUC Score:  {pr_auc:.4f}  (Refleja la degradación por falsos positivos)")
-print(f"Prevalencia de clase positiva: {prevalencia*100:.2f}%")
-
-# 4. Generación Gráfica Comparativa (Fondo Blanco Plano)
-fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5.5), facecolor='white')
-
-# Panel 1: Curva ROC
-ax1.set_facecolor('white')
-ax1.plot(fpr, tpr, color='#0072b2', linewidth=2.5, label=f'Modelo (ROC-AUC = {roc_auc:.3f})')
-ax1.plot(,, color='#d55e00', linestyle='--', linewidth=1.5, label='Azar (AUC = 0.500)')
-ax1.set_title('1. Curva ROC (Aparenta Éxito Engañoso)', fontsize=12, fontweight='bold', pad=10)
-ax1.set_xlabel('Tasa de Falsos Positivos (FPR = FP / [FP + TN])', fontsize=10.5)
-ax1.set_ylabel('Recall / TPR (TP / [TP + FN])', fontsize=10.5)
-ax1.set_xlim(-0.02, 1.02)
-ax1.set_ylim(-0.02, 1.04)
-ax1.grid(True, linestyle=':', alpha=0.6)
-ax1.spines['top'].set_visible(False)
-ax1.spines['right'].set_visible(False)
-ax1.legend(frameon=True, facecolor='white', loc='lower right', fontsize=9.5)
-
-# Panel 2: Curva Precision-Recall
-ax2.set_facecolor('white')
-ax2.plot(recall, precision, color='#009e73', linewidth=2.5, label=f'Modelo (PR-AUC = {pr_auc:.3f})')
-ax2.axhline(prevalencia, color='#e69f00', linestyle='--', linewidth=1.5,
-            label=f'Línea Base = Prevalencia ({prevalencia*100:.1f}%)')
-ax2.set_title('2. Curva Precision-Recall (Revela el Impacto de Falsos Positivos)', fontsize=12, fontweight='bold', pad=10)
-ax2.set_xlabel('Recall / Exhaustividad (TP / [TP + FN])', fontsize=10.5)
-ax2.set_ylabel('Precisión (TP / [TP + FP])', fontsize=10.5)
-ax2.set_xlim(-0.02, 1.02)
-ax2.set_ylim(-0.02, 1.04)
-ax2.grid(True, linestyle=':', alpha=0.6)
-ax2.spines['top'].set_visible(False)
-ax2.spines['right'].set_visible(False)
-ax2.legend(frameon=True, facecolor='white', loc='upper right', fontsize=9.5)
-
-fig.suptitle('Impacto del Desbalance Extremo de Clases (99% Negativos vs 1% Positivos)',
-             fontsize=14, fontweight='bold', y=0.98)
-plt.tight_layout()
-plt.show()
-```
-</TabItem>
-</Tabs><br/>
-
-
-
 ***
 ## **PR-AUC**
 
@@ -446,10 +409,12 @@ Existen dos formas de calcular el área bajo la curva PR en `scikit-learn`:
         * $\text{Recall}_k$ y $\text{Precisión}_k$ son los valores evaluados en el $k$-ésimo umbral de decisión.
 
 
-
+***
 ### 🖥️ Implementación
-#### Precision-Recall
 <br/>
+
+#### Precision-Recall
+
 <Tabs>
 <TabItem value="mnp" label="Antecedentes" default>
 <div class="alert alert--primary">
@@ -595,95 +560,16 @@ plt.tight_layout()
 plt.show()
 ```
 </TabItem>
-</Tabs><br/>
-
-
-
-
-
-
-
-
-***
-## **Matriz de confusión**
-
-Cuando un modelo de clasificación emite predicciones, solo decir que *"acertó el 90% de las veces"* resulta muy ambiguo y peligroso. Por ejemplo, si en un control de calidad industrial el 95% de las piezas producidas son perfectas y solo el 5% presentan defectos, un modelo defectuoso que prediga ciegamente que *"todas las piezas son perfectas"* obtendrá un 95% de aciertos generales, pero **habrá fallado en detectar el 100% de las piezas defectuosas**.
-
-La **matriz de confusión** (o tabla de contingencia) es una tabla de doble entrada que **desglosa exactamente en qué acierta y en qué se equivoca un modelo clasificador**. 
-* Cruza la **realidad** (lo que verdaderamente era cada caso) con la **predicción** (lo que el modelo creyó que era).
-
-* Permite observar de forma transparente no solo los aciertos correctos, sino también **el tipo exacto de error cometido**: si se generó una *falsa alarma* (falso positivo) o si el modelo *dejó escapar un caso crítico* (falso negativo).
-
-
-En el aprendizaje automático supervisado, la matriz de confusión para un problema de clasificación binaria particiona el conjunto de evaluación $N_{\text{test}}$ en una matriz cuadrada de dimensión $2 \times 2$. 
-
-Siguiendo la convención matemática y de librerías como `scikit-learn`, las **filas representan la clase real observada (*ground truth*)** y las **columnas representan la clase predicha por el estimador**:
-
-```
-                                  Clase Predicha (Prediction)
-                             Negativo (0)            Positivo (1)
-                       ┌───────────────────────┬───────────────────────┐
-         Negativo (0)  │ Verdadero Negativo    │ Falso Positivo        │
-                       │         (TN)          │         (FP)          │
-Clase Real             ├───────────────────────┼───────────────────────┤
-(Ground Truth)         │ Falso Negativo        │ Verdadero Positivo    │
-         Positivo (1)  │         (FN)          │         (TP)          │
-                       └───────────────────────┴───────────────────────┘
-```
-
-#### Los Cuatro Cuadrantes Fundamentales:
-1. **Verdaderos Positivos (TP - *True Positives*):** Casos donde la condición real era positiva ($y = 1$) y el modelo predijo correctamente positivo ($\hat{y} = 1$). *Ejemplo:* Una falla crítica que el sensor detectó con éxito.
-
-2. **Verdaderos Negativos (TN - *True Negatives*):** Casos donde la condición real era negativa ($y = 0$) y el modelo predijo correctamente negativo ($\hat{y} = 0$). *Ejemplo:* Operación normal que el sistema catalogó como normal.
-
-3. **Falsos Positivos (FP - *False Positives* o Error Tipo I):** Casos negativos reales ($y = 0$) catalogados erróneamente como positivos ($\hat{y} = 1$). *Ejemplo:* Una falsa alarma; se detiene la línea de producción sin que exista avería real.
-
-4. **Falsos Negativos (FN - *False Negatives* o Error Tipo II):** Casos positivos reales ($y = 1$) que el modelo omitió clasificándolos como negativos ($\hat{y} = 0$). *Ejemplo:* Una falla real que el modelo no detectó, provocando una detención no planificada.
-
-:::info
-**Propiedad geométrica:** **Los aciertos se concentran exclusivamente sobre la diagonal principal** (de arriba-izquierda a abajo-derecha: $\text{TN} + \text{TP}$). Todos los valores fuera de dicha diagonal representan errores de clasificación.
-:::
-
-
-
-### Fórmulas matemáticas
-
-A partir de los cuatro recuentos de la matriz, se calculan las métricas que gobiernan la toma de decisiones en ingeniería de datos:
-
-#### A. Exactitud Global (*Accuracy*)
-
-```math 
-\text{Accuracy} = \frac{\text{TP} + \text{TN}}{\text{TP} + \text{TN} + \text{FP} + \text{FN}}
-```
-*   **Componentes:** El numerador es la suma de todas las decisiones correctas; el denominador es el tamaño total de la muestra.
-*   **Interpretación:** Mide la fracción general de aciertos. Es útil únicamente cuando las clases están perfectamente equilibradas, pero **sumamente engañosa ante desbalance de clases**.
-
-#### B. Precisión (*Precision* o Valor Predictivo Positivo - PPV)
-```math 
-\text{Precision} = \frac{\text{TP}}{\text{TP} + \text{FP}}
-```
-*   **Componentes:** $\text{TP}$ sobre el total de predicciones positivas realizadas por el modelo (la suma de la columna positiva).
-*   **Interpretación:** ¿Qué porcentaje de las alarmas que emitió el modelo fueron reales? Penaliza las falsas alarmas ($\text{FP}$).
-
-#### C. Exhaustividad / Sensibilidad (*Recall*, *Sensitivity* o Tasa de Verdaderos Positivos - TPR)
-```math 
-\text{Recall} = \frac{\text{TP}}{\text{TP} + \text{FN}}
-```
-*   **Componentes:** $\text{TP}$ sobre el total de casos positivos reales existentes en los datos (la suma de la fila positiva).
-*   **Interpretación:** ¿Qué porcentaje de los eventos críticos reales fue capaz de capturar el clasificador? Penaliza los casos omitidos ($\text{FN}$).
-
-#### D. Puntuación F1 (*F1-Score*)
-```math 
-F_1 = 2 \cdot \frac{\text{Precision} \times \text{Recall}}{\text{Precision} + \text{Recall}} = \frac{\text{TP}}{\text{TP} + \frac{\text{FP} + \text{FN}}{2}}
-```
-*   **Componentes:** Es la **media armónica** entre la precisión y el *recall*.
-*   **Interpretación:** A diferencia de la media aritmética, la media armónica penaliza drásticamente los desequilibrios extremos donde una de las dos métricas es muy baja, siendo el indicador sintético estándar bajo desbalance muestral.
-
-
-
-### Implementación
+</Tabs>
 
 <br/>
+
+
+
+
+
+#### Detección de fallas
+
 <Tabs>
 <TabItem value="mnp" label="Antecedentes" default>
 <div class="alert alert--primary">
@@ -723,6 +609,7 @@ Interpretación de los 300 casos de prueba evaluados:
 **Conclusión Diagnóstica:**
 
 * **Exhaustividad sobresaliente ($\text{Recall} = 93,5\%$):** El modelo cumple su objetivo principal en ingeniería: capturar casi todas las fallas reales (43 de 46), cometiendo apenas 3 falsos negativos.
+
 * **El costo del compromiso ($\text{Precisión} = 40,2\%$):** Para lograr no omitir averías, el modelo relaja su umbral, generando 64 falsas alarmas. Esto explica por qué el $F_1\text{-Score}$ se sitúa en un equilibrado **56,2%**, revelando una realidad operativa que la exactitud global (**77,7%**) no permitía apreciar por sí sola.
 
 </div>
@@ -832,6 +719,258 @@ plt.show()
 </TabItem>
 </Tabs><br/>
 
+
+
+***
+## **ROC_AUC vs. PR-AUC**
+
+En problemas reales, como la detección de fraudes con tarjetas de crédito, ciberseguridad (detección de intrusiones), diagnóstico de enfermedades raras o mantenimiento predictivo de turbinas industriales, las clases suelen estar **severamente desbalanceadas** (por ejemplo, el 99% o 99,9% de los registros pertenecen a la clase negativa o normal, y solo el 1% o 0,1% corresponde a la clase positiva de interés).
+
+Bajo estas condiciones operativas, confiar ciegamente en la curva **ROC-AUC** puede inducir a un **diagnóstico falsamente optimista**. En su lugar, la curva **Precision-Recall (PR-AUC)** es el estándar de evaluación riguroso.
+
+
+### El Problema Matemático
+**¿Por Qué ROC-AUC Puede Ser Engañosa?**
+
+Examinemos las fórmulas que definen el eje horizontal de cada curva:
+
+#### A. La Tasa de Falsos Positivos (Eje X en la Curva ROC)
+```math
+\text{FPR} = \frac{\text{FP}}{\text{FP} + \text{TN}} = \frac{\text{FP}}{N}
+```
+
+*   **Argumentos:**
+    *   $\text{FP}$: Falsos Positivos (registros normales clasificados erróneamente como fraude o falla).
+
+    *   $\text{TN}$: Verdaderos Negativos (registros normales clasificados correctamente).
+
+    *   $N = \text{FP} + \text{TN}$: Total de observaciones pertenecientes a la **clase negativa real**.
+*   **La distorsión del denominador masivo:**  
+    Si evaluamos 100.000 transacciones bancarias donde 99.000 son legítimas ($N = 99.000$) y 1.000 son fraudulentas ($P = 1.000$), supongamos que el modelo produce **1.980 falsas alarmas** (falsos positivos).  
+    Calculamos el $\text{FPR}$:
+
+    ```math
+    \text{FPR} = \frac{1.980}{99.000} = 0,02 \quad (2\%)
+    ```
+
+    En la curva ROC, un $\text{FPR}$ de apenas el 2% sitúa el punto en el extremo izquierdo del gráfico, dando la ilusión visual de un modelo casi perfecto. Sin embargo, para un equipo de analistas de seguridad, revisar 1.980 falsas alarmas diarias para capturar unos pocos cientos de fraudes representa un colapso operativo inaceptable.
+
+#### B. La Precisión (Eje Y en la Curva Precision-Recall)
+La curva PR reemplaza el $\text{FPR}$ por la **Precisión** (*Valor Predictivo Positivo*), enfocándose estrictamente en la pureza de las predicciones positivas:
+
+```math
+\text{Precisión} = \frac{\text{TP}}{\text{TP} + \text{FP}}
+```
+
+*   **Argumentos:**
+    *   $\text{TP}$: Verdaderos Positivos (fraudes reales detectados con éxito).
+    *   $\text{FP}$: Falsos Positivos.
+    *   **Nótese que $\text{TN}$ no interviene en esta ecuación.**
+*   Si de los 1.000 fraudes el modelo detectó 800 ($\text{TP} = 800$, lo que da un excelente *Recall* de $800/1.000 = 80\%$), la precisión real será:
+    ```math
+    \text{Precisión} = \frac{800}{800 + 1.980} = \frac{800}{2.780} \approx 0,287 \quad (28,7\%)
+    ```
+    Esto significa que **más del 71% de las alertas generadas por el sistema son falsas alarmas**. Mientras la curva ROC oculta este desastre bajo un $\text{FPR} = 2\%$, la curva Precision-Recall lo evidencia de inmediato al caer a un nivel de precisión del 28,7%.
+
+
+### Cuadro Comparativo
+
+| Criterio Técnico | Curva ROC-AUC | Curva Precision-Recall (PR-AUC) |
+| :--- | :--- | :--- |
+| **Métricas en los Ejes** | $\text{TPR}$ (*Recall*) vs. $\text{FPR}$ | Precisión vs. $\text{Recall}$ ($\text{TPR}$) |
+| **Presencia de $\text{TN}$ en el cálculo** | **Sí** (en el denominador de $\text{FPR}$) | **No** (solo evalúa $\text{TP}$, $\text{FP}$ y $\text{FN}$) |
+| **Línea base (Clasificador aleatorio)** | **Constante e invariable: $0,50$** (diagonal de 45°) | **Variable: igual a la prevalencia** $\frac{P}{P + N}$ (e.g., $0,01$ o $1\%$) |
+| **Sensibilidad a la prevalencia de clases** | **Invariante:** no cambia si la proporción de negativos aumenta | **Sensible:** penaliza severamente el costo operativo de las falsas alarmas |
+| **¿Cuándo utilizarlo?** | Clases balanceadas o cuando **interesa tanto la detección de negativos como de positivos** | **Desbalance severo** o cuando la clase positiva es rara y las falsas alarmas son costosas |
+
+
+***
+### 🖥️ Implementación
+#### Comparación experimental en desbalance severo
+<Tabs>
+<TabItem value="mnp" label="Antecedentes" default>
+<div class="alert alert--primary">
+**Comparación Experimental en Desbalance Severo**
+
+El siguiente código reproduce exactamente este fenómeno: genera un conjunto de datos con un **99% de clase negativa y solo un 1% de clase positiva** (10.000 muestras) y grafica ambas curvas lado a lado:
+
+```
+ROC-AUC Score: 0.7426  (Aparenta ser casi perfecto)
+PR-AUC Score:  0.1913  (Refleja la degradación por falsos positivos)
+Prevalencia de clase positiva: 1.53%
+```
+![](img/roc-evaluacion.png)
+
+**Lectura del gráfico**
+
+El gráfico muestra la discrepancia diagnóstica sobre el mismo modelo y los mismos datos:
+
+1. **Panel Izquierdo (Curva ROC — Aparenta un éxito engañoso):**  
+   El modelo exhibe un **$\text{ROC-AUC} = 0,845$**, curvándose hacia la esquina superior izquierda. La presencia de 2.970 Verdaderos Negativos amortigua el $\text{FPR}$, haciendo creer al ingeniero que el clasificador está listo para producción.
+
+2. **Panel Derecho (Curva Precision-Recall — Revela la realidad operativa):**  
+   La curva cae rápidamente, alcanzando un **$\text{PR-AUC} = 0,195$**. Muestra que para capturar más del 60% de los casos positivos reales (*Recall* > 0,6), la precisión se desploma por debajo del 20%, lo que evidencia una inundación de falsas alarmas que el gráfico ROC había ocultado.
+
+3. **Línea Base Naranja Horizontal:**  
+   En la curva PR, el desempeño aleatorio no es 0,5, sino la prevalencia basal (**1,0%**). Aunque el modelo supera ampliamente el azar puro, el gráfico deja claro que se requiere un ajuste de umbral o técnicas de muestreo (como SMOTE o penalizaciones de coste asimétrico) antes de su puesta en producción.
+</div>
+</TabItem>
+<TabItem value="mnp-python" label="🖥️ Código">
+
+```python showLineNumbers
+"""
+Evaluación Comparativa ROC-AUC vs PR-AUC bajo Desbalance Extremo.
+Dataset: 99% Negativos (Legítimos) vs. 1% Positivos (Fraude).
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import roc_curve, roc_auc_score, precision_recall_curve, auc
+
+# 1. Simulación de datos con 99% negativos y 1% positivos
+X, y = make_classification(
+    n_samples=10000, n_features=15, n_informative=6, n_redundant=3,
+    weights=[0.99, 0.01], random_state=42
+)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.3, random_state=42, stratify=y
+)
+
+# 2. Ajuste del modelo de Regresión Logística (con ponderación balanceada)
+clf = LogisticRegression(class_weight='balanced', random_state=42)
+clf.fit(X_train, y_train)
+
+# Probabilidades continuas predichas para la clase positiva
+y_probs = clf.predict_proba(X_test)[:, 1]
+
+# 3. Cálculo de métricas ROC y PR
+fpr, tpr, _ = roc_curve(y_test, y_probs)
+roc_auc = roc_auc_score(y_test, y_probs)
+
+precision, recall, _ = precision_recall_curve(y_test, y_probs)
+pr_auc = auc(recall, precision)
+prevalencia = np.mean(y_test)  # Línea base de azar en PR (~0.01)
+
+print(f"ROC-AUC Score: {roc_auc:.4f}  (Aparenta ser casi perfecto)")
+print(f"PR-AUC Score:  {pr_auc:.4f}  (Refleja la degradación por falsos positivos)")
+print(f"Prevalencia de clase positiva: {prevalencia*100:.2f}%")
+
+# 4. Generación Gráfica Comparativa (Fondo Blanco Plano)
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(14, 5.5), facecolor='white')
+
+# Panel 1: Curva ROC
+ax1.set_facecolor('white')
+ax1.plot(fpr, tpr, color='#0072b2', linewidth=2.5, label=f'Modelo (ROC-AUC = {roc_auc:.3f})')
+ax1.plot(,, color='#d55e00', linestyle='--', linewidth=1.5, label='Azar (AUC = 0.500)')
+ax1.set_title('1. Curva ROC (Aparenta Éxito Engañoso)', fontsize=12, fontweight='bold', pad=10)
+ax1.set_xlabel('Tasa de Falsos Positivos (FPR = FP / [FP + TN])', fontsize=10.5)
+ax1.set_ylabel('Recall / TPR (TP / [TP + FN])', fontsize=10.5)
+ax1.set_xlim(-0.02, 1.02)
+ax1.set_ylim(-0.02, 1.04)
+ax1.grid(True, linestyle=':', alpha=0.6)
+ax1.spines['top'].set_visible(False)
+ax1.spines['right'].set_visible(False)
+ax1.legend(frameon=True, facecolor='white', loc='lower right', fontsize=9.5)
+
+# Panel 2: Curva Precision-Recall
+ax2.set_facecolor('white')
+ax2.plot(recall, precision, color='#009e73', linewidth=2.5, label=f'Modelo (PR-AUC = {pr_auc:.3f})')
+ax2.axhline(prevalencia, color='#e69f00', linestyle='--', linewidth=1.5,
+            label=f'Línea Base = Prevalencia ({prevalencia*100:.1f}%)')
+ax2.set_title('2. Curva Precision-Recall (Revela el Impacto de Falsos Positivos)', fontsize=12, fontweight='bold', pad=10)
+ax2.set_xlabel('Recall / Exhaustividad (TP / [TP + FN])', fontsize=10.5)
+ax2.set_ylabel('Precisión (TP / [TP + FP])', fontsize=10.5)
+ax2.set_xlim(-0.02, 1.02)
+ax2.set_ylim(-0.02, 1.04)
+ax2.grid(True, linestyle=':', alpha=0.6)
+ax2.spines['top'].set_visible(False)
+ax2.spines['right'].set_visible(False)
+ax2.legend(frameon=True, facecolor='white', loc='upper right', fontsize=9.5)
+
+fig.suptitle('Impacto del Desbalance Extremo de Clases (99% Negativos vs 1% Positivos)',
+             fontsize=14, fontweight='bold', y=0.98)
+plt.tight_layout()
+plt.show()
+```
+</TabItem>
+</Tabs><br/>
+
+
+
+***
+## **Usar ROC vs. Precision-Recall**
+
+La elección entre la curva **ROC** (*Receiver Operating Characteristic*) y la curva **Precision-Recall (PR)** no es arbitraria ni intercambiable. Cada una responde a objetivos analíticos y distribuciones poblacionales completamente diferentes.
+
+
+#### La Regla de Oro
+
+* **Usa la curva ROC** cuando las **clases estén razonablemente balanceadas** (o con desbalance leve, p. ej. 60/40 o 70/30) Y te interese evaluar la capacidad del modelo para **clasificar correctamente tanto los casos positivos como los casos negativos** de forma equitativa.
+
+* **Usa la curva Precision-Recall (PR)** cuando exista un **desbalance severo de clases** (p. ej. 95/5, 99/1 o superior, como en detección de fraude, anomalías en ciberseguridad o fallas raras) Y el costo operativo de las **falsas alarmas (Falsos Positivos)** sea crítico.
+
+
+### Elegir la Curva ROC? 
+**(Criterios Técnicos)**
+
+Debes optar formalmente por la **Curva ROC / ROC-AUC** en los siguientes escenarios:
+
+#### A. Cuando la clase negativa es tan importante como la positiva
+En muchos problemas de negocio, clasificar correctamente a un individuo negativo tiene el mismo impacto operativo o ético que clasificar a un positivo.
+* **Ejemplo (Aprobación de créditos / Riesgo crediticio):**  
+  Aceptar a un buen pagador (Verdadero Negativo) genera ingresos financieros para el banco, mientras que rechazar erróneamente a un cliente solvente (Falso Positivo) implica pérdida de cuota de mercado frente a la competencia. En este caso, medir la **especificidad** capacidad de acertar negativos es vital: 
+  ```math
+  \text{FPR} = \frac{\text{FP}}{\text{FP} + \text{TN}}
+  ``` 
+
+#### B. Cuando se requiere invariancia a la prevalencia poblacional
+Las dos métricas que componen la curva ROC se calculan de manera independiente dentro de cada grupo real:
+```math
+\text{Sensibilidad (TPR)} = \frac{\text{TP}}{\text{TP} + \text{FN}} = \frac{\text{TP}}{\text{Positivos Reales}}
+```
+```math
+\text{Tasa de Falsos Positivos (FPR)} = \frac{\text{FP}}{\text{FP} + \text{TN}} = \frac{\text{FP}}{\text{Negativos Reales}}
+```
+* **Propiedad matemática:** Como el denominador de cada eje solo depende de su propia clase, **la curva ROC es invariante a los cambios en la proporción de clases**. 
+
+* **Caso de uso:** Si entrenas un modelo en una región o temporada donde la prevalencia es del 40%, y luego lo despliegas en otra región donde la prevalencia cambia al 20%, la forma intrínseca de la curva ROC del modelo se mantendrá consistente y comparable.
+
+#### C. Cuando se busca una línea base absoluta de no-discriminación
+* En la curva ROC, la línea base del azar **siempre es fija e igual a 0,50** (la diagonal de 45°), lo que permite contrastar de forma directa si cualquier algoritmo supera estadísticamente a una decisión aleatoria pura. En cambio, en la curva PR la línea base cambia constantemente según la prevalencia muestral.
+
+
+
+### Elegir Precision-Recall?
+
+El fallo crítico de la curva ROC ocurre cuando el número de negativos reales ($N = \text{FP} + \text{TN}$) es gigantesco frente a los positivos:
+* Si en una base de 100.000 registros tienes **99.000 negativos** y el modelo comete **1.980 falsas alarmas**, la tasa de falsos positivos en el eje X de la curva ROC será:
+  ```math
+  \text{FPR} = \frac{1.980}{99.000} = 0,02 \quad (2\%)
+  ```
+* En el gráfico ROC, un $\text{FPR} = 2\%$ coloca el punto en el extremo izquierdo, haciendo que el **AUC-ROC aparente un rendimiento sobresaliente (~0,90)**.
+* Sin embargo, la **precisión real** revela que el sistema inunda al equipo de operaciones con falsas alarmas:
+  ```math
+  \text{Precisión} = \frac{\text{TP}}{\text{TP} + \text{FP}} = \frac{800}{800 + 1.980} \approx 28,7\%
+  ```
+* En este escenario, la curva **Precision-Recall** no se deja engañar por el gran número de verdaderos negativos ($\text{TN}$) porque **no los incluye en su fórmula**, evidenciando inmediatamente la caída en la pureza de las predicciones positivas.
+
+
+### Matriz de decisión
+
+| Dimensión de Decisión | Curva ROC (ROC-AUC) | Curva Precision-Recall (PR-AUC / AP) |
+| :--- | :--- | :--- |
+| **Balance de clases** | **Equilibrado** (o desbalance moderado $< 70/30$) | **Severamente desbalanceado** ($90/10$, $99/1$, $99.9/0.1$) |
+| **Foco del problema** | Interesa tanto la clase positiva como la negativa | Interesa **exclusivamente la clase positiva** (minoritaria y crítica) |
+| **Impacto de las falsas alarmas** | Tolerable o ponderado frente a los verdaderos negativos | **Crítico**: cada falsa alarma tiene un costo humano o financiero alto |
+| **Línea base de comparación** | Fija en **$0,50$** (diagonal de azar) | Dinámica: igual a la prevalencia poblacional ($\frac{P}{P+N}$) |
+| **Casos típicos en la industria** | Diagnóstico general, riesgo de crédito, segmentación de clientes | Fraude con tarjetas, ciberataques, detección de cáncer, defectos de manufactura |
+
+
+
 ***
 ## **Matriz multiclase**
 
@@ -851,7 +990,7 @@ Cuando un problema pasa de 2 a 3 o más clases, la **matriz de confusión multic
 
 
 
-### Estructura Formal
+#### Estructura Formal
 **Desglose One-vs-Rest**
 
 Consideremos una matriz multiclase para $K=3$ estados operativos:
@@ -876,7 +1015,7 @@ Para una clase cualquiera $k$ (por ejemplo, la clase $B$ - *Alerta*):
 
 
 
-### Fórmulas matemáticas de agregación 
+### Fórmulas de agregación 
 *Macro*, *Micro* y *Weighted*
 
 Una vez calculadas la 
@@ -922,8 +1061,11 @@ Agrega globalmente todos los $\text{TP}$, $\text{FP}$ y $\text{FN}$ a través de
 * **Propiedad matemática:** En clasificación multiclase donde cada instancia pertenece exactamente a una clase, **$\text{Precision}_{\text{micro}} = \text{Recall}_{\text{micro}} = \text{F1}_{\text{micro}} = \text{Accuracy}$**.
 
 
-### Implementación
+***
+### 🖥️ Implementación
 <br/>
+
+#### Telemetría industrial
 <Tabs>
 <TabItem value="mnp" label="Antecedentes" default>
 <div class="alert alert--primary">
@@ -955,7 +1097,7 @@ F1-Score Micro    (Global agregado = Accuracy) : 0.860
 ```python showLineNumbers
 # Implementación en Python
 """
-Módulo Académico: Matriz de Confusión Multiclase y Promedios (Macro, Micro, Weighted).
+Matriz de Confusión Multiclase y Promedios (Macro, Micro, Weighted).
 Librerías: scikit-learn, matplotlib y seaborn.
 """
 
@@ -1039,9 +1181,11 @@ plt.show()
 
 
 
-### Resumen de decisión
+#### Resumen de decisión
 
 1. **Usa `macro`** cuando todas las clases tengan el mismo valor estratégico o ético, y sea inaceptable que el modelo sacrifique la clase minoritaria a cambio de una mayor exactitud general.
+
 2. **Usa `weighted`** si te interesa evaluar el impacto poblacional global respetando la frecuencia natural con la que ocurren los eventos.
+
 3. **Usa `micro`** cuando necesites una métrica global agregada independiente del etiquetado por clases (coincide conceptualmente con la exactitud global).
 
