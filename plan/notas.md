@@ -53,8 +53,9 @@ config:
 </div>
 </TabItem>
 <TabItem value="mnp-python" label="🖥️ Código">
+
 ```python showLineNumbers
-# Implementación en Python
+
 ```
 </TabItem>
 </Tabs><br/>

@@ -8,7 +8,7 @@
     "build": "docusaurus build",
     "swizzle": "docusaurus swizzle",
     "deploy": "docusaurus deploy",
-    "postbuild": "node scripts/deploy-ftp.js",
+    "postbuild": "DOCUSAURUS_IGNORE_SSG_WARNINGS=true node scripts/deploy-ftp.js",
     "clear": "docusaurus clear",
     "serve": "docusaurus serve",
     "write-translations": "docusaurus write-translations",

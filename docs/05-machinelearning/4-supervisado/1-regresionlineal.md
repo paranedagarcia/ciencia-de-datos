@@ -19,15 +19,41 @@ La **regresión lineal** consiste en **encontrar la mejor línea recta (o plano)
 
 En palabras cotidianas: es el método estadístico para **estimar una cantidad continua a partir de una o varias pistas, asumiendo que la relación entre ellas sigue una proporción lineal directa**.
 
+
 La **Regresión Lineal** es uno de los métodos supervisados más clásicos y utilizados para predecir variables cuantitativas continuas ($Y$) a partir de un conjunto de variables explicativas o características ($X$). 
 
 En el paradigma del **aprendizaje automático supervisado**, la regresión lineal es un modelo que aproxima la relación condicional entre una variable escalar dependiente y continua $y \in \mathbb{R}$ (denominada respuesta o *target*) y un vector de $p$ variables explicativas o predictoras $x = [x_1, x_2, \dots, x_p]^T \in \mathbb{R}^p$ (*features* o regresores).
 
+<center>
+<figure>
+![](img/regresion-lineal.jpg)
+<figcaption>**Regresión lineal**. Se busca establecer un función que explique la relación asumiendo una proporción lineal directa.</figcaption>
+</figure>
+</center>
+
 Bajo la formulación lineal estándar, el modelo asume que el valor esperado de la variable respuesta es una combinación lineal ponderada de las características de entrada, la respuesta es lineal sujeta a un término de error o ruido estocástico $\epsilon$:
 
-```math
-y = w_0 + w_1 x_1 + w_2 x_2 + \dots + w_p x_p + \epsilon = w_0 + w^T x + \epsilon
-```
+En la regresión lineal simple, la relación se expresa mediante la ecuación:
+
+$$
+y = w_0 + w_1 x + \epsilon
+$$
+
+donde:
+- $y$ es la variable dependiente,
+- $x$ es la variable independiente,
+- $w_0$ es el intercepto,
+- $w_1$ es el coeficiente de regresión (pendiente),
+- $\epsilon$ es el término de error.
+
+En la regresión lineal múltiple, se extiende a varias variables independientes:
+
+$$
+y = w_0 + w_1 x_1 + w_2 x_2 + \dots + w_n x_n + \epsilon
+$$
+
+La regresión lineal es ampliamente utilizada por su simplicidad, interpretabilidad y eficiencia, aunque asume que la relación entre variables es lineal, que los errores son independientes y distribuidos normalmente, y que no existe multicolinealidad entre las variables independientes.
+
 
 Donde:
 *   $w_0$ (frecuentemente denotado como $b$ o $\beta_0$) es el **término de sesgo** o intersección con el eje (*intercept*).
@@ -76,9 +102,16 @@ Para que el estimador OLS sea el **Mejor Estimador Lineal Insesgado** (BLUE, *Be
 :::info[]
 * **Nota adicional:** Si además se asume que los errores siguen una distribución normal $\epsilon \sim \mathcal{N}(0, \sigma^2 I)$, el estimador OLS coincide exactamente con el estimador de Máxima Verosimilitud (MLE) y alcanza la cota inferior de varianza de Cramér-Rao.*
 :::
-Después de ajustar un modelo OLS, se evalúan:
+Después de ajustar un modelo OLS, este se evalúa:
 
 #### Evaluación del modelo
+
+<center>
+<figure>
+![](img/regresion-mse.jpg)
+<figcaption>**Evaluación**. La precisión de un modelo se evalúa calculando las distancias (errores) entre el valor real y el valor predicho (dado por la función resultante). El objetivo es encontrar el valor mínimo de estas distancias (MSE).</figcaption>
+</figure>
+</center>
 
 El ajuste global del modelo suele cuantificarse mediante el **coeficiente de determinación ($R^2$)**:
 
@@ -87,7 +120,14 @@ R^2 = 1 - \frac{\sum_{i=1}^N (y^{(i)} - \hat{y}^{(i)})^2}{\sum_{i=1}^N (y^{(i)} 
 ```
 El cual mide la fracción de variabilidad total de $y$ que logra explicar el modelo frente a la simple predicción de la media.
 
-Cuando se viola el supuesto de rango completo debido a alta correlación entre variables predictoras (multicolinealidad) o cuando el número de variables supera a las observaciones ($p > N$), OLS sufre de inestabilidad numérica extrema y sobreajuste. En tales circunstancias se recurre a técnicas de **regularización**:
+<center>
+<figure>
+![](img/regresion-sobreajuste.jpg)
+<figcaption></figcaption>
+</figure>
+</center>
+
+Cuando se viola el supuesto de rango completo debido a alta correlación entre variables predictoras ([multicolinealidad](/docs/machinelearning/supervisado/multicolinealidad)) o cuando el número de variables supera a las observaciones ($p > N$), OLS sufre de inestabilidad numérica extrema y sobreajuste. En tales circunstancias se recurre a técnicas de **regularización**:
 * **Ridge ($L_2$):** Penaliza la norma $\|w\|_2^2$ de los coeficientes, contrayéndolos uniformemente hacia cero para reducir la varianza sin anularlos.
 * **Lasso ($L_1$):** Penaliza la norma $\|w\|_1$, forzando a que las variables irrelevantes o colineales tengan pesos de exactamente cero, actuando como un mecanismo automático de selección de variables y parsimonia.
 
@@ -135,11 +175,18 @@ Skew:                           0.289   Prob(JB):                        0.752
 Kurtosis:                       1.450   Cond. No.                         8.37
 ==============================================================================
 ```
-Metricas a revisar: [Durbin-Watson](/docs/metricas/Durbin-Watson), 
+Metricas a revisar: [Durbin-Watson](/docs/metricas/Durbin-Watson), [Jarque-Bera](/docs/metricas/Jarque-Bera)
 
 ***
 ### Regularización L2 Ridge
 **Regresión Ridge (Tikhonov)**
+
+<center>
+<figure>
+![](img/regresion-ridge.jpg)
+<figcaption></figcaption>
+</figure>
+</center>
 
 La **Regresión Ridge** (o regularización de Tikhonov) introduce una penalización proporcional a la **norma $L_2$ al cuadrado** del vector de pesos. Esto restringe la magnitud de los coeficientes, forzándolos a ser pequeños y reduciendo la varianza del estimador a cambio de introducir un sesgo leve y controlado:
 
@@ -167,6 +214,13 @@ Donde:
 
 ### Regularización L1 Lasso
 **Regresión Lasso (Feature Selection)**
+
+<center>
+<figure>
+![](img/regresion-lasso.jpg)
+<figcaption></figcaption>
+</figure>
+</center>
 
 La **Regresión Lasso** (*Least Absolute Shrinkage and Selection Operator*) modifica la función de coste sumando la **norma $L_1$** (la suma de los valores absolutos) de los coeficientes:
 
@@ -213,6 +267,13 @@ J_{\text{Ridge}}(w) = \sum_{i=1}^{N} \Big(y^{(i)} - (w_0 + w^T x^{(i)})\Big)^2 +
 
 * **Explicación de argumentos:** $\alpha \ge 0$ (en literatura matemática a menudo denotado $\lambda$) es el **hiperparámetro de regularización** que controla el balance entre el ajuste a los datos y la simplicidad del modelo. El término independiente o sesgo ($w_0$) **no se penaliza** para no hacer el procedimiento dependiente del origen de coordenadas de $y$.
 
+
+<center>
+<figure>
+![](img/regresion-bayes.png)
+<figcaption></figcaption>
+</figure>
+</center>
 ---
 
 #### Solución Analítica: Estabilidad Numérica y Multicolinealidad
@@ -344,9 +405,9 @@ Ridge -> RMSE: 0.8049 | R²: 0.9514
 Cuando se presentan variables correlacionadas en alta dimensionalidad, existe un modelo híbrido llamado **ElasticNet**, que combina linealmente las penalizaciones $L_1$ y $L_2$ para heredar las ventajas de ambas.
 :::
 
----
 
-### Implementación en Python
+
+###  🖥️ Implementación
 
 El siguiente código contrasta el ajuste de **OLS**, **Ridge** y **Lasso** sobre un conjunto de datos multivariable, ilustrando cómo el escalado de características y la sintonización de $\alpha$ modifican los pesos resultantes:
 
@@ -512,7 +573,7 @@ En el espacio de parámetros $(w_1, w_2)$, la región factible impuesta por Elas
 * **Conserva esquinas en los ejes coordenados:** Al igual que Lasso, cuando las elipses de contorno del error cuadrático hacen contacto tangencial con los vértices sobre los ejes, los coeficientes se anulan a **cero exacto**, permitiendo **selección automática de variables**.
 * **Superficie estrictamente convexa:** La adición del término cuadrático $L_2$ curva las caras planas del rombo de Lasso, eliminando las aristas planas que causan indeterminación matemática cuando existen predictores colineales.
 
----
+
 
 ### ¿Cuándo se utiliza?
 
@@ -543,8 +604,16 @@ En problemas complejos donde no se conoce a priori si el fenómeno responde a un
 | **Comportamiento ante colineales** | Contrae uniformemente | Selecciona una al azar y anula el resto | **Agrupa y contrae el bloque conjuntamente** |
 | **Capacidad cuando $p > N$** | Funciona sin restricciones | Máximo $N$ variables seleccionadas | Selecciona más de $N$ variables si es preciso |
 
+### Que elegir?
 
-### Implementación en Python
+<center>
+<figure>
+![](img/regresion-elecciones.jpg)
+<figcaption></figcaption>
+</figure>
+</center>
+
+### 🖥️ Implementación
 
 A continuación se muestra cómo sintonizar de manera óptima un modelo ElasticNet utilizando la clase `ElasticNetCV`, la cual busca simultáneamente la mejor combinación de $\alpha$ y `l1_ratio` mediante validación cruzada:
 
@@ -618,7 +687,7 @@ print(f"Rendimiento en Test Set -> RMSE: {rmse:.4f} | R²: {r2*100:.2f}%")
 
 
 ***
-## **Casos**
+##  🖥️ **Casos**
 
 ### Progresión de diabetes
 
@@ -627,7 +696,7 @@ Utilizaremos el **conjunto de datos de progresión de la diabetes** (*Diabetes D
 El dataset cuenta con 442 pacientes y 10 variables fisiológicas de entrada (edad, sexo, índice de masa corporal, presión arterial y seis mediciones de suero sanguíneo: `s1` a `s6`). Al introducir términos polinómicos e interacciones entre variables, el espacio de características se expande, generando **alta multicolinealidad** y riesgo de **sobreajuste (*overfitting*)**. Esto proporciona el escenario ideal para enfrentar a **OLS (Mínimos Cuadrados Ordinarios)**, **Ridge ($L_2$)**, **Lasso ($L_1$)** y **ElasticNet ($L_1 + L_2$)**, evaluando formalmente cuál es la opción óptima y por qué.
 
 
-#### Implementación en Python
+#### Implementación
 
 El siguiente flujo de trabajo:
 1. Carga los datos y genera interacciones polinómicas de segundo grado para inducir multicolinealidad.
@@ -787,7 +856,7 @@ OLS no aplica ningún castigo a la complejidad. Al haber 65 variables correlacio
 
 <br/>
 
-### Caso comparacion de regularizacion
+### Comparacion de regularizacion
 <Tabs>
 <TabItem value="mnp" label="Ejemplo" default>
 <div class="alert alert--primary">
@@ -1367,11 +1436,36 @@ En una validación cruzada de $K$ pliegues (típicamente $K=5$ o $K=10$):
 
 
 
-#### Implementación en Python
+#### Implementación
+
+<Tabs>
+<TabItem value="mnp" label="Antecedentes" default>
+<div class="alert alert--primary">
+
+**Validación cruzada con Ridge**
 
 El siguiente código muestra cómo ejecutar la búsqueda de $\alpha$ tanto de forma manual (para registrar y graficar la curva del error de validación) como utilizando la interfaz automatizada `RidgeCV`:
 
-```python
+
+![](img/cruzada.png)
+
+#### Interpretación de la Curva de Validación
+
+Este ejemplo muestra la clásica curva en forma de "U" del dilema sesgo-varianza:
+
+1. **Zona de Penalización Débil ($\alpha < 1$):**  
+   El modelo se comporta casi idéntico a OLS. Debido a las 65 variables correlacionadas, la varianza es alta y el error en validación es elevado (~60 a 64 RMSE).
+
+2. **Zona de Mínimo Global ($\alpha \approx 73,2$):**  
+   La regularización $L_2$ contrae la dispersión de los coeficientes de las variables colineales, alcanzando el mínimo de error en validación (**58,14 RMSE**) y permitiendo que el modelo generalice de forma óptima en el conjunto de prueba (**52,18 RMSE** con un $R^2 = 50,7\%$).
+   
+3. **Zona de Sobrepenalización ($\alpha > 500$):**  
+   La penalización es excesiva; los coeficientes se reducen casi a cero, destruyendo la capacidad predictiva del modelo y disparando el error debido al subajuste (alto sesgo).
+</div>
+</TabItem>
+<TabItem value="mnp-python" label="🖥️ Código">
+
+```python showLineNumbers
 """
 Validación Cruzada en Regresión Ridge.
 Incluye:
@@ -1503,18 +1597,269 @@ Alpha seleccionado por RidgeCV: α = 73.18
 RMSE en Test Set:              52.18
 R² en Test Set:                50.76%
 ```
-![](img/cruzada.png)
+</TabItem>
+</Tabs><br/>
 
-#### Interpretación de la Curva de Validación
 
-Este ejemplo muestra la clásica curva en forma de "U" del dilema sesgo-varianza:
 
-1. **Zona de Penalización Débil ($\alpha < 1$):**  
-   El modelo se comporta casi idéntico a OLS. Debido a las 65 variables correlacionadas, la varianza es alta y el error en validación es elevado (~60 a 64 RMSE).
 
-2. **Zona de Mínimo Global ($\alpha \approx 73,2$):**  
-   La regularización $L_2$ contrae la dispersión de los coeficientes de las variables colineales, alcanzando el mínimo de error en validación (**58,14 RMSE**) y permitiendo que el modelo generalice de forma óptima en el conjunto de prueba (**52,18 RMSE** con un $R^2 = 50,7\%$).
-   
-3. **Zona de Sobrepenalización ($\alpha > 500$):**  
-   La penalización es excesiva; los coeficientes se reducen casi a cero, destruyendo la capacidad predictiva del modelo y disparando el error debido al subajuste (alto sesgo).
+### Consumo de combustible
+
+<Tabs>
+<TabItem value="mnp" label="Antecedentes" default>
+<div class="alert alert--primary">
+
+**la predicción del consumo térmico de combustible en una planta de generación / refinería industrial**
+
+En este escenario, se recolectan mediciones de telemetría de **$N = 180$ turnos operativos** a través de **$p = 50$ variables de sensores**:
+1. **8 variables operativas fundamentales:** Procesos de combustión reales (flujo de vapor de alta presión, temperatura en la cámara, presión de caldera, caudal de agua de alimentación, etc.).
+2. **16 variables con severa multicolinealidad:** Sensores redundantes y duplicados instalados en las mismas líneas físicas por normativa de seguridad (con correlaciones $r > 0,95$).
+3. **26 variables espurias de ruido ambiental:** Vibraciones mecánicas externas, temperatura en bodegas remotas y fluctuaciones de la red auxiliar que no guardan relación con el consumo del reactor.
+
+Este desbalance entre tamaño de muestra ($N=180$), colinealidad crítica y abundancia de sensores ruidosos constituye el entorno donde se comprueba el impacto de la regularización.
+
+![](img/regresion-combustible.png)
+
+
+**Lectura de los gráficos**
+
+1.  **Panel 1 — Error Cuadrático Medio (RMSE):**  
+    Permite visualizar la reducción del error de estimación conforme se introduce regularización: OLS presenta el error más alto (**20,79 MW**) debido a la inestabilidad de la matriz mal condicionada. Ridge y ElasticNet amortiguan el error a **17,50 MW** y **15,26 MW**, mientras que Lasso alcanza el mínimo con **15,07 MW**.
+
+2.  **Panel 2 — Coeficiente de Determinación ($R^2$):**  
+    La varianza explicada asciende del **94,2%** en OLS hasta un **96,9%** en Lasso y ElasticNet, confirmando que la regularización previene que el modelo gaste capacidad de ajuste en memorizar el ruido muestral.
+
+3.  **Panel 3 — Parsimonia y Dispersión (Sparsity):**  
+    Muestra el desglose de complejidad: OLS y Ridge mantienen activos los **50 sensores**, ElasticNet anula 4 variables, y Lasso descarta **20 sensores ruidosos a cero exacto**, resolviendo el problema con apenas **30 variables activas**.
+
+4.  **Panel 4 — Alineación Real vs. Predicho:**  
+    Contrasta las predicciones frente a la recta de identidad de 45° (línea discontinua 1:1). Los puntos verdes de Lasso se alinean de forma más compacta y homogénea a lo largo de la diagonal, mientras que los puntos anaranjados de OLS muestran dispersión y desviaciones en los extremos operativos de alta demanda energética.
+
+**Resultados Experimentales en Datos de Prueba (Test Set)**
+
+Los cuatro estimadores se evaluaron sobre una partición independiente de prueba del 30% (*held-out test set*), con estandarización rigurosa (`StandardScaler`) ajustada únicamente sobre el conjunto de entrenamiento. Los hiperparámetros $\alpha$ y $\rho$ se sintonizaron mediante validación cruzada interna de 5 pliegues (*5-Fold Cross Validation*):
+
+| Modelo Evaluado | Hiperparámetro Óptimo | RMSE en Test (↓) | $R^2$ en Test (↑) | Sensores Retenidos ($w \neq 0$) | Sensores Anulados ($w = 0$) |
+| :--- | :---: | :---: | :---: | :---: | :---: |
+| **OLS (Sin regularizar)** | Ninguno | 20,79 MW | 94,2% | **50 / 50** | 0 |
+| **Ridge ($L_2$)** | $\alpha = 0,10$ | 17,50 MW | 95,9% | **50 / 50** | 0 |
+| **ElasticNet ($L_1 + L_2$)** | $\alpha = 0,35$ ($\rho = 0,5$) | 15,26 MW | 96,9% | **46 / 50** | 4 |
+| **Lasso ($L_1$)** | $\alpha = 0,51$ | **15,07 MW** | **96,9%** | **30 / 50** | **20** |
+
+
+
+**Análisis Técnico: ¿Qué Regularización es la Más Óptima y Por Qué?**
+
+En este escenario de ingeniería, **Lasso ($L_1$) es la regularización más óptima**, por tres fundamentos esenciales:
+
+1.  **Minimización del Error de Generalización:**  
+    Lasso alcanza el **menor error cuadrático medio (RMSE = 15,07 MW)** y el **mayor $R^2$ (96,9%)**, reduciendo en más de 5,7 MW el error de OLS (20,79 MW).
+
+2.  **Principio de Parsimonia y Supresión de Ruido:**  
+    De las 50 señales captadas por los instrumentos, 26 eran ruido ambiental irrelevante. Mientras que OLS y Ridge retienen obligatoriamente los 50 sensores en memoria, **Lasso anula a cero 20 variables superfluas**, preservando una arquitectura compacta enfocada exclusivamente en los procesos térmicos reales.
+
+3.  **Compromiso en Entornos Industriales (Arquitectura de Telemetría):**  
+    Mantener 50 sensores transmitiendo datos a alta frecuencia hacia un Data Lakehouse implica mayor ancho de banda, consumo de cómputo en la capa de ingesta y costo de mantenimiento físico de la instrumentación. Al seleccionar las 30 variables críticas, Lasso permite **reducir en un 40% la infraestructura de monitoreo continuo** sin perder precisión predictiva.
+
+</div>
+</TabItem>
+<TabItem value="mnp-python" label="🖥️ Código">
+
+```python showLineNumbers
+"""
+Módulo Universitario: Evaluación de Regularización en Telemetría Industrial.
+Genera el ajuste de OLS, Ridge, ElasticNet y Lasso, y grafica los 4 paneles de diagnóstico:
+  1. Error Cuadrático Medio (RMSE en Test Set)
+  2. Coeficiente de Determinación (R² en Test Set)
+  3. Principio de Parsimonia (Variables Activas vs. Anuladas)
+  4. Alineación: Consumo Real vs. Predicho (OLS vs. Lasso frente a la Recta 1:1)
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LinearRegression, RidgeCV, LassoCV, ElasticNetCV
+from sklearn.metrics import mean_squared_error, r2_score
+
+# ==============================================================================
+# 1. Simulación de Telemetría Industrial (Planta Térmica)
+# ==============================================================================
+np.random.seed(42)
+N = 180  # Observaciones operacionales por turno
+
+# A. 8 Procesos de combustión fundamentales (Señal real)
+p_base = 8
+X_base = np.random.normal(loc=50, scale=10, size=(N, p_base))
+beta_real = np.array([4.5, -3.8, 2.5, -3.0, 1.8, -2.2, 3.5, -2.8])
+
+# B. 16 Sensores con alta multicolinealidad (Duplicados en la misma tubería)
+X_colineal = []
+for i in range(p_base):
+    s1 = X_base[:, i] * 1.01 + np.random.normal(0, 0.4, size=N)
+    s2 = X_base[:, i] * 0.99 + np.random.normal(0, 0.4, size=N)
+    X_colineal.extend([s1, s2])
+X_colineal = np.column_stack(X_colineal)
+
+# C. 26 Sensores de ruido ambiental (Variables espurias)
+p_ruido = 26
+X_ruido = np.random.normal(loc=30, scale=8, size=(N, p_ruido))
+
+# Consolidamos la matriz de 50 sensores
+X_total = np.hstack([X_base, X_colineal, X_ruido])
+p_total = X_total.shape
+
+# Variable objetivo continua: Consumo de combustible en Megavatios (MW)
+ruido_estocastico = np.random.normal(0, 15.0, size=N)
+y = 150.0 + np.dot(X_base, beta_real) + ruido_estocastico
+
+# ==============================================================================
+# 2. Partición Rigurosa de Datos y Preprocesamiento
+# ==============================================================================
+X_train, X_test, y_train, y_test = train_test_split(
+    X_total, y, test_size=0.30, random_state=42
+)
+
+# REGLA METODOLÓGICA: fit exclusivamente sobre X_train para evitar Data Leakage
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+# ==============================================================================
+# 3. Entrenamiento y Sintonización de Modelos vía 5-Fold Cross Validation
+# ==============================================================================
+ols = LinearRegression().fit(X_train_scaled, y_train)
+
+alphas_grid = np.logspace(-1, 4, 100)
+ridge = RidgeCV(alphas=alphas_grid, cv=5).fit(X_train_scaled, y_train)
+
+lasso = LassoCV(cv=5, random_state=42, max_iter=20000).fit(X_train_scaled, y_train)
+
+elastic = ElasticNetCV(
+    cv=5, l1_ratio=[0.1, 0.5, 0.7, 0.9], random_state=42, max_iter=20000
+).fit(X_train_scaled, y_train)
+
+# ==============================================================================
+# 4. Cálculo de Métricas en el Conjunto de Prueba
+# ==============================================================================
+modelos_dict = {
+    'OLS (Sin reg.)': ols,
+    f'Ridge (α={ridge.alpha_:.1f})': ridge,
+    f'ElasticNet (α={elastic.alpha_:.2f})': elastic,
+    f'Lasso (α={lasso.alpha_:.2f})': lasso
+}
+
+nombres_modelos = list(modelos_dict.keys())
+lista_rmse, lista_r2, lista_activos, lista_anulados = [], [], [], []
+predicciones = {}
+
+for nombre, m in modelos_dict.items():
+    pred = m.predict(X_test_scaled)
+    predicciones[nombre] = pred
+    rmse = np.sqrt(mean_squared_error(y_test, pred))
+    r2 = r2_score(y_test, pred)
+    
+    coefs = m.coef_
+    n_ceros = np.sum(np.isclose(coefs, 0.0, atol=1e-3))
+    n_activos = p_total - n_ceros
+    
+    lista_rmse.append(rmse)
+    lista_r2.append(r2 * 100)
+    lista_activos.append(n_activos)
+    lista_anulados.append(n_ceros)
+
+# ==============================================================================
+# 5. Generación de Gráficos Diagnósticos en Cuadrícula 2x2
+# ==============================================================================
+fig, axes = plt.subplots(2, 2, figsize=(15, 11), facecolor='white')
+fig.suptitle(
+    'Diagnóstico de Regularizaciones en Telemetría Industrial (N=180, p=50 sensores)',
+    fontsize=16, fontweight='bold', y=0.98
+)
+
+colores_paleta = ['#d55e00', '#0072b2', '#e69f00', '#009e73']
+
+# Panel 1: Error Cuadrático Medio (RMSE en Test Set)
+ax1 = axes
+ax1.set_facecolor('white')
+barras_rmse = ax1.bar(nombres_modelos, lista_rmse, color=colores_paleta, width=0.52)
+ax1.set_title('1. Error Cuadrático Medio (RMSE en Test Set)', fontsize=12, fontweight='bold', pad=10)
+ax1.set_ylabel('RMSE (Megavatios - MW)', fontsize=11)
+ax1.set_ylim(0, max(lista_rmse) * 1.25)
+ax1.grid(axis='y', linestyle=':', alpha=0.6)
+ax1.spines['top'].set_visible(False)
+ax1.spines['right'].set_visible(False)
+for b, val in zip(barras_rmse, lista_rmse):
+    ax1.text(b.get_x() + b.get_width() / 2, val + 0.5, f'{val:.2f} MW', ha='center', va='bottom', fontweight='bold', fontsize=10)
+
+# Panel 2: Coeficiente de Determinación (R² en Test Set)
+ax2 = axes
+ax2.set_facecolor('white')
+barras_r2 = ax2.bar(nombres_modelos, lista_r2, color=colores_paleta, width=0.52)
+ax2.set_title('2. Capacidad Explicativa (R² en Test Set)', fontsize=12, fontweight='bold', pad=10)
+ax2.set_ylabel('Varianza Explicada (%)', fontsize=11)
+ax2.set_ylim(85, 100)
+ax2.grid(axis='y', linestyle=':', alpha=0.6)
+ax2.spines['top'].set_visible(False)
+ax2.spines['right'].set_visible(False)
+for b, val in zip(barras_r2, lista_r2):
+    ax2.text(b.get_x() + b.get_width() / 2, val + 0.35, f'{val:.1f}%', ha='center', va='bottom', fontweight='bold', fontsize=10)
+
+# Panel 3: Principio de Parsimonia y Dispersión
+ax3 = axes
+ax3.set_facecolor('white')
+indices = np.arange(len(nombres_modelos))
+ancho_b = 0.52
+
+b_act = ax3.bar(indices, lista_activos, width=ancho_b, label='Variables Activas (w ≠ 0)', color='#0072b2')
+b_anu = ax3.bar(indices, lista_anulados, width=ancho_b, bottom=lista_activos, label='Variables Anuladas a Cero (w = 0)', color='#cccccc')
+ax3.set_title('3. Parsimonia: Sensores Retenidos vs. Descartados', fontsize=12, fontweight='bold', pad=10)
+ax3.set_ylabel('Número de Sensores (de 50)', fontsize=11)
+ax3.set_xticks(indices)
+ax3.set_xticklabels(nombres_modelos)
+ax3.set_ylim(0, 58)
+ax3.grid(axis='y', linestyle=':', alpha=0.6)
+ax3.spines['top'].set_visible(False)
+ax3.spines['right'].set_visible(False)
+ax3.legend(frameon=True, facecolor='white', loc='upper right')
+
+for idx, (act, anu) in enumerate(zip(lista_activos, lista_anulados)):
+    ax3.text(idx, act / 2, f'{act}', ha='center', va='center', color='white', fontweight='bold', fontsize=10)
+    if anu > 0:
+        ax3.text(idx, act + (anu / 2), f'{anu}', ha='center', va='center', color='#333333', fontweight='bold', fontsize=10)
+
+# Panel 4: Alineación Real vs. Predicho (OLS vs. Lasso frente a la Recta 1:1)
+ax4 = axes
+ax4.set_facecolor('white')
+pred_ols = predicciones['OLS (Sin reg.)']
+pred_lasso = predicciones[f'Lasso (α={lasso.alpha_:.2f})']
+
+ax4.scatter(y_test, pred_ols, color='#d55e00', alpha=0.55, s=40, label=f'OLS (RMSE: {lista_rmse:.2f} MW)')
+ax4.scatter(y_test, pred_lasso, color='#009e73', alpha=0.8, s=40, label=f'Lasso (RMSE: {lista_rmse:.2f} MW)')
+
+min_val = min(y_test.min(), pred_lasso.min(), pred_ols.min()) - 10
+max_val = max(y_test.max(), pred_lasso.max(), pred_ols.max()) + 10
+ax4.plot([min_val, max_val], [min_val, max_val], color='#333333', linestyle='--', linewidth=1.5, label='Alineación Ideal (1:1)')
+
+ax4.set_title('4. Alineación: Consumo Real vs. Predicho en Test', fontsize=12, fontweight='bold', pad=10)
+ax4.set_xlabel('Consumo Real de Combustible (MW)', fontsize=11)
+ax4.set_ylabel('Consumo Predicho por el Modelo (MW)', fontsize=11)
+ax4.set_xlim(min_val, max_val)
+ax4.set_ylim(min_val, max_val)
+ax4.grid(True, linestyle=':', alpha=0.6)
+ax4.spines['top'].set_visible(False)
+ax4.spines['right'].set_visible(False)
+ax4.legend(frameon=True, facecolor='white', loc='upper left')
+
+plt.tight_layout()
+plt.show()
+```
+</TabItem>
+</Tabs><br/>
+
+
+
+
+
+
 

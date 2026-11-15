@@ -41,6 +41,12 @@ A pesar de conservar la palabra «regresión» en su nombre histórico, es un al
 
 En la regresión lineal ordinaria, la combinación lineal de los datos $z = w_0 + w_1 x_1 + \dots + w_p x_p = w^T x$ genera salidas no acotadas en la recta real $(-\infty, +\infty)$. Si intentáramos usar una recta para clasificar probabilidades, obtendríamos valores absurdos (negativos o mayores a 1).
 
+<center>
+<figure>
+![](img/logistica-odds.jpg)
+<figcaption>**Entendiendo Odds.** Los Odds representan la proporción en tre la probabilidad de que un evento ocurra y la probabilidad de que no ocurra. Como ejemplo en Titanic: Si la probabilidad de no sobrevivir en 3ra. clase es mucho mayor, el modelo calcula un Odds Ratio de ~7x en comparación con a 1ra. clase.</figcaption>
+</figure>
+</center>
 
 Para resolver esto, la regresión logística modela linealmente el **logaritmo de la razón de momios (*log-odds* o función logit)**.
 

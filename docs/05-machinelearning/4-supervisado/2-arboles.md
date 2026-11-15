@@ -350,7 +350,7 @@ Los árboles de decisión son la base de algoritmos más avanzados como Random F
 ***
 ## 🖥️ **Ejemplos**
 
-### 1. Detección de fraude
+### Detección de fraude
 <Tabs>
 <TabItem value="af" label="Antecedentes" default>
 <div class="alert alert--primary">
@@ -367,7 +367,7 @@ Los árboles de decisión son la base de algoritmos más avanzados como Random F
 </TabItem>
 </Tabs><br/>
 
-### 2. Diagnóstico médico
+### Diagnóstico médico
 <Tabs>
 <TabItem value="dm" label="Antecedentes" default>
 <div class="alert alert--primary">
@@ -384,7 +384,7 @@ Los árboles de decisión son la base de algoritmos más avanzados como Random F
 </TabItem>
 </Tabs><br/>
 
-### 3. Segmentación de clientes
+### Segmentación de clientes
 <Tabs>
 <TabItem value="sc" label="Antecedentes" default>
 <div class="alert alert--primary">
@@ -401,7 +401,7 @@ Los árboles de decisión son la base de algoritmos más avanzados como Random F
 </TabItem>
 </Tabs><br/>
 
-### 4. Predicción de precios
+### Predicción de precios
 <Tabs>
 <TabItem value="pp" label="Antecedentes" default>
 <div class="alert alert--primary">
