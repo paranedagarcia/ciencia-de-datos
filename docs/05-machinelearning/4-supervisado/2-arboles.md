@@ -3,9 +3,10 @@ id: arboles
 title: "Árboles de decisión"
 sidebar_label: "📄 Árboles de decisión"
 description: "Los modelos de árboles de decisión se engloban dentro de una clase conocida como algoritmos **CART** (Classification and Regression Trees)"
+hide_title: true
 ---
 
-## **Árboles**
+## **Árboles de decisión**
 
 ![](img/arboles.jpg)
 
@@ -64,14 +65,33 @@ De forma probabilística, representa la **probabilidad de que un elemento elegid
 Para un nodo o partición $t$ que contiene observaciones distribuidas a lo largo de $C$ clases, la **Impureza de Gini $I_G(t)$** se calcula como:
 
 ```math
-I_G(t) = \sum_{i=1}^{C} p_i (1 - p_i) = 1 - \sum_{i=1}^{C} p_i^2
+I_G(t) = 1 - \sum_{i=1}^{C} p_i^2
 ```
 
 Donde:
 *   $C$ es el número total de clases del problema.
 *   $p_i$ es la proporción o probabilidad empírica de observar la clase $i$ dentro de ese nodo (es decir, $p_i = \frac{N_{t, i}}{N_t}$, donde $N_{t, i}$ es el recuento de muestras de la clase $i$ y $N_t$ es el total de muestras en el nodo).
 
+**Proceso:** Al calcular el Gini para cada posible división, el algoritmo elige la característica y el valor de corte que resulten en la mayor reducción de la impureza (es decir, el menor valor de Gini ponderado en los nodos hijos)
 
+
+
+Para clasificación, el árbol busca particiones que minimicen una función de impureza $I$ en cada nodo $t$:
+
+$$
+I(t) = \sum_{k=1}^K p_{k}(1 - p_{k})
+$$
+
+donde $p_{k}$ es la proporción de muestras de la clase $k$ en el nodo $t$ (índice de Gini).  
+Para regresión, se suele minimizar la suma de los errores cuadrados (varianza):
+
+$$
+I(t) = \frac{1}{N_t} \sum_{i \in t} (y_i - \bar{y}_t)^2
+$$
+
+donde $N_t$ es el número de muestras en el nodo $t$ y $\bar{y}_t$ es el valor medio de la variable objetivo en ese nodo.
+
+El árbol se construye de manera recursiva hasta que se cumple un criterio de parada (profundidad máxima, número mínimo de muestras, etc.).
 
 #### Mecánica en la Construcción del Árbol 
 **(La Función de Coste de División)**
@@ -123,54 +143,6 @@ Supongamos un nodo padre con **10 instancias** (5 positivas y 5 negativas) que s
     ```
     *La reducción de impureza lograda por este corte es $0.50 - 0.167 = \mathbf{0.333}$*.
 
-En el bloque de código siguiente se ilustra cómo programar este cálculo exacto desde cero en Python y contrastarlo con la implementación nativa de Scikit-Learn:
-
-```python showLineNumbers
-import numpy as np
-from sklearn.tree import DecisionTreeClassifier, export_text
-
-# 1. Función explícita para calcular la impureza de Gini de un conjunto de etiquetas
-def gini_impurity(y):
-    if len(y) == 0:
-        return 0.0
-    _, counts = np.unique(y, return_counts=True)
-    probabilities = counts / len(y)
-    return 1.0 - np.sum(probabilities ** 2)
-
-# Conjunto sintético de demostración
-# y: 0 = No, 1 = Sí
-y_padre = np.array()
-y_hijo_izq = np.array()          # 4 positivos (Puro)
-y_hijo_der = np.array()    # 1 positivo, 5 negativos
-
-g_padre = gini_impurity(y_padre)
-g_izq = gini_impurity(y_hijo_izq)
-g_der = gini_impurity(y_hijo_der)
-
-# Cálculo de la impureza ponderada de la división
-n_total = len(y_padre)
-gini_split = (len(y_hijo_izq) / n_total) * g_izq + (len(y_hijo_der) / n_total) * g_der
-ganancia = g_padre - gini_split
-
-print(f"Gini Padre:             {g_padre:.4f}")
-print(f"Gini Hijo Izquierdo:    {g_izq:.4f}")
-print(f"Gini Hijo Derecho:      {g_der:.4f}")
-print(f"Gini Ponderado (Split): {gini_split:.4f}")
-print(f"Reducción de Impureza:  {ganancia:.4f}\n")
-
-# 2. Equivalente formal con Scikit-Learn
-X_demo = np.array([,,,,,,,,,])
-y_demo = y_padre
-
-# DecisionTreeClassifier utiliza por defecto criterion='gini'
-tree_clf = DecisionTreeClassifier(criterion='gini', max_depth=1)
-tree_clf.fit(X_demo, y_demo)
-
-print("Estructura del árbol inducido en Scikit-Learn:")
-print(export_text(tree_clf, feature_names=["Variable_X"]))
-```
-
-
 
 
 ### Ventajas 
@@ -204,6 +176,8 @@ Utilizamos la librería scikit-learn en Python para construir el árbol. En este
 1. **Preparación de Datos**: Se definen los atributos de entrada (X) y el resultado esperado (y). (Asumimos que 'Sex_male' ha sido codificado como 0 o 1).
 2. **Construcción y Entrenamiento**: Se importa la clase DecisionTreeClassifier y se ajusta el modelo a los datos de entrenamiento
 
+<details>
+<summary>🖥️ Código</summary>
 
 ```python showLineNumbers
 # EJEMPLO CONCEPTUAL EN PYTHON USANDO SCIKIT-LEARN
@@ -214,8 +188,9 @@ from sklearn.metrics import accuracy_score, classification_report, confusion_mat
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
+import requests
 
-df = pd.read_csv('../data/titanic.csv')
+df = pd.read_csv('https://patricioaraneda.cl/public/titanic5_full.csv')
 df = df[['Survived', 'Age', 'Sex']].dropna(subset=['Survived', 'Age', 'Sex'])
 
 # Codificar sexo (male=1, female=0)
@@ -246,7 +221,7 @@ plt.show()
 # 1. El nodo raíz dividiendo por 'Sex_male' (porque es el atributo más importante, como se ve en el ejemplo real).
 # 2. Las siguientes divisiones basadas en 'Age'.
 ```
-
+</details>
 
 <center>
 <figure>
@@ -256,12 +231,17 @@ plt.show()
 </center>
 
 
+<details>
+<summary>🖥️ Código</summary>
+
 ```python showLineNumbers
 from sklearn.metrics import accuracy_score, classification_report, confusion_matrix
 import matplotlib.pyplot as plt
 
 # Cargar y preparar datos
-df = pd.read_csv('../data/titanic.csv')
+import requests
+
+df = pd.read_csv('https://patricioaraneda.cl/public/titanic5_full.csv')
 df = df[['Survived', 'Age', 'Sex']].dropna(subset=['Survived', 'Age', 'Sex'])
 
 # Codificar sexo (male=1, female=0)
@@ -297,7 +277,9 @@ plot_tree(clf, feature_names=['Age','Sex_male'], class_names=['No','Si'], filled
 plt.show()
 # El árbol resultante mostraría cómo las decisiones se basan en estos atributos para predecir la supervivencia
 ```
+</details>
 
+```
     Accuracy: 0.7865168539325843
                   precision    recall  f1-score   support
     
@@ -310,16 +292,14 @@ plt.show()
     
     Age: 0.2391
     Sex_male: 0.7609
-
-
+```
 
     
 ![png](img/Arboles_3_1.png)
     
 
-
 ### Caso sobre predicción
-
+Predicción para un pasajeros del Titanic, sobre edad y sexo.
 
 ```python showLineNumbers
 # genera una predicion para un pasajero de 25 años y sexo masculino
@@ -371,12 +351,69 @@ Los árboles de decisión son la base de algoritmos más avanzados como Random F
 ## 🖥️ **Ejemplos**
 
 ### 1. Detección de fraude
+<Tabs>
+<TabItem value="af" label="Antecedentes" default>
+<div class="alert alert--primary">
+**Detección de fraude**
 
+
+</div>
+</TabItem>
+<TabItem value="af-python" label="🖥️ Código">
+
+```python showLineNumbers
+
+```
+</TabItem>
+</Tabs><br/>
 
 ### 2. Diagnóstico médico
+<Tabs>
+<TabItem value="dm" label="Antecedentes" default>
+<div class="alert alert--primary">
+**Diagnóstico médico**
 
+
+</div>
+</TabItem>
+<TabItem value="dm-python" label="🖥️ Código">
+
+```python showLineNumbers
+
+```
+</TabItem>
+</Tabs><br/>
 
 ### 3. Segmentación de clientes
+<Tabs>
+<TabItem value="sc" label="Antecedentes" default>
+<div class="alert alert--primary">
+**Segmentación de clientes**
 
+
+</div>
+</TabItem>
+<TabItem value="sc-python" label="🖥️ Código">
+
+```python showLineNumbers
+
+```
+</TabItem>
+</Tabs><br/>
 
 ### 4. Predicción de precios
+<Tabs>
+<TabItem value="pp" label="Antecedentes" default>
+<div class="alert alert--primary">
+**Predicción de precios**
+
+
+</div>
+</TabItem>
+<TabItem value="pp-python" label="🖥️ Código">
+
+```python showLineNumbers
+
+```
+</TabItem>
+</Tabs><br/>
