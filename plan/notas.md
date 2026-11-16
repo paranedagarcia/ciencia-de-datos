@@ -45,7 +45,6 @@ config:
 </center>
 
 ### 🖥️ Implementación
-<br/>
 <Tabs>
 <TabItem value="mnp" label="Antecedentes" default>
 <div class="alert alert--primary">
