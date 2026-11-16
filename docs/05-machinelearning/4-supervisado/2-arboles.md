@@ -22,9 +22,18 @@ Los modelos de árboles de decisión se engloban dentro de una clase conocida co
 
 El objetivo principal de un Árbol de Decisión es aprender una secuencia de preguntas tipo "SI ESTO, ENTONCES AQUELLO" que conduzcan a la predicción correcta de la manera más eficiente posible. El algoritmo construye esta estructura jerárquica dividiendo el conjunto de datos de entrada en subconjuntos cada vez más "puros" o homogéneos.
 
+<center>
+<figure>
+![](img/arbol-preguntas.jpg)
+<figcaption>La mente humana clasifica información haciendo secuencias de preguntas binarias. Esta es la base matemática exacta del algoritmo de Machine Learning.</figcaption>
+</figure>
+</center>
+
 ### Elementos Clave del Árbol
 
 La estructura de un árbol permite representar una lógica de decisión clara:
+
+![](img/arbol-anatomia.jpg)
 
 | Elemento | Descripción |
 |---|---|
@@ -44,12 +53,25 @@ Para lograr esto, el algoritmo utiliza medidas de **impureza** para evaluar la c
 
 El **Índice de Gini** (o más formalmente, **Impureza de Gini**, *Gini Impurity*) es la métrica de dispersión o función de coste matemática por defecto en algoritmos de árboles de decisión para clasificación, notablemente en **CART** (*Classification and Regression Trees*) y en librerías como Scikit-Learn y PySpark MLlib.
 
+<center>
+<figure>
+![](img/arbol-gini-cart.jpg)
+<figcaption>Es el motor matemático que usan algoritmos como CART en los Árboles de decisión para determinar la mejor forma de dividir y clasificar datos.</figcaption>
+</figure>
+</center>
+
 El **Índice de Gini** mide la probabilidad de que un elemento elegido al azar de un subconjunto sea clasificado incorrectamente si su clase se selecciona aleatoriamente en proporción a la distribución de clases en ese subconjunto.
 
 :::info[Objetivo]
 El algoritmo busca elegir divisiones que **minimicen** el Índice de Gini. Un valor de 0 indica una pureza total (todos los elementos pertenecen a una sola clase), mientras que un valor más cercano a 1 (o 0.5 para clasificación binaria) indica una mezcla de clases.
 :::
 
+<center>
+<figure>
+![](img/arbol-gini-escala.jpg)
+<figcaption>En una clasificación binaria, el valor nunca supera el 0.5 (el peor escenario posible) ni desciende de 0 (el objetivo ideal.)</figcaption>
+</figure>
+</center>
 
 #### Definición Teórica y Significado
 
@@ -74,7 +96,12 @@ Donde:
 
 **Proceso:** Al calcular el Gini para cada posible división, el algoritmo elige la característica y el valor de corte que resulten en la mayor reducción de la impureza (es decir, el menor valor de Gini ponderado en los nodos hijos)
 
-
+<center>
+<figure>
+![](img/arbol-diagnostico.png)
+<figcaption>Es probabilidad. Restamos a 1 la suma de al proporciónal cuadrado de cada clase presente en el grupo.</figcaption>
+</figure>
+</center>
 
 Para clasificación, el árbol busca particiones que minimicen una función de impureza $I$ en cada nodo $t$:
 
@@ -96,6 +123,13 @@ El árbol se construye de manera recursiva hasta que se cumple un criterio de pa
 #### Mecánica en la Construcción del Árbol 
 **(La Función de Coste de División)**
 
+<center>
+<figure>
+![](img/arbol-codicia.jpg)
+<figcaption>**Cómo aprende. Búsqueda codiciosa.** Evalúa todas las características iterativamente para elegir la mejor separación matmática inmediata.</figcaption>
+</figure>
+</center>
+
 El algoritmo CART utiliza un enfoque voraz (*greedy*) conocido como partición binaria recursiva (*recursive binary splitting*). Para decidir qué característica $k$ y qué punto de corte o umbral $t_k$ utilizar para ramificar un nodo padre, el algoritmo evalúa la **reducción neta de impureza** o la **impureza ponderada de los nodos hijos**:
 
 ```math
@@ -111,6 +145,8 @@ El algoritmo selecciona la característica y el umbral que **minimizan $J(k, t_k
 
 
 #### Gini vs. Entropía (Ganancia de Información)
+
+![](img/arbol-impureza.jpg)
 
 Tanto la Impureza de Gini como la **Entropía**, derivada de la teoría de la información de Shannon, 
 
@@ -374,6 +410,13 @@ La profundidad gobierna directamente la **capacidad de generalización** (es dec
 * **Árbol excesivamente profundo (Sobreajuste / *Overfitting*):**  
   Si el árbol crece sin restricciones hasta que cada hoja contenga un único dato o casos residuales, el modelo no aprende reglas generales. En su lugar, **memoriza el ruido, las anomalías y las particularidades irrelevantes del conjunto de entrenamiento**. Logra un 100% de aciertos en el entrenamiento, pero falla drásticamente al recibir datos nuevos.
 
+<center>
+<figure>
+![](img/arbol-sobreajuste.jpg)
+<figcaption>**El sobreajuste.** Sin restricciones, un árbol crecerá infinitamente para crear hojas puras para cada punto individual, perdiendo su capacidad predictiva en el mundo real.</figcaption>
+</figure>
+</center>
+
 * **El punto óptimo (*Sweet Spot*):**  
   Existe una profundidad intermedia equilibrada donde el árbol es lo suficientemente flexible para capturar la estructura real del problema, pero lo bastante simple como para ignorar el ruido aleatorio, maximizando el rendimiento en datos de prueba.
 
@@ -443,7 +486,12 @@ Para garantizar la generalización en entornos de producción, se emplean dos en
 3. **Ensamble mediante Bosques Aleatorios (*Random Forests*):**  
    En lugar de depender de un único árbol cuya profundidad deba sintonizarse al milímetro, se promedian múltiples árboles profundos descorrelacionados (*Bagging* con subconjuntos aleatorios de variables), reduciendo drásticamente la varianza global sin incrementar el sesgo.
 
-
+<center>
+<figure>
+![](img/arbol-poda.jpg)
+<figcaption></figcaption>
+</figure>
+</center>
 
 ### 🖥️ Implementación
 <Tabs>
