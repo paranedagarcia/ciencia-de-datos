@@ -517,7 +517,7 @@ Profundidad óptima identificada por Validación Cruzada: max_depth = 3
 
 ```python showLineNumbers
 """
-Módulo Académico: Impacto de la Profundidad en el Rendimiento Generalizador.
+Impacto de la Profundidad en el Rendimiento Generalizador.
 Dataset: Breast Cancer Wisconsin (scikit-learn).
 """
 
