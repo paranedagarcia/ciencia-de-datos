@@ -331,7 +331,7 @@ Sex_male: 0.8217
 ```
 
     
-![png](img/Arboles_3_1.png)
+![png](img/arbol-3.png)
     
 
 #### Caso sobre predicción
@@ -988,15 +988,207 @@ plt.show()
 <Tabs>
 <TabItem value="sc" label="Antecedentes" default>
 <div class="alert alert--primary">
+
 **Segmentación de clientes**
 
+En este enfoque, el negocio define un objetivo estratégico explícito —por ejemplo, el nivel de rentabilidad o consumo del cliente: Nivel Básico, Nivel Estándar o Nivel Premium / Alto Valor—.
+- El **árbol de decisión** analiza los datos sociodemográficos y financieros (como edad, ingresos o tenencia de vivienda) y descubre automáticamente reglas de negocio jerárquicas del tipo «Si / Entonces» (If-Then Rules).
 
+- **Ventaja clave en ingeniería y negocio:** Las reglas son 100% auditables y transparentes. Un equipo de marketing o ingeniería de software puede programar directamente en su motor de CRM o base de datos reglas como:
+«Si el Ingreso Anual > \$42.000 y el cliente es Propietario $\rightarrow$ Asignar automáticamente al Segmento Premium».
+
+Utilizamos el conjunto de datos de William Greene (Econometric Analysis, NYU Stern), integrado de forma pública en la librería científica statsmodels (statsmodels.datasets.ccard):
+
+
+* **Observaciones reales:** Clientes bancarios titulares de tarjetas de crédito.
+* **Variables predictoras del cliente ($X$):**
+  - INCOME: Ingreso anual del cliente (en decenas de miles de USD; e.g., \$5,5 = \$55.000).
+  - AGE: Edad del titular en años.
+  - OWNRENT: Tenencia de vivienda (1 = Propietario, 0 = Inquilino).
+  
+* Definición del Segmento Objetivo ($y$):
+A partir del gasto mensual promedio con tarjeta (AVGEXP), la institución financiera define 3 niveles comerciales estratégicos:
+- Segmento Básico (Gasto < \$100 USD/mes): Clientes de bajo volumen transaccional (campañas de incentivo de uso).
+- Segmento Estándar (Gasto entre \$100 y \$300 USD/mes): Clientes recurrentes con consumo moderado.
+- Segmento Premium / Alto Valor (Gasto > \$300 USD/mes): Clientes de alta rentabilidad (programas de lealtad exclusivos y líneas de crédito ampliadas).
+
+En cada bifurcación del árbol, el algoritmo busca la variable $j$ (Ingreso, Edad o Propietario) y el umbral de corte $t$ que maximicen la pureza de los segmentos resultantes utilizando la Impureza de Gini Multiclase.
+
+```
+=== DISTRIBUCIÓN DE CLIENTES POR SEGMENTO EN EL DATASET ===
+Segmento
+Básico      28
+Estándar    22
+Premium     22
+Name: count, dtype: int64
+
+=== PREDICCIÓN PARA NUEVO CLIENTE PROSPECTO ===
+Atributos: Ingreso = $55,000 | Edad = 35 años | Propietario = Sí
+-> Segmento Asignado por el Árbol: PREMIUM
+   * Probabilidad Básico  : 0.0%
+   * Probabilidad Estándar: 0.0%
+   * Probabilidad Premium : 100.0%
+```
+![](img/arbol-segmentacion.png)
+![](img/arbol-segmentacion-clasificacion.png)
+
+**Análisis del gráfico**
+
+**Panel 1 (Estructura Jerárquica del Árbol):**
+- Nodo Raíz: La variable más determinante para segmentar el valor del cliente es el Ingreso Anual. Un umbral de corte en $\approx$  \$36.000 USD (INCOME $<=$ 3.6) separa de inmediato a los clientes de menor consumo (hacia la izquierda, dominados por el Segmento Básico) de los clientes con potencial de alto valor (hacia la derecha).
+
+- Cortes Secundarios: En las ramas subsiguientes, la Tenencia de Vivienda (OWNRENT) y la Edad refinan la pureza de la segmentación: los clientes con ingresos superiores a 42.000 que son propietarios de su vivienda caen en una hoja terminal pura del Segmento Premium (impureza de Gini = 0,0).
+
+**Panel 2 (Mapa en el Espacio Ingreso vs. Edad):**
+- Los puntos azules (Básicos) se concentran en ingresos inferiores a 35k.
+- Los puntos naranjas (Estándar) ocupan la franja media entre 25k y 45k.
+- Los puntos rojos (Premium) dominan la región de ingresos superiores a 45k.
+
+**Comprobación del Nuevo Cliente (Estrella Púrpura $\bigstar$):**
+- Con 55.000 de ingreso, 35 años de edad y vivienda propia, el prospecto recorre la rama derecha del árbol y aterriza en la hoja terminal de clientes de alta rentabilidad, con una probabilidad del 100% de pertenecer al Segmento Premium.
 </div>
 </TabItem>
 <TabItem value="sc-python" label="🖥️ Código">
+El siguiente script:
+- Carga el dataset público de William Greene y estructura los tres segmentos de clientes.
+- Entrena un clasificador por árbol de decisión regularizado (max_depth=3, min_samples_leaf=4) para prevenir sobreajuste y generar reglas comerciales comprensibles.
+- Evalúa e infiere el segmento de un nuevo cliente prospecto con:
+  - Ingreso Anual: $55.000 USD (INCOME = 5.5)
+  - Edad: 35 años (AGE = 35.0)
+  - Propietario de Vivienda: Sí (OWNRENT = 1.0)
+- Genera una visualización comparativa en dos paneles.
 
 ```python showLineNumbers
+"""
+Segmentación de Clientes con Árboles de Decisión.
+Dataset Público: William Greene's Credit Card Expenditure (statsmodels.datasets.ccard).
+"""
 
+import numpy as np
+import pandas as pd
+import statsmodels.api as sm
+import matplotlib.pyplot as plt
+from sklearn.tree import DecisionTreeClassifier, plot_tree
+
+# ==============================================================================
+# 1. Carga del Dataset Público Real (William Greene - Econometric Analysis)
+# ==============================================================================
+df = sm.datasets.ccard.load_pandas().data
+
+# ==============================================================================
+# 2. Definición Supervisada de Segmentos de Negocio
+# ==============================================================================
+# Segmentación por gasto mensual con tarjeta (AVGEXP en USD)
+df['Segmento'] = pd.cut(
+    df['AVGEXP'],
+    bins=[-np.inf, 100, 300, np.inf],
+    labels=['Básico', 'Estándar', 'Premium']
+)
+
+nombres_clases = ['Básico', 'Estándar', 'Premium']
+nombres_vars = ['Ingreso ($10k)', 'Edad', 'Propietario']
+
+X = df[['INCOME', 'AGE', 'OWNRENT']].copy()
+y = df['Segmento']
+
+# ==============================================================================
+# 3. Ajuste del Árbol de Decisión Regularizado
+# ==============================================================================
+# Fijamos max_depth=3 y min_samples_leaf=4 para obtener reglas robustas y auditables
+arbol_segmentacion = DecisionTreeClassifier(
+    criterion='gini',
+    max_depth=3,
+    min_samples_leaf=4,
+    random_state=42
+)
+arbol_segmentacion.fit(X, y)
+
+print("=== DISTRIBUCIÓN DE CLIENTES POR SEGMENTO EN EL DATASET ===")
+print(df['Segmento'].value_counts())
+
+# ==============================================================================
+# 4. Inferencia y Comprobación de un Nuevo Cliente Ejemplo
+# ==============================================================================
+# Nuevo prospecto: Ingreso Anual = $55,000 (5.5), Edad = 35 años, Propietario = Sí (1)
+nuevo_cliente = pd.DataFrame([[5.5, 35.0, 1.0]], columns=['INCOME', 'AGE', 'OWNRENT'])
+
+# Inferencia de la clase y vector de probabilidades posteriores
+pred_segmento = arbol_segmentacion.predict(nuevo_cliente)[0]
+probs_nuevo = arbol_segmentacion.predict_proba(nuevo_cliente)[0]
+
+print("\n=== PREDICCIÓN PARA NUEVO CLIENTE PROSPECTO ===")
+print(f"Atributos: Ingreso = $55,000 | Edad = 35 años | Propietario = Sí")
+print(f"-> Segmento Asignado por el Árbol: {pred_segmento.upper()}")
+for clase, prob in zip(arbol_segmentacion.classes_, probs_nuevo):
+    print(f"   * Probabilidad {clase:<8}: {prob * 100:.1f}%")
+
+# ==============================================================================
+# 5. Generación Gráfica (Fondo Blanco Plano y Paleta Contrastada)
+# ==============================================================================
+fig1, ax1 = plt.subplots(figsize=(12, 8), facecolor='white')
+
+# Panel 1: Arquitectura e Interpretabilidad del Árbol
+ax1.set_facecolor('white')
+plot_tree(
+    arbol_segmentacion,
+    feature_names=nombres_vars,
+    class_names=nombres_clases,
+    filled=True,
+    rounded=True,
+    fontsize=10,
+    ax=ax1,
+    impurity=True
+)
+ax1.set_title("1. Reglas Jerárquicas de Segmentación (Arquitectura del Árbol)",
+              fontsize=14, fontweight='bold', pad=12)
+
+fig1.suptitle("Segmentación de Clientes con Árboles de Decisión",
+             fontsize=16, fontweight='bold', y=0.98)
+
+fig1.tight_layout()
+plt.show()
+
+# Panel 2: Mapa de Clientes en el Espacio de Decisión (Ingreso vs Edad)
+fig2, ax2 = plt.subplots(figsize=(12, 8), facecolor='white')
+ax2.set_facecolor('white')
+colores_seg = {'Básico': '#0072b2', 'Estándar': '#e69f00', 'Premium': '#d55e00'}
+
+for seg in nombres_clases:
+    sub = df[df['Segmento'] == seg]
+    ax2.scatter(
+        sub['INCOME'] * 10, sub['AGE'],
+        color=colores_seg[seg], 
+        label=f'Segmento {seg} ({len(sub)} clientes)',
+        s=55, alpha=0.85, edgecolors='white', linewidth=0.8
+    )
+
+# Posición destacada del nuevo cliente evaluado
+x_nuevo_k = nuevo_cliente['INCOME'].values[0] * 10
+y_nuevo = nuevo_cliente['AGE'].values[0]
+
+ax2.scatter([x_nuevo_k], [y_nuevo], color='#cc79a7', s=170, marker='*', zorder=6,
+            edgecolors='#222222', linewidth=1.2, label=f'Nuevo Cliente Evaluado ({pred_segmento})')
+
+ax2.annotate(
+    f'Nuevo Cliente\nIngreso: ${x_nuevo_k:.0f}k | Edad: {y_nuevo:.0f} años\nSegmento: {pred_segmento} (P={np.max(probs_nuevo)*100:.0f}%)',
+    xy=(x_nuevo_k, y_nuevo),
+    xytext=(x_nuevo_k - 38, y_nuevo + 6),
+    arrowprops=dict(facecolor='#222222', shrink=0.08, width=1.2, headwidth=6),
+    fontweight='bold', fontsize=9.5, color='#222222',
+    bbox=dict(boxstyle='round,pad=0.4', facecolor='white', edgecolor='#cccccc')
+)
+
+ax2.set_title("2. Distribución de Clientes y Clasificación del Nuevo Prospecto",
+              fontsize=14, fontweight='bold', pad=12)
+ax2.set_xlabel("Ingreso Anual del Cliente (Miles de USD - $k)", fontsize=12)
+ax2.set_ylabel("Edad del Cliente (Años)", fontsize=12)
+ax2.grid(True, linestyle=':', alpha=0.6)
+ax2.spines['top'].set_visible(False)
+ax2.spines['right'].set_visible(False)
+ax2.legend(frameon=True, facecolor='white', loc='upper right', fontsize=10)
+
+plt.tight_layout(rect=[0, 0, 1, 0.94])
+plt.show()
 ```
 </TabItem>
 </Tabs><br/>
@@ -1005,15 +1197,163 @@ plt.show()
 <Tabs>
 <TabItem value="pp" label="Antecedentes" default>
 <div class="alert alert--primary">
+
 **Predicción de precios**
 
+```=== EVALUACIÓN DEL MODELO DE REGRESIÓN (DATASET GREENE) ===
+R² en Test:   0.474
+MAE en Test:  $194.52 USD/mes
+RMSE en Test: $261.91 USD/mes
 
+=== PREDICCIÓN DE NUEVO CLIENTE PROSPECTO ===
+Atributos del Cliente: Ingreso = $55k USD/año (5.5) | Edad = 35 años
+-> Gasto Mensual Estimado por el Árbol: $803.25 USD/mes
+```
+![](img/arbol-precios.png)
+
+**Análisis del Gráfico**
+1. **Panel 1 (Estructura del Árbol y Promedios Regionales):**
+   * Cada caja o nodo del árbol ya no contiene porcentajes de clases, sino la etiqueta **`value`**: que representa el **gasto promedio de los clientes contenidos en ese nodo**.
+   * **Nodo Raíz:** La división principal se produce en el Ingreso Anual de $\approx$ \$31.000 USD (`INCOME <= 3.1`). Los clientes con ingresos inferiores tienen un gasto medio estimado de solo \$116,8, mientras que aquellos con ingresos superiores saltan a una media de \$423,9.
+   * **Hoja Terminal Superior:** Los clientes con ingresos superiores a \$47.000 y edad menor o igual a 40 años caen en la hoja terminal naranja con `value = 803.2` USD/mes.
+2. **Panel 2 (Función Escalonada Constante a Tramos):**
+   * La línea azul continua muestra cómo el árbol modela la realidad mediante **escalones horizontales**: para ingresos bajos predice un valor base cercano a \$85; al cruzar el umbral de \$31k salta a \$356, y al superar \$47k escala hasta \$803,2.
+3. **Inferencia del Nuevo Caso Ejemplo (Estrella Naranja $\bigstar$):**
+   * Con **\$55k de ingreso anual y 35 años**, el nuevo prospecto recorre las ramas `Ingreso > 3.1` $\rightarrow$ `Edad <= 40.5` $\rightarrow$ `Ingreso > 4.7`.
+   * El modelo le asigna un **gasto mensual estimado de \$803,2 USD/mes**, posicionándolo visualmente sobre el escalón superior de clientes de alta capacidad económica.
 </div>
 </TabItem>
 <TabItem value="pp-python" label="🖥️ Código">
 
 ```python showLineNumbers
+"""
+Predicción Cuantitativa con Árboles de Regresión (DecisionTreeRegressor).
+Dataset Público: William Greene's Econometric Analysis (statsmodels.datasets.ccard).
+"""
 
+import numpy as np
+import pandas as pd
+import statsmodels.api as sm
+import matplotlib.pyplot as plt
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeRegressor, plot_tree
+from sklearn.metrics import mean_squared_error, r2_score, mean_absolute_error
+
+# ==============================================================================
+# 1. Carga del Dataset Público
+# ==============================================================================
+data = sm.datasets.ccard.load_pandas().data
+
+features = ['INCOME', 'AGE']
+X = data[features]
+y = data['AVGEXP']  # Gasto mensual con tarjeta (USD/mes)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42
+)
+
+# ==============================================================================
+# 2. Ajuste del Árbol de Regresión Regularizado
+# ==============================================================================
+# max_depth=3 y min_samples_leaf=4 evitan que se aíslen puntos individuales atípicos
+reg_tree = DecisionTreeRegressor(
+    criterion='squared_error',
+    max_depth=3,
+    min_samples_leaf=4,
+    random_state=42
+)
+reg_tree.fit(X_train, y_train)
+
+# Evaluación formal en conjunto de prueba
+y_pred_test = reg_tree.predict(X_test)
+r2 = r2_score(y_test, y_pred_test)
+mae = mean_absolute_error(y_test, y_pred_test)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred_test))
+
+print("=== EVALUACIÓN DEL MODELO DE REGRESIÓN (DATASET GREENE) ===")
+print(f"R² en Test:   {r2:.3f}")
+print(f"MAE en Test:  ${mae:.2f} USD/mes")
+print(f"RMSE en Test: ${rmse:.2f} USD/mes\n")
+
+# ==============================================================================
+# 3. Predicción con un Nuevo Dato Ejemplo
+# ==============================================================================
+# Nuevo cliente evaluado: Ingreso = $55,000 USD/año (5.5) | Edad = 35 años
+nuevo_cliente = pd.DataFrame([[5.5, 35.0]], columns=['INCOME', 'AGE'])
+gasto_predicho = reg_tree.predict(nuevo_cliente)[0]
+
+print("=== PREDICCIÓN DE NUEVO CLIENTE PROSPECTO ===")
+print(f"Atributos del Cliente: Ingreso = $55k USD/año (5.5) | Edad = 35 años")
+print(f"-> Gasto Mensual Estimado por el Árbol: ${gasto_predicho:.2f} USD/mes\n")
+
+# ==============================================================================
+# 4. Generación Gráfica (Fondo Blanco Plano y Paleta Contrastada)
+# ==============================================================================
+fig1, ax1 = plt.subplots(figsize=(12, 8), facecolor='white')
+
+# Panel 1: Arquitectura Jerárquica del Árbol
+ax1.set_facecolor('white')
+plot_tree(
+    reg_tree,
+    feature_names=['Ingreso ($10k)', 'Edad'],
+    filled=True,
+    rounded=True,
+    fontsize=11,
+    ax=ax1,
+    precision=1
+)
+ax1.set_title("1. Reglas Jerárquicas del Árbol de Regresión (Valor = Gasto Medio Estimado)",
+              fontsize=11.5, fontweight='bold', pad=12)
+
+fig1.suptitle("Predicción de Precios y Gastos mediante Árboles de Decisión (CART Regresión)",
+              fontsize=14, fontweight='bold', y=0.98)
+
+fig1.tight_layout()
+plt.show()
+
+# Panel 2: Función de Predicción Escalonada vs. Ingreso y Nuevo Dato
+fig2, ax2 = plt.subplots(figsize=(12, 8), facecolor='white')
+ax2.set_facecolor('white')
+
+# Rango continuo de ingresos para proyectar la respuesta constante a tramos
+ingreso_line = np.linspace(X['INCOME'].min(), X['INCOME'].max(), 300)
+grid_predict = pd.DataFrame({'INCOME': ingreso_line, 'AGE': np.full_like(ingreso_line, 35.0)})
+pred_line = reg_tree.predict(grid_predict)
+
+# Nube de puntos de clientes reales
+ax2.scatter(data['INCOME'] * 10, data['AVGEXP'], color='#8a8a8a', alpha=0.7, s=45,
+            edgecolors='#333333', linewidth=0.6, label='Clientes Reales (Greene Dataset)')
+
+# Función escalonada del árbol
+ax2.step(ingreso_line * 10, pred_line, color='#0072b2', linewidth=2.8, where='post',
+         label='Función Escalonada del Árbol (para Edad = 35 años)')
+
+# Posición del nuevo dato predicho
+nuevo_x = nuevo_cliente['INCOME'].values[0] * 10
+ax2.scatter([nuevo_x], [gasto_predicho], color='#d55e00', s=180, marker='*', zorder=6,
+            edgecolors='#222222', linewidth=1.2, label=f'Nuevo Cliente Predicho (${gasto_predicho:.1f})')
+
+ax2.annotate(
+    f'Nuevo Cliente\nIngreso: ${nuevo_x:.0f}k USD\nGasto Estimado: ${gasto_predicho:.1f} USD/mes',
+    xy=(nuevo_x, gasto_predicho),
+    xytext=(nuevo_x - 30, gasto_predicho + 260),
+    arrowprops=dict(facecolor='#222222', shrink=0.08, width=1.2, headwidth=6),
+    fontweight='bold', fontsize=9.5, color='#222222',
+    bbox=dict(boxstyle='round,pad=0.4', facecolor='white', edgecolor='#cccccc')
+)
+
+ax2.set_title("2. Función de Predicción Escalonada y Asignación del Nuevo Cliente",
+              fontsize=11.5, fontweight='bold', pad=12)
+ax2.set_xlabel("Ingreso Anual del Cliente (Miles de USD - $k)", fontsize=11)
+ax2.set_ylabel("Gasto Mensual con Tarjeta (USD)", fontsize=11)
+ax2.grid(True, linestyle=':', alpha=0.6)
+ax2.spines['top'].set_visible(False)
+ax2.spines['right'].set_visible(False)
+ax2.legend(frameon=True, facecolor='white', loc='upper left', fontsize=9)
+
+
+plt.tight_layout(rect=[0, 0, 1, 0.94])
+plt.show()
 ```
 </TabItem>
 </Tabs><br/>
