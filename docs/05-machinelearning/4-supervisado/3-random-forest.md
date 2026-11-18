@@ -39,6 +39,7 @@ Detección de fraudes, diagnóstico médico, clasificación de imágenes, predic
 Random Forest es una técnica poderosa y versátil, ampliamente utilizada en la industria y la investigación por su capacidad para ofrecer predicciones precisas y estables en una amplia variedad de problemas.
 
 ## Los pasos para construir un Random Forest son:
+
 ### A. Muestreo de Datos (Bootstrapping)
 En lugar de entrenar cada árbol con el conjunto de datos completo, el algoritmo utiliza una técnica llamada "muestreo de bolsa" o "bootstrapping".
 
@@ -67,6 +68,9 @@ Una vez que se ha construido el "bosque" de n árboles, el algoritmo combina sus
 ## 🖥️ **Ejemplos**
 
 ### Clasificación (sklearn)
+
+<details>
+<summary>🖥️ Código</summary>
 
 ```python showLineNumbers
 # Random Forest - clasificación sobre el dataset breast cancer (sklearn)
@@ -159,7 +163,9 @@ plot_tree(rf_clf.estimators_[0], feature_names=feature_names, class_names=['Mali
 plt.title('Árbol individual del Random Forest')
 plt.show()
 ```
+</details>
 
+```
     Accuracy (RF): 0.9580
     ROC AUC (RF): 0.9950
     
@@ -177,26 +183,20 @@ plt.show()
     [[49  4]
      [ 2 88]]
     OOB Score: 0.9624
+```
 
-
-
-    
 ![png](img/Arboles_12_1.png)
     
-
-
-
     
 ![png](img/Arboles_12_2.png)
     
-
-
-
     
 ![png](img/Arboles_12_3.png)
     
 
 ### Clasificación (Titanic)
+<details>
+<summary>🖥️ Código</summary>
 
 ```python showLineNumbers
 # Random Forest - clasificación sobre el dataset titanic
@@ -232,7 +232,8 @@ plt.title('Importancia de características - Random Forest')
 plt.show()  
 
 ```
-
+</details>
+```
     Accuracy: 0.7865168539325843
                   precision    recall  f1-score   support
     
@@ -243,7 +244,7 @@ plt.show()
        macro avg       0.78      0.76      0.77       267
     weighted avg       0.78      0.79      0.78       267
     
-
+```
 
 
     

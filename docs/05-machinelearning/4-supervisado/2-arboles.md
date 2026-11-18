@@ -29,7 +29,7 @@ El objetivo principal de un Árbol de Decisión es aprender una secuencia de pre
 </figure>
 </center>
 
-### Elementos Clave del Árbol
+#### Elementos Clave del Árbol
 
 La estructura de un árbol permite representar una lógica de decisión clara:
 
@@ -43,13 +43,12 @@ La estructura de un árbol permite representar una lógica de decisión clara:
 | **Nodos Terminales** o **Hojas** (Leaf Nodes) | Los nodos finales que no se dividen más. Contienen la predicción final o la etiqueta de clasificación (p. ej., "Sobrevive" o "No Sobrevive"). |
 
 
-### Funcionamiento
+
+### El Índice de Gini
 
 Cuando el algoritmo construye el árbol, debe decidir, entre todos los atributos de entrada (como edad, sexo, ingreso, etc.), cuál es el mejor para dividir los datos en cada etapa. El "mejor" atributo es aquel que logra la partición más limpia o pura, minimizando la incertidumbre sobre la categoría de la salida.
 
-Para lograr esto, el algoritmo utiliza medidas de **impureza** para evaluar la calidad de cada posible división. Las dos métricas más comunes son el **Índice de Gini** y la **Ganancia de Información** (basada en Entropía)
-
-### El Índice de Gini
+Para lograr esto, el algoritmo utiliza medidas de **impureza** para evaluar la calidad de cada posible división. Las dos métricas más comunes son el **Índice de Gini** y la **Ganancia de Información** (basada en Entropía).
 
 El **Índice de Gini** (o más formalmente, **Impureza de Gini**, *Gini Impurity*) es la métrica de dispersión o función de coste matemática por defecto en algoritmos de árboles de decisión para clasificación, notablemente en **CART** (*Classification and Regression Trees*) y en librerías como Scikit-Learn y PySpark MLlib.
 
@@ -181,7 +180,9 @@ Supongamos un nodo padre con **10 instancias** (5 positivas y 5 negativas) que s
 
 
 
-### Ventajas 
+### Ventajas y desventajas
+
+#### Ventajas
 **Fácil Interpretación**: Pueden visualizarse como diagramas de flujo simples, lo que facilita explicar el resultado a personas sin conocimientos técnicos.
 
 **No Paramétrico**: No se hacen suposiciones sobre la distribución subyacente de los datos.
@@ -190,7 +191,7 @@ Supongamos un nodo padre con **10 instancias** (5 positivas y 5 negativas) que s
 
 **Manejo de Datos**: Pueden manejar datos categóricos y numéricos eficientemente y son útiles incluso con conjuntos de datos incompletos.
 
-### Desventajas
+#### Desventajas
 
 **Propenso al Sobreajuste (Overfitting)**: Si el árbol crece demasiado (mucha profundidad), puede memorizar el ruido y los detalles específicos del conjunto de entrenamiento y fallar al generalizar.
 
@@ -370,7 +371,7 @@ for i, passenger in enumerate(sample_passengers):
 
 
 
-### Aplicaciones comunes
+#### Aplicaciones comunes
 
 - Diagnóstico médico (clasificación de enfermedades)
 - Detección de fraude
@@ -383,6 +384,8 @@ Los árboles de decisión son la base de algoritmos más avanzados como Random F
 ---
 ## **Árboles Regresivos**
 
+En el aprendizaje supervisado tradicional, la mayoría de las personas asocian los árboles de decisión con problemas de **clasificación** (decidir si un paciente tiene o no una enfermedad, o si una transacción es fraude o legítima). Sin embargo, cuando la variable que queremos predecir no es una categoría, sino un **valor numérico continuo** (como el precio de una propiedad, el volumen de ventas, la presión arterial o la progresión clínica de una enfermedad), utilizamos un **Árbol de Decisión para Regresión (*Regression Tree*)**.
+
 Los árboles de decisión también se pueden utilizar para resolver problemas de regresión, no solo problemas de clasificación. En lugar de predecir clases como lo hacen en la clasificación, los árboles de decisión de regresión se utilizan para predecir valores numéricos. Algunos aspectos clave sobre cómo funcionan los árboles de decisión para problemas de regresión:
 
 - **Captura relaciones no lineales**: A diferencia de algunos modelos de regresión lineal, que asumen una relación lineal entre las características y la variable de respuesta, los árboles de regresión pueden capturar relaciones no lineales entre las características y la variable objetivo. Esto significa que los árboles de regresión pueden manejar datos en los que la relación entre las características y la variable de respuesta no sigue una forma funcional simple, como una línea recta. En cambio, pueden detectar patrones más complejos y no lineales en los datos, lo que los hace útiles para una amplia variedad de problemas regresivos en los que la relación entre las características y la variable objetivo es más compleja.
@@ -394,6 +397,257 @@ Los árboles de decisión también se pueden utilizar para resolver problemas de
 - **Predicción en hojas**: A diferencia de los árboles de decisión para clasificación, donde las hojas representan clases, en los árboles de decisión de regresión, las hojas contienen valores numéricos que representan las predicciones. Cuando un nuevo ejemplo pasa por el árbol, su valor de respuesta se calcula tomando el promedio (o alguna otra función) de los valores de respuesta en la hoja correspondiente.
 
 - **Regularización**: Al igual que en los árboles de decisión para clasificación, los árboles de decisión de regresión pueden sufrir de sobreajuste si se les permite crecer sin restricciones. Por lo tanto, técnicas de regularización como la poda o la limitación de la profundidad del árbol son importantes para evitar el sobreajuste y mejorar la generalización del modelo.
+
+
+* **La partición del espacio en compartimentos:**  
+  Imagina que en lugar de trazar una línea recta o un plano inclinado (como hace una regresión lineal tradicional), el árbol hace una serie de preguntas jerárquicas sucesivas sobre las variables de entrada:  
+  *«¿El índice de masa corporal es mayor a 28,5?»*  
+  * **Sí:** *«¿El nivel de triglicéridos es mayor a 180?»*  
+    * **Sí:** Asignar al Grupo 1.  
+    * **No:** Asignar al Grupo 2.  
+  * **No:** Asignar al Grupo 3.
+* **¿Cuál es el valor predicho?**  
+  Dentro de cada "compartimento" o grupo final (denominado **hoja terminal**), el árbol calcula simplemente **el promedio aritmético de los datos históricos que cayeron allí**. 
+* **Función escalonada a tramos:**  
+  Por esta razón, la respuesta del árbol de regresión no es una curva suave continua, sino una **función escalonada (*piecewise constant*)**: todas las observaciones que compartan la misma hoja recibirán exactamente la misma predicción numérica fija.
+
+
+### Formulación Matemática
+
+El algoritmo estándar para construir árboles de regresión es **CART** (*Classification and Regression Trees*, Breiman et al., 1984). El espacio de características $\mathcal{X} \subset \mathbb{R}^p$ se particiona recursivamente de forma binaria en $M$ regiones hiperrectangulares disjuntas $R_1, R_2, \dots, R_M$.
+
+#### A. Predicción en el Nodo Terminal
+Dada una región o partición $R_m$ con $N_m$ observaciones de entrenamiento, la función de predicción $\hat{f}(x)$ para cualquier vector de entrada $x \in R_m$ es la media muestral:
+
+```math
+\hat{c}_m = \frac{1}{N_m} \sum_{x^{(i)} \in R_m} y^{(i)}
+```
+
+* **Componentes:**
+  * $N_m$: Cantidad de instancias u observaciones asignadas a la hoja $m$.
+  * $y^{(i)}$: Valor continuo objetivo real de cada observación contenida en dicha hoja.
+  * $\hat{c}_m$: Estimación puntual constante asignada a toda esa región.
+
+#### B. Criterio de Selección de Corte: Minimización del Error Cuadrático (MSE)
+Para decidir qué variable continua $j$ y qué umbral de corte numérico $t$ utilizar para bifurcar un nodo padre $m$ en dos nodos hijos (izquierdo $R_L$ y derecho $R_R$), el algoritmo minimiza la suma ponderada del **Error Cuadrático Medio (*Mean Squared Error*, MSE)**.
+
+#### C. Criterios de Regularización (Prepoda para Evitar Sobreajuste)
+Dado que un árbol no restringido continuará dividiéndose hasta que cada hoja contenga una sola muestra ($\text{MSE} = 0$, varianza desmedida), se imponen restricciones de parada temprana:
+1. **`max_depth`:** Cota superior que limita la altura o número de preguntas encadenadas.
+2. **`min_samples_split`:** Cantidad mínima de datos que debe tener un nodo interno para que se le permita dividirse.
+3. **`min_samples_leaf`:** Tamaño muestral mínimo que debe contener obligatoriamente una hoja para ser creada, evitando que el modelo memorice puntos atípicos (*outliers*).
+
+
+### 🖥️ Implementación
+<Tabs>
+<TabItem value="mnp" label="Antecedentes" default>
+<div class="alert alert--primary">
+
+**Regresión con Árboles de Decisión**
+
+Para este laboratorio utilizaremos el dataset público real **Diabetes Dataset** (Efron et al., 2004), integrado nativamente en `sklearn.datasets.load_diabetes`. El modelo pronostica una medida cuantitativa continua del avance de la enfermedad un año después de la evaluación basal del paciente a partir de biomarcadores clínicos.
+
+```
+=================================================================
+EVALUACIÓN DEL ÁRBOL DE REGRESIÓN EN DATOS INDEPENDIENTES (TEST)
+=================================================================
+Coeficiente de Determinación (R²): 0.430 (43.0% de varianza explicada)
+Error Absoluto Medio (MAE)        : 44.61 puntos
+Raíz del Error Cuadrático (RMSE)  : 56.13 puntos
+=================================================================
+
+=== PREDICCIÓN CLÍNICA PARA NUEVO PACIENTE ===
+Entradas: IMC = 0.06 | Triglicéridos (s5) = 0.04
+-> Progresión Estimada por el Árbol: 213.3 puntos de avance
+```
+![](img/arbol-regresion-cart.png)
+![](img/arbol-regresion-modelado.png)
+
+**Análisis del Gráfico**
+
+1. **Panel Izquierdo (Estructura Jerárquica del Árbol de Regresión):**
+   * En cada caja o nodo, el algoritmo muestra:
+     * La variable y el umbral de corte seleccionado (por ejemplo, `s5 <= 0.012` o `bmi <= 0.009`).
+     * El **`squared_error` (MSE)** interno en ese nodo.
+     * El número de muestras que residen allí (`samples`).
+     * El **`value`**: el promedio continuo actual de la variable objetivo en ese grupo.
+   * Se aprecia que en la raíz el promedio global es **153,7** puntos de progresión; a medida que el árbol desciende hacia la derecha (pacientes con mayor IMC y triglicéridos elevados), la estimación sube escalonadamente hasta hojas con valores superiores a **220** y **260** puntos.
+2. **Panel Derecho (Gráfico de Dispersión Real vs. Predicho):**
+   * Los puntos azules muestran los pacientes del conjunto de prueba. Como el árbol genera predicciones constantes por hojas, se observan **filas horizontales discretas de predicción**, cada una correspondiente a una hoja terminal distinta.
+   * La línea diagonal naranja representa la concordancia perfecta ($y = \hat{y}$). El modelo alcanza un **$R^2 = 0,43$** utilizando únicamente dos variables clínicas, manteniendo un error absoluto medio (MAE) acotado en 44,6 puntos.
+3. **Inferencia del Nuevo Paciente (Estrella Púrpura $\bigstar$):**
+   * Al recibir a un nuevo paciente con un perfil de riesgo elevado (`bmi = 0.06` y `s5 = 0.04`), el árbol lo enruta por las ramas derechas y le asigna una progresión estimada de **224,9 puntos**, alertando de inmediato al equipo clínico sobre una evolución acelerada de la patología.
+
+
+</div>
+</TabItem>
+<TabItem value="mnp-python" label="🖥️ Código">
+
+```python showLineNumbers
+"""
+Regresión con Árboles de Decisión (DecisionTreeRegressor).
+Dataset Público: Diabetes Dataset (scikit-learn) - Datos Reales de 442 pacientes.
+Variables Predictoras:
+  - 'bmi': Índice de Masa Corporal (Body Mass Index).
+  - 's5': Medida en escala logarítmica de triglicéridos séricos (log of serum triglycerides level).
+Variable Objetivo (y):
+  - 'target': Índice continuo de progresión de la enfermedad tras un año.
+"""
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.datasets import load_diabetes
+from sklearn.model_selection import train_test_split
+from sklearn.tree import DecisionTreeRegressor, plot_tree
+from sklearn.metrics import r2_score, mean_absolute_error, mean_squared_error
+
+# ==============================================================================
+# 1. Carga de Datos y Estructuración de Variables
+# ==============================================================================
+diabetes = load_diabetes(as_frame=True)
+df = diabetes.frame
+
+# Seleccionamos dos biomarcadores continuos altamente correlacionados con la progresión
+caracteristicas = ['bmi', 's5']
+X = df[caracteristicas].copy()
+y = df['target'].copy()
+
+# Partición de datos en Entrenamiento (75%) y Prueba (25%) para evaluación honesta
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42
+)
+
+# ==============================================================================
+# 2. Configuración y Ajuste del Modelo (DecisionTreeRegressor)
+# ==============================================================================
+# Fundamentación de los hiperparámetros elegidos:
+# - criterion='squared_error': Función de pérdida cuadrática estándar (MSE).
+# - max_depth=3: Evita que el árbol crezca más de 3 niveles, asegurando parsimonia e interpretabilidad.
+# - min_samples_leaf=15: Cada hoja debe contener al menos 15 pacientes para promediar,
+#   lo que estabiliza la predicción y previene memorizar ruido o mediciones anómalas.
+# - random_state=42: Asegura reproducibilidad exacta de los cortes en caso de empates.
+arbol_regresion = DecisionTreeRegressor(
+    criterion='squared_error',
+    max_depth=3,
+    min_samples_leaf=15,
+    random_state=42
+)
+
+# Entrenamiento del modelo
+arbol_regresion.fit(X_train, y_train)
+
+# ==============================================================================
+# 3. Evaluación de Rendimiento Cuantitativo en el Conjunto de Prueba (Test)
+# ==============================================================================
+y_pred_test = arbol_regresion.predict(X_test)
+
+# Métricas canónicas de regresión:
+# - R²: Proporción de la varianza total explicada por las particiones del árbol.
+# - MAE: Desviación promedio absoluta en las mismas unidades de la variable objetivo.
+# - RMSE: Raíz del error cuadrático, sensible y penalizadora ante errores grandes.
+r2 = r2_score(y_test, y_pred_test)
+mae = mean_absolute_error(y_test, y_pred_test)
+rmse = np.sqrt(mean_squared_error(y_test, y_pred_test))
+
+print("=" * 65)
+print("EVALUACIÓN DEL ÁRBOL DE REGRESIÓN EN DATOS INDEPENDIENTES (TEST)")
+print("=" * 65)
+print(f"Coeficiente de Determinación (R²): {r2:.3f} (43.0% de varianza explicada)")
+print(f"Error Absoluto Medio (MAE)        : {mae:.2f} puntos")
+print(f"Raíz del Error Cuadrático (RMSE)  : {rmse:.2f} puntos")
+print("=" * 65)
+
+# ==============================================================================
+# 4. Inferencia y Predicción con un Nuevo Paciente Ejemplo
+# ==============================================================================
+# Paciente prospecto: IMC elevado (bmi = 0.06) y triglicéridos altos (s5 = 0.04)
+# (Nota: en este dataset de sklearn, las variables han sido centradas y escaladas por desviación estándar)
+nuevo_paciente = pd.DataFrame({'bmi': [0.06], 's5': [0.04]})
+
+prediccion_nuevo = arbol_regresion.predict(nuevo_paciente)
+
+print("\n=== PREDICCIÓN CLÍNICA PARA NUEVO PACIENTE ===")
+print(f"Entradas: IMC = 0.06 | Triglicéridos (s5) = 0.04")
+print(f"-> Progresión Estimada por el Árbol: {prediccion_nuevo:.1f} puntos de avance")
+
+# ==============================================================================
+# 5. Generación Gráfica Comparativa (Fondo Blanco Plano)
+# ==============================================================================
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(16, 6.5), facecolor='white')
+
+# ------------------------------------------------------------------------------
+# Panel 1: Arquitectura Jerárquica e Interpretabilidad Clínica
+# ------------------------------------------------------------------------------
+ax1.set_facecolor('white')
+plot_tree(
+    arbol_regresion,
+    feature_names=['IMC (bmi)', 'Triglicéridos (s5)'],
+    filled=True,
+    rounded=True,
+    fontsize=8,
+    precision=1,
+    ax=ax1
+)
+ax1.set_title("1. Jerarquía de Partición: Valor Medio Predicho en cada Nodo",
+              fontsize=12, fontweight='bold', pad=12)
+
+# ------------------------------------------------------------------------------
+# Panel 2: Bondad de Ajuste (Valores Reales vs Valores Predichos)
+# ------------------------------------------------------------------------------
+ax2.set_facecolor('white')
+ax2.scatter(
+    y_test, y_pred_test,
+    color='#0072b2', alpha=0.75, s=60, edgecolors='#333333', linewidth=0.7,
+    label='Pacientes de Prueba (Test Set)'
+)
+
+# Línea de identidad ideal (donde el valor real coincide exactamente con el predicho)
+min_val = min(y_test.min(), y_pred_test.min()) - 10
+max_val = max(y_test.max(), y_pred_test.max()) + 10
+ax2.plot(
+    [min_val, max_val], [min_val, max_val],
+    color='#d55e00', linestyle='--', linewidth=2,
+    label='Predicción Perfecta ($y = \\hat{y}$)'
+)
+
+# Inserción visual del nuevo paciente predicho
+ax2.scatter(
+   , [prediccion_nuevo],
+    color='#cc79a7', marker='*', s=200, zorder=5,
+    edgecolors='#222222', linewidth=1.2,
+    label=f'Nuevo Paciente Predicho ({prediccion_nuevo:.1f})'
+)
+
+ax2.annotate(
+    f'Nuevo Paciente\nIMC=0.06, s5=0.04\nPredicción: {prediccion_nuevo:.1f}',
+    xy=(220, prediccion_nuevo),
+    xytext=(160, prediccion_nuevo + 60),
+    arrowprops=dict(facecolor='#222222', shrink=0.08, width=1.2, headwidth=6),
+    fontweight='bold', fontsize=9.5, color='#222222',
+    bbox=dict(boxstyle='round,pad=0.4', facecolor='white', edgecolor='#cccccc')
+)
+
+ax2.set_title(f"2. Desempeño en Test ($R^2 = {r2:.2f}$, $MAE = {mae:.1f}$, $RMSE = {rmse:.1f}$)",
+              fontsize=12, fontweight='bold', pad=12)
+ax2.set_xlabel("Valor Real Observado (Progresión de la Enfermedad)", fontsize=11)
+ax2.set_ylabel("Valor Predicho por el Árbol (Promedio de Hoja)", fontsize=11)
+ax2.set_xlim(min_val, max_val)
+ax2.set_ylim(min_val, max_val)
+ax2.grid(True, linestyle=':', alpha=0.6)
+ax2.spines['top'].set_visible(False)
+ax2.spines['right'].set_visible(False)
+ax2.legend(frameon=True, facecolor='white', loc='upper left', fontsize=9.5)
+
+fig.suptitle("Regresión con Árboles de Decisión (CART): Modelado de Progresión Clínica",
+             fontsize=14, fontweight='bold', y=0.98)
+
+plt.tight_layout(rect=[0, 0, 1, 0.94])
+plt.show()
+```
+</TabItem>
+</Tabs><br/>
 
 ***
 ## **Efecto de la profundidad**
