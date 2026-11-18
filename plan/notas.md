@@ -270,3 +270,14 @@ Muestra cómo evaluar un modelo de regresión con validación cruzada
 ¿Cómo se evalúa el rendimiento con la matriz de confusión?
 ¿Qué es la curva ROC-AUC en clasificación?
 ¿Cómo funciona la regularización en regresión logística?
+
+## AUC
+
+¿Cómo se calcula el umbral óptimo de decisión utilizando el F1-Score?
+
+Explícame cómo extender la curva ROC-AUC a problemas multiclase
+
+¿Cuándo es preferible utilizar la curva ROC en lugar de la curva PR?
+
+## arboles
+

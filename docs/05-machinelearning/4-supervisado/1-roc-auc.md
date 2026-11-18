@@ -168,7 +168,7 @@ Por esta razón, cuando los datos están muy desbalanceados, los científicos de
 
 ***
 ## **AUC**
-**¿Qué es el AUC?**  
+
 Es el **Área Bajo la Curva** (*Area Under the Curve*). Es un número único entre **0,5 y 1,0** que resume la calidad global del clasificador:
 * **$\text{AUC} = 0,5$:** Equivale a lanzar una moneda al aire (el modelo no tiene ninguna capacidad de discriminación).
 
@@ -367,7 +367,37 @@ plt.show()
 ***
 ## **PR-AUC**
 
-La métrica **PR-AUC** (*Precision-Recall Area Under the Curve*) y su estimador estándar en Scikit-Learn, la **Precisión Media (*Average Precision*, AP)**, constituyen la herramienta diagnóstica fundamental para evitar las conclusiones engañosas que suele arrojar la curva ROC.
+Imagina que trabajas en el sistema de seguridad de un aeropuerto analizando equipajes en busca de objetos peligrosos (una situación donde el 99,9% de las maletas son normales y solo una fracción mínima contiene amenazas). Tu modelo de detección asigna una probabilidad continua de riesgo a cada maleta.
+
+Para tomar una decisión operativa, debes elegir un **umbral de corte**:
+* Si eres **muy estricto** y fijas un umbral alto (por ejemplo, alertar solo cuando la certeza sea > 90%), las pocas maletas que revises serán casi con seguridad amenazas reales (**alta precisión**), pero dejarás escapar muchas otras amenazas que tenían puntuaciones intermedias (**baja exhaustividad o *recall*).
+
+* Si eres **muy precavido** y fijas un umbral bajo (por ejemplo, alertar ante cualquier sospecha > 10%), capturarás prácticamente todas las amenazas reales (**alto *recall*), pero generarás miles de falsas alarmas con maletas inocentes, colapsando el personal de seguridad (**baja precisión**).
+
+**La curva Precision-Recall (PR) es el gráfico que dibuja ese compromiso continuo entre precisión y exhaustividad al evaluar todos los umbrales posibles (desde 0 hasta 1).**
+
+#### ¿Qué es entonces el PR-AUC?
+El **PR-AUC** (*Precision-Recall Area Under the Curve*) es simplemente la **superficie total que queda por debajo de esa curva**. 
+* Representa un **resumen numérico único (entre 0 y 1)** que califica qué tan bueno es tu modelo ordenando y detectando los casos críticos, sin atarte a un único umbral arbitrario.
+
+* **Cuanto más cercano a 1,0 esté el valor**, más arriba y a la derecha se mantiene la curva, lo que significa que el algoritmo es capaz de alcanzar un alto nivel de detección (*recall*) manteniendo al mismo tiempo una baja tasa de falsas alarmas (alta precisión).
+
+* Es la métrica reina cuando buscas **"una aguja en un pajar"** (detección de fraude bancario, diagnóstico de enfermedades poco frecuentes, fallas de maquinaria o ciberataques), donde las clases están severamente desbalanceadas.
+
+La métrica **PR-AUC** y su estimador estándar en Scikit-Learn, la **Precisión Media (*Average Precision*, AP)**, constituyen la herramienta diagnóstica fundamental para evitar las conclusiones engañosas que suele arrojar la curva ROC.
+
+
+
+
+### Cuadro Comparativo
+
+| Criterio | Curva ROC-AUC | Curva PR-AUC / Average Precision |
+| :--- | :--- | :--- |
+| **Ejes analizados** | Sensibilidad (TPR) vs. Falsas Alarmas (FPR) | Precisión (PPV) vs. Exhaustividad (Recall) |
+| **Sensibilidad al desbalance** | **Baja (invariante a la prevalencia):** Se ve inflada y optimista porque el gran volumen de TN reduce artificialmente el FPR. | **Alta (muy sensible):** No incluye los TN en ninguna fórmula, reflejando fielmente el costo real de los falsos positivos. |
+| **Línea base de comparación** | Fija en **0,50** (diagonal de azar). | Dinámica: igual a la proporción de positivos en la muestra ($\frac{P}{P+N}$). |
+| **Cuándo usarla en la industria** | Clases equilibradas (50/50 o 60/40) donde predecir negativos correctos es tan valioso como predecir positivos. | Detección de fraude, ciberseguridad, fallas en líneas de manufactura y diagnósticos oncológicos. |
+
 
 
 ### Formulación Matemática 
@@ -391,13 +421,17 @@ Para una clase positiva de interés (por ejemplo, transacciones fraudulentas o p
     *   $\text{FN}(t)$: Falsos Negativos (positivos ignorados por el modelo).
 
 #### B. La Línea Base Teórica (Clasificador Aleatorio)
+
 A diferencia de la curva ROC —donde el clasificador aleatorio siempre tiene un $\text{AUC} = 0,50$—, en la curva Precision-Recall la línea base no es fija; **es igual a la prevalencia de la clase positiva en la población**:
+
 ```math 
 \text{Línea Base} = \frac{P}{P + N}
 ```
 Si solo el $2\%$ de las instancias son positivas, un clasificador aleatorio tendrá una precisión constante de **$0,02$** a lo largo de todo el espectro de *Recall*.
 
-#### C. Estimación del Área: `auc()` vs. `average_precision_score()` en Scikit-Learn
+#### C. Estimación del Área
+**`auc()` vs. `average_precision_score()` en Scikit-Learn**
+
 Existen dos formas de calcular el área bajo la curva PR en `scikit-learn`:
 1. **Regla trapezoidal clásica (`auc(recall, precision)`):** Une los puntos evaluados con líneas rectas. Sin embargo, en curvas Precision-Recall, la regla del trapecio tiende a **sobreestimar de manera no conservadora** el rendimiento del modelo entre umbrales sucesivos.
 2. **Precisión Media (*Average Precision*, AP) vía `average_precision_score()`:** Es la aproximación recomendada formalmente por Scikit-Learn. Calcula el promedio ponderado de la precisión alcanzada en cada umbral, utilizando como ponderación el incremento en el *Recall*:
@@ -412,6 +446,124 @@ Existen dos formas de calcular el área bajo la curva PR en `scikit-learn`:
 ***
 ### 🖥️ Implementación
 <br/>
+
+<Tabs>
+<TabItem value="mnp" label="Antecedentes" default>
+<div class="alert alert--primary">
+**Evaluación con Precision-Recall AUC**
+
+El siguiente módulo académico simula un problema industrial con un **desbalance del 98% clase negativa frente al 2% clase positiva**, entrena un clasificador logístico ponderado, calcula el **Average Precision (AP)** y grafica la curva completa sobre un fondo blanco plano con su línea base poblacional:
+</div>
+</TabItem>
+<TabItem value="mnp-python" label="🖥️ Código">
+
+```python showLineNumbers
+"""
+Evaluación con Precision-Recall AUC (PR-AUC / Average Precision).
+Librerías: scikit-learn y matplotlib.
+"""
+
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.datasets import make_classification
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.linear_model import LogisticRegression
+from sklearn.metrics import (
+    precision_recall_curve,
+    average_precision_score,
+    auc,
+    PrecisionRecallDisplay
+)
+
+# ==============================================================================
+# 1. Simulación de Datos Desbalanceados (98% Normal vs. 2% Anomalía/Fraude)
+# ==============================================================================
+X, y = make_classification(
+    n_samples=5000,
+    n_features=12,
+    n_informative=6,
+    n_redundant=2,
+    weights=[0.98, 0.02],  # Prevalencia del 2%
+    random_state=42
+)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.30, random_state=42, stratify=y
+)
+
+# ==============================================================================
+# 2. Ajuste del Estimador con Compensación de Pesos
+# ==============================================================================
+scaler = StandardScaler()
+X_train_scaled = scaler.fit_transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+
+clf = LogisticRegression(class_weight='balanced', random_state=42)
+clf.fit(X_train_scaled, y_train)
+
+# Extracción obligatoria de probabilidades continuas P(y=1|x)
+y_scores = clf.predict_proba(X_test_scaled)[:, 1]
+
+# ==============================================================================
+# 3. Cálculo Numérico de PR-AUC y Average Precision
+# ==============================================================================
+# Método estándar: Average Precision
+ap_score = average_precision_score(y_test, y_scores)
+
+# Método trapezoidal tradicional
+precision, recall, _ = precision_recall_curve(y_test, y_scores)
+pr_auc_trapecio = auc(recall, precision)
+prevalencia = np.mean(y_test)
+
+print("=== EVALUACIÓN NUMÉRICA BAJO DESBALANCE ===")
+print(f"Prevalencia de clase positiva en Test : {prevalencia * 100:.2f}%")
+print(f"Average Precision (AP oficial)        : {ap_score:.4f}")
+print(f"Área Trapezoidal (auc)                : {pr_auc_trapecio:.4f}")
+
+# ==============================================================================
+# 4. Visualización Gráfica (Fondo Blanco Plano y Paleta Contrastada)
+# ==============================================================================
+fig, ax = plt.subplots(figsize=(8, 5.5), facecolor='white')
+ax.set_facecolor('white')
+
+# Curva PR mediante la API moderna de visualización
+display = PrecisionRecallDisplay.from_predictions(
+    y_test,
+    y_scores,
+    name="Regresión Logística (Ponderada)",
+    color="#0072b2",
+    linewidth=2.5,
+    ax=ax
+)
+
+# Sombreado bajo la curva (PR-AUC)
+ax.fill_between(recall, precision, color="#0072b2", alpha=0.15)
+
+# Línea base del clasificador puramente aleatorio (Prevalencia muestral)
+ax.axhline(
+    prevalencia,
+    color="#d55e00",
+    linestyle="--",
+    linewidth=1.6,
+    label=f"Línea Base de Azar (Prevalencia = {prevalencia*100:.1f}%)"
+)
+
+ax.set_title(f"Curva Precision-Recall (Average Precision = {ap_score:.2f})", fontsize=12, fontweight="bold", pad=12)
+ax.set_xlabel("Recall / Exhaustividad (TP / [TP + FN])", fontsize=10.5)
+ax.set_ylabel("Precisión (TP / [TP + FP])", fontsize=10.5)
+ax.set_xlim(-0.02, 1.02)
+ax.set_ylim(-0.02, 1.04)
+ax.grid(True, linestyle=":", alpha=0.6)
+ax.spines['top'].set_visible(False)
+ax.spines['right'].set_visible(False)
+ax.legend(frameon=True, facecolor='white', loc='upper right', fontsize=9.5)
+
+plt.tight_layout()
+plt.show()
+```
+</TabItem>
+</Tabs><br/>
 
 #### Precision-Recall
 
