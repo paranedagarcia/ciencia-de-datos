@@ -877,15 +877,26 @@ Para aplicar la poda, el científico de datos debe resolver dos problemas técni
 
 En la literatura de algoritmos basados en árboles (CART, C4.5, ID3) existen dos paradigmas principales para llevar a cabo este control:
 
-```
-                                  Estrategias de Poda
-                                           │
-         ┌─────────────────────────────────┴─────────────────────────────────┐
-         ▼                                                                   ▼
-  1. Prepoda (Pre-pruning)                                            2. Pospoda (Post-pruning)
-  - Parada temprana durante el crecimiento.                           - Poda a posteriori del árbol completo.
-  - Criterio: ¿Cumple el corte las condiciones mínimas?               - Criterio: Función de Complejidad de Coste (CCP).
-  - Regula: max_depth, min_samples_leaf, min_impurity_decrease.       - Regula: ccp_alpha (α).
+```mermaid
+---
+config:
+  theme: 'redux-color'
+  themeVariables:
+     fontSize: 16px
+---
+flowchart LR
+    A["<strong>Poda</strong>"] --> B["<strong>PREPODA (Pre-pruning)</strong><br/>Parada temprana durante el crecimiento.<br/>Criterio: ¿Cumple el corte las condiciones mínimas?"]
+    A --> C["<strong>POSPODA (Post-pruning)</strong><br/>Poda a posteriori del árbol completo.<br/>."]
+
+    criterioa["<strong>Criterio:</strong><br/>¿Cumple el corte las condiciones mínimas?"]
+    criteriob["<strong>Criterio:</strong><br/>Función de complejidad de Coste (CCP)"]
+
+    regulaa["Regula:<br/>max_depth, min_samples_leaf, min_impurity_decrease."]
+    regulab["Regula:<br/> ccp_alpha (α)."]
+    B --- criterioa
+    C --- criteriob
+    criterioa --- regulaa
+    criteriob --- regulab
 ```
 
 #### A. Prepoda (*Pre-pruning* o Parada Temprana)
@@ -1066,6 +1077,7 @@ plt.tight_layout(rect=[0, 0, 1, 0.94])
 plt.show()
 ```
 </details>
+
 ```
 === RESULTADOS DE LA PODA COST-COMPLEXITY (CART) ===
 Árbol No Podado -> Nodos: 31 | Hojas: 16 | Profundidad: 6
@@ -1097,6 +1109,186 @@ He generado y publicado en tu panel de **Studio** el artefacto visual **`mecanic
 | **¿Dónde podar?** | En cualquier nodo que no cumpla los umbrales prefijados (`max_depth`, `min_samples_leaf`). | En los subárboles con el menor ratio de ganancia de impureza frente al número de hojas colapsadas (mínimo $\alpha_{\text{efectivo}}$). |
 | **Mecanismo de Selección** | Búsqueda por rejilla (*Grid Search*) sobre hiperparámetros con validación cruzada. | Identificación del punto de máxima precisión/mínimo error en la curva de validación sobre $\alpha$. |
 | **Fortaleza Principal** | Rápido y ligero de computar. | Inmune a la miopía voraz del algoritmo; preserva interacciones complejas profundas. |
+
+***
+## **Funciones Scikit-learn**
+
+En la librería `scikit-learn`, trabajar con árboles de decisión es como armar y operar un sistema de reglas de decisión automatizado. Para ello, la librería divide sus herramientas en tres grandes grupos de funciones y clases:
+
+1. **Los Modelos Principales (Estimadores):** Son los encargados de aprender las preguntas y respuestas a partir de los datos históricos. Hay uno para predecir categorías o etiquetas discretas (`DecisionTreeClassifier`) y otro para predecir números o cantidades continuas (`DecisionTreeRegressor`).
+2. **Las Herramientas de Visualización:** Permiten "abrir la caja" y ver el diagrama de flujo completo del árbol, ya sea como un dibujo gráfico (`plot_tree`) o como un texto estructurado con sangrías del tipo *«si X > 5 entonces...»* (`export_text`).
+3. **El Mecanismo de Poda Analítica:** Una función especializada (`cost_complexity_pruning_path`) que calcula exactamente cuáles son las ramitas más débiles que debemos cortar para que el árbol no se vuelva demasiado complejo y memorice ruido.
+
+
+#### Clases Principales de Modelado
+
+##### A. `DecisionTreeClassifier` (Clasificación)
+Se utiliza cuando la variable objetivo es cualitativa o categórica (por ejemplo: *Transacción Fraudulenta / Legítima*, *Diagnóstico Maligno / Benigno*, o *Segmento de Clientes A / B / C*).
+
+* **¿Cómo se usa?**
+  ```python showLineNumbers
+  from sklearn.tree import DecisionTreeClassifier
+
+  modelo_clas = DecisionTreeClassifier(
+      criterion='gini',
+      max_depth=3,
+      min_samples_split=10,
+      min_samples_leaf=5,
+      class_weight='balanced',
+      random_state=42
+  )
+  modelo_clas.fit(X_entrenamiento, y_entrenamiento)
+  predicciones = modelo_clas.predict(X_prueba)
+  probabilidades = modelo_clas.predict_proba(X_prueba)
+  ```
+
+##### B. `DecisionTreeRegressor` (Regresión)
+Se emplea cuando queremos pronosticar una cantidad numérica continua (por ejemplo: el precio de una vivienda, el gasto mensual con tarjeta o la progresión clínica de un paciente). En lugar de predecir una clase, cada hoja terminal calcula el **promedio numérico** de los datos que cayeron en ella.
+
+* **¿Cómo se usa?**
+  ```python showLineNumbers
+  from sklearn.tree import DecisionTreeRegressor
+
+  modelo_reg = DecisionTreeRegressor(
+      criterion='squared_error',
+      max_depth=4,
+      min_samples_leaf=10,
+      random_state=42
+  )
+  modelo_reg.fit(X_entrenamiento, y_entrenamiento)
+  valores_estimados = modelo_reg.predict(X_prueba)
+  ```
+
+
+#### Argumentos e Hiperparámetros
+
+Tanto en clasificación como en regresión, el comportamiento del árbol se modula mediante argumentos clave dentro de su constructor:
+
+##### `criterion` (Criterio de Evaluación de Divisiones)
+Es la brújula que utiliza el árbol para decidir cuál es la mejor pregunta en cada paso:
+* **En Clasificación:**
+  * `'gini'` (predeterminado): Mide la probabilidad de clasificar erróneamente un elemento si se eligiera una etiqueta al azar según la distribución del nodo. Favorece divisiones rápidas que aíslen la clase mayoritaria.
+  * `'entropy'` / `'log_loss'`: Mide el desorden o sorpresa en la información. Penaliza de forma más uniforme los nodos impuros.
+* **En Regresión:**
+  * `'squared_error'` (predeterminado): Busca cortes que minimicen la dispersión cuadrática respecto al promedio de la hoja (equivalente a minimizar la varianza interna).
+  * `'absolute_error'`: Minimiza la distancia absoluta respecto a la mediana del grupo; es mucho más robusto si el dataset contiene valores atípicos (*outliers*) extremos.
+
+##### `max_depth` (Profundidad Máxima)
+Determina la cantidad máxima de preguntas sucesivas que el árbol tiene permitido encadenar desde la raíz hasta cualquier hoja:
+* **Si se deja en `None` (por defecto):** El árbol crecerá libremente hasta que todas las hojas sean puras o contengan menos muestras que el umbral mínimo, generando un alto riesgo de **sobreajuste**.
+* **Fijar un número entero (ej. `max_depth=3` o `4`):** Actúa como una técnica de **prepoda** que detiene el crecimiento vertical, obligando al modelo a aprender únicamente reglas globales y comprensibles.
+
+##### `min_samples_split` (Muestras Mínimas para Bifurcar)
+Es la cantidad mínima de observaciones que debe contener obligatoriamente un nodo interno para que el algoritmo tenga permiso de intentar dividirlo:
+* Por ejemplo, si un nodo solo tiene 4 pacientes y fijamos `min_samples_split=10`, el algoritmo se detiene de inmediato y convierte ese nodo en una hoja terminal, impidiendo divisiones sobre grupos diminutos.
+
+##### `min_samples_leaf` (Muestras Mínimas en la Hoja Terminal)
+Garantiza que ninguna conclusión o predicción final del árbol se base en un grupo estadísticamente insignificante:
+* Una división solo se aprueba si tanto la rama izquierda como la derecha resultantes terminan con al menos este número de datos.
+* Si fijas `min_samples_leaf=15`, ninguna hoja del árbol tendrá menos de 15 casos reales de respaldo, eliminando reglas anecdóticas creadas por ruido.
+
+##### `ccp_alpha` (Parámetro de Poda por Complejidad de Costo)
+Representa el valor de penalización o "impuesto" que se le cobra al árbol por mantener cada hoja terminal activa:
+* Por defecto es `0.0` (sin poda a posteriori).
+* Al asignarle un valor mayor a cero (por ejemplo, `0.015`), el algoritmo colapsa y poda hacia atrás todas las ramas secundarias cuya ganancia no justifique el costo de tener hojas adicionales.
+
+##### `class_weight` (Ponderación de Clases, exclusivo de Clasificación)
+Permite compensar problemas donde una clase es muy rara frente a la otra (como en detección de fraude con 98% de transacciones normales y 2% fraudulentas):
+* Si se define como `'balanced'`, el algoritmo calcula automáticamente pesos inversamente proporcionales a la frecuencia de cada clase, evitando que el árbol ignore a la clase minoritaria.
+
+##### `random_state` (Semilla de Aleatoriedad)
+Fija una semilla numérica (por ejemplo, `42`) para garantizar que los resultados sean exactamente reproducibles si existen empates entre dos variables con idéntica ganancia al momento de decidir una división.
+
+
+
+#### Funciones de Visualización y Explicabilidad
+
+Scikit-learn incorpora funciones dentro de su submódulo `sklearn.tree` para auditar la lógica del modelo:
+
+##### A. `plot_tree` (Renderizado Gráfico)
+Dibuja el árbol como un diagrama de cajas conectado por flechas sobre un lienzo de Matplotlib.
+
+```python showLineNumbers
+from sklearn.tree import plot_tree
+import matplotlib.pyplot as plt
+
+fig, ax = plt.subplots(figsize=(12, 6), facecolor='white')
+
+plot_tree(
+    modelo_clas,
+    feature_names=['Ingreso', 'Edad', 'Gasto'],
+    class_names=['Básico', 'Premium'],
+    filled=True,      # Pinta las cajas con colores según la clase predominante
+    rounded=True,     # Bordes redondeados para estética clara
+    proportion=True,  # Muestra porcentajes en lugar de conteos absolutos
+    precision=2,      # Decimales en los umbrales
+    fontsize=9,
+    ax=ax
+)
+plt.show()
+```
+* **Argumentos clave:**
+  * `feature_names`: Lista con los nombres de las columnas para que el gráfico muestre nombres claros en lugar de códigos genéricos como `X`.
+  * `class_names`: Nombres de las categorías a predecir.
+  * `filled=True`: Colorea las cajas según su pureza (tonos más intensos indican mayor certeza en el diagnóstico o segmento).
+
+##### B. `export_text` (Reglas en Formato de Texto Plano)
+Genera una representación textual con sangrías jerárquicas muy útil para consolas, registros de auditoría o para traducir las reglas a sentencias SQL / código de base de datos.
+
+```python showLineNumbers
+from sklearn.tree import export_text
+
+reglas = export_text(
+    modelo_clas,
+    feature_names=['Ingreso', 'Edad', 'Gasto'],
+    spacing=3
+)
+print(reglas)
+```
+* **Salida generada:**
+  ```text
+  |--- Ingreso <= 35.50
+  |   |--- Gasto <= 120.00
+  |   |   |--- class: Básico
+  |   |--- Gasto >  120.00
+  |   |   |--- class: Estándar
+  |--- Ingreso >  35.50
+  |   |--- class: Premium
+  ```
+
+
+
+#### Función Especializada de Poda: `cost_complexity_pruning_path`
+
+Esta función responde de forma matemática a la pregunta de **dónde y cuándo podar**.
+
+* **¿Cómo opera?**  
+  Toma el árbol ya entrenado y los datos de entrenamiento, y calcula analíticamente la secuencia completa de valores críticos de alfa (`ccp_alphas`) en los cuales cada rama pasa a ser el eslabón más débil del árbol.
+
+```python showLineNumbers
+# 1. Extraer la secuencia analítica de alphas
+trayectoria = modelo_clas.cost_complexity_pruning_path(X_train, y_train)
+alphas_disponibles = trayectoria.ccp_alphas
+impurezas = trayectoria.impurities
+
+# 2. alphas_disponibles es un vector ordenado de menor a mayor.
+# Cada valor representa el umbral exacto donde una rama del árbol se colapsa.
+print(f"Secuencia de alphas calculada: {alphas_disponibles[:5]}")
+```
+
+Al iterar sobre ese vector de alphas con validación cruzada, el analista puede identificar con precisión el valor exacto de `ccp_alpha` que maximiza la generalización del modelo sin necesidad de adivinar hiperparámetros al azar.
+
+
+
+#### Resumen de funciones
+
+| Función / Herramienta | Rol en el Flujo de Trabajo | Cuándo se Utiliza |
+| :--- | :--- | :--- |
+| **`DecisionTreeClassifier`** | Estimador de clasificación | Predicción de variables categóricas o discretas. |
+| **`DecisionTreeRegressor`** | Estimador de regresión cuantitativa | Predicción de valores numéricos continuos mediante promedios locales. |
+| **`plot_tree`** | Inspección visual gráfica | Presentaciones ejecutivas, validación clínica o auditoría de reglas. |
+| **`export_text`** | Inspección en texto plano | Exportación directa a reglas lógicas de negocio o motores SQL/CRM. |
+| **`cost_complexity_pruning_path`** | Cálculo de la trayectoria de poda | Determinación científica del hiperparámetro `ccp_alpha` óptimo. |
 
 
 
