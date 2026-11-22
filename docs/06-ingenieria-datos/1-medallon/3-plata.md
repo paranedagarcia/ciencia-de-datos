@@ -13,7 +13,6 @@ Dentro del **modelo medallón** (*Medallion Architecture*) en arquitecturas de *
 A esta etapa se le conoce frecuentemente como la **zona limpia o validada** (*cleansed / validated data*), y su propósito es transformar los datos crudos e inmutables de la capa bronce en una fuente de información estructurada, consistente y fiable.
 
 
-
 ### Principales características y funciones de la Capa Plata
 
 * **Limpieza y resolución de anomalías:** Se corrigen o filtran inconsistencias en los registros, gestionando valores nulos o incompletos y eliminando registros inválidos o corruptos.
@@ -42,9 +41,8 @@ A esta etapa se le conoce frecuentemente como la **zona limpia o validada** (*cl
 
 Para transformar datos desde la **capa Bronce** (datos crudos, históricos e inmutables) hacia la **capa Plata** (datos filtrados, limpios, tipados y estandarizados), se utilizan diversas herramientas clasificadas según su rol operativo en la arquitectura:
 
-
-
 ### Motores de Cómputo Distribuido y Cuadernos (Code-First)
+
 Son las herramientas predilectas para transformaciones a gran escala, complejas o sobre datos semiestructurados:
 *   **Apache Spark y Azure Databricks:** Es el estándar por excelencia para procesar grandes volúmenes de datos. Permite desarrollar rutinas en **PySpark, Scala o Spark SQL** mediante *notebooks* para leer datos crudos, eliminar duplicados, descartar valores nulos, estandarizar esquemas y ejecutar operaciones `MERGE` (upsert) en el destino.
 
@@ -53,8 +51,8 @@ Son las herramientas predilectas para transformaciones a gran escala, complejas 
 *   **Spark Pools en Azure Synapse y Microsoft Fabric:** Entornos Spark administrados y preconfigurados para limpiar y validar datasets masivos directamente sobre lagos de datos (ADLS Gen2 u OneLake) sin mover físicamente la información.
 
 
+### Integración y ETL/ELT
 
-### Servicios de Integración y ETL/ELT en la Nube
 Facilitan la preparación visual de datos y la orquestación automatizada de los pipelines:
 *   **Azure Data Factory / Fabric Data Factory:**
     *   **Data Pipelines:** Orquestan y programan dependencias de ejecución secuencial (como desencadenar primero la carga a Bronce y luego ejecutar cuadernos o scripts hacia Plata).
@@ -65,18 +63,18 @@ Facilitan la preparación visual de datos y la orquestación automatizada de los
 *   **Google Cloud Dataprep y Cloud Dataflow:** Dataprep permite explorar y limpiar datos de forma interactiva sugiriendo patrones de transformación, ejecutando las cargas subyacentes a través de pipelines de Cloud Dataflow (Apache Beam).
 
 
+### Herramientas
 
-### Herramientas de Modelado Declarativo y Calidad de Datos
-*   **dbt (data build tool):** Muy adoptada para complementar a motores como Spark y Databricks. Permite escribir transformaciones y selecciones modulares mediante plantillas SQL y archivos de configuración YAML, aplicando pruebas de integridad y facilitando el diseño de tablas con historización (como dimensiones de cambio lento / SCD Tipo 2) al alimentar la capa Plata.
+**dbt (data build tool)** 
+
+Muy adoptada para complementar a motores como Spark y Databricks. Permite escribir transformaciones y selecciones modulares mediante plantillas SQL y archivos de configuración YAML, aplicando pruebas de integridad y facilitando el diseño de tablas con historización (como dimensiones de cambio lento / SCD Tipo 2) al alimentar la capa Plata.
+
+**Delta Lake** 
+
+Más que una herramienta de cálculo, es el **formato y motor de almacenamiento abierto** sobre el que se materializa la capa Plata. Construido sobre archivos Parquet con un log de transacciones (`_delta_log`), garantiza **cumplimiento ACID**, imposición de esquemas (*schema enforcement*), versionado (*time travel*) y soporte nativo para comandos de actualización y combinación (`UPDATE`, `DELETE`, `MERGE`) esenciales para consolidar los datos limpios.
 
 
-
-### Capa de Almacenamiento y Persistencia Transaccional
-*   **Delta Lake:** Más que una herramienta de cálculo, es el **formato y motor de almacenamiento abierto** sobre el que se materializa la capa Plata. Construido sobre archivos Parquet con un log de transacciones (`_delta_log`), garantiza **cumplimiento ACID**, imposición de esquemas (*schema enforcement*), versionado (*time travel*) y soporte nativo para comandos de actualización y combinación (`UPDATE`, `DELETE`, `MERGE`) esenciales para consolidar los datos limpios.
-
-
-
-### Resumen de Selección según el Perfil
+### Resumen de selección
 
 | Escenario / Perfil | Herramienta Recomendada | Beneficio Clave |
 | :--- | :--- | :--- |
@@ -92,26 +90,25 @@ Facilitan la preparación visual de datos y la orquestación automatizada de los
 Las diferencias fundamentales entre la **capa Bronce** y la **capa Plata** dentro del modelo medallón radican en el nivel de refinamiento, la estructura técnica, la mutabilidad y los casos de uso a los que sirven:
 
 
-### Estado y Calidad del Dato
+#### Estado y Calidad del Dato
 * **Capa Bronce (Crudo / *Raw*):** Almacena los datos en su estado original y sin procesar tal como provienen de los sistemas fuente (*as-is*). No se aplican filtros de validación de negocio, por lo que puede contener registros duplicados, valores nulos, registros corruptos o inconsistencias.
 
 * **Capa Plata (Limpio y Enriquecido):** Los datos han sido sometidos a procesos rigurosos de limpieza, filtrado, manejo de valores ausentes y validación de calidad. Las inconsistencias numéricas y de formato se corrigen o descartan antes de persistirlos.
 
-### Formato y Esquema
+#### Formato y Esquema
 * **Capa Bronce:** Puede alojar una amplia variedad de formatos y estructuras dispares (archivos planos CSV, JSON semiestructurados, datos no estructurados o volcados de bases de datos relacionales) con un nivel mínimo de organización y metadatos básicos de ingesta.
 
 * **Capa Plata:** El esquema es estricto, estandarizado y tipado. Los datos se unifican y almacenan en un formato columnar optimizado y abierto, preferentemente **Delta Lake (Delta Parquet)**, lo que garantiza cumplimiento ACID, alto rendimiento y protección contra la corrupción.
 
-### Operatoria de Escritura: *Append-Only* vs. *Upsert (Merge)*
+#### Operatoria de Escritura: *Append-Only* vs. *Upsert (Merge)*
 * **Capa Bronce:** Es generalmente **inmutable y de solo anexado (*append-only*)**. Actúa como un registro histórico permanente y auditable del origen, lo que permite reconstruir o reprocesar cualquier capa posterior en caso de errores en los pipelines analíticos.
 
 * **Capa Plata:** Soporta mutabilidad controlada mediante operaciones de **`MERGE` (upsert)**, eliminando duplicados mediante claves de negocio y actualizando registros ya existentes con sus versiones más recientes (o gestionando tablas de dimensiones de cambio lento / SCD Tipo 2).
 
-### Audiencia y Consumidores
+#### Audiencia y Consumidores
 * **Capa Bronce:** Su acceso suele estar reservado de forma automatizada para ingenieros de datos y procesos de ETL/ELT; no está concebida para el consumo directo del usuario final ni para herramientas de visualización.
 
 * **Capa Plata:** Diseñada para **ingenieros de datos, analistas y científicos de datos**. Sirve de base para analítica fundacional, entrenamiento de modelos de Machine Learning y como punto de partida para construir las tablas de hechos y dimensiones de la **capa Oro**.
-
 
 
 #### Resumen comparativo
@@ -124,7 +121,6 @@ Las diferencias fundamentales entre la **capa Bronce** y la **capa Plata** dentr
 | **Patrón de carga** | Inmutable, anexado continuo (*append-only*). | Incremental con `MERGE` / upsert y control de versiones. |
 | **Propósito clave** | Registro histórico fidedigno y trazabilidad. | Base confiable para analítica avanzada y capa Oro. |
 | **Consumidores directos** | Pipelines de ingesta y orquestación técnica. | Ingenieros de datos, analistas y científicos de datos. |
-
 
 
 ***
@@ -236,7 +232,7 @@ FROM cleaned
 #### 2. Pruebas automáticas de calidad (`models/silver/schema.yml`)
 dbt evalúa la integridad de los datos durante la compilación y ejecución antes de promoverlos a la capa Plata:
 
-```yaml
+```yaml showLineNumbers
 version: 2
 
 models:
@@ -259,7 +255,7 @@ models:
 
 
 
-### Consideraciones técnicas al materializar en Plata
+### Consideraciones técnicas
 1. **Idempotencia:** La lógica de `MERGE` o `unique_key` asegura que reejecutar el pipeline varias veces no cree registros duplicados ni altere los totales.
 
 2. **Control de versiones (*Time Travel*):** Al emplear Delta Lake, cada operación de `MERGE` crea una nueva entrada en el log de transacciones (`_delta_log`), permitiendo consultar el estado exacto de la tabla en momentos anteriores o revertir cambios si una carga resulta anómala.

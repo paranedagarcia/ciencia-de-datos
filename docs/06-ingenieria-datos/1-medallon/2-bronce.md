@@ -13,7 +13,7 @@ Dentro del **modelo medallón** (*Medallion Architecture*), la **capa bronce** (
 Esta capa funciona como la puerta de entrada al *data lakehouse*, preservando la información en su estado más puro tal como proviene de los sistemas de origen.
 
 
-### Características y aspectos clave de la Capa Bronce
+### Características
 
 1. **Datos en estado crudo (*Raw Data / As-is*):**
    * Los datos se ingieren y almacenan en su formato nativo o en un estado *"tal cual"* (*as-is*) sin alterar su contenido ni aplicar reglas de negocio o transformaciones complejas.
@@ -32,7 +32,7 @@ Esta capa funciona como la puerta de entrada al *data lakehouse*, preservando la
 
 
 
-### Su rol frente a las demás capas del modelo
+### El rol
 
 | Capa | Estado del Dato | Propósito principal |
 | :--- | :--- | :--- |
@@ -49,7 +49,7 @@ A continuación se detalla su arquitectura, etapas operativas y un ejemplo prác
 
 ---
 
-### 1. Responsabilidades clave de la Capa Plata
+### Responsabilidades clave de la Capa Plata
 A diferencia de la capa Bronce (que conserva los datos tal como llegan del origen), el procesamiento hacia la capa Plata debe resolver:
 * **Aplicación de esquemas y tipado estricto:** Castear columnas desde tipos genéricos (como cadenas de texto) a enteros, dobles, booleanos o fechas formales.
 * **Limpieza de calidad de datos:** Tratar o descartar registros con valores nulos críticos, eliminar espacios en blanco y filtrar inconsistencias numéricas.
@@ -59,7 +59,7 @@ A diferencia de la capa Bronce (que conserva los datos tal como llegan del orige
 
 ---
 
-### 2. Implementación del Pipeline en PySpark (Notebook)
+### Implementación del Pipeline en PySpark (Notebook)
 
 El siguiente flujo ilustra el procesamiento incremental desde archivos o tablas en la capa Bronce hacia una tabla Delta en la capa Plata:
 
