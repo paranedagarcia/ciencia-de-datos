@@ -1,0 +1,8 @@
+{
+  "label": "📁 Arquitectura Medallón",
+  "link": {
+    "type": "generated-index",
+    "description": "Conceptos básicos de la arquitectura medallón, incluyendo capas de datos y técnicas de procesamiento.",
+    "slug": "/ingenieria-datos/medallon"
+  }
+}

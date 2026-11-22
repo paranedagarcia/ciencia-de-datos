@@ -281,3 +281,16 @@ Explícame cómo extender la curva ROC-AUC a problemas multiclase
 
 ## arboles
 
+## medallon
+
+¿Qué características tiene la capa plata en el modelo medallón?
+¿Cómo se estructuran las capas bronce, plata y oro en un lakehouse?
+¿Qué herramientas se utilizan para transformar datos de bronce a plata?
+
+Si quieres, podemos revisar los patrones para construir la capa oro a partir de la capa plata, modelando esquemas en estrella con tablas de hechos y dimensiones para reportes en herramientas de BI.
+
+Diseñemos una tabla de hechos para la capa Oro
+
+¿Cómo se vincula Power BI con la capa Oro?
+
+Muéstrame un ejemplo de esquema en estrella

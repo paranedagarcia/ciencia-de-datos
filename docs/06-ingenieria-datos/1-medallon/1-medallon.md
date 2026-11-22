@@ -3,11 +3,12 @@ id: medallon
 title: "Arquitectura Medallon"
 sidebar_label: "📄 Arquitectura Medallón"
 description: "Esta arquitectura se prefiere para cargas de trabajo analíticas ya que garantiza transacciones **ACID**"
+slug: /ingenieria-datos/introduccion
 ---
 
 ![](img/medallon.jpg)
 
-La **** (también conocida como **arquitectura multi-hop** o de múltiples saltos) es un patrón de diseño que organiza los datos de manera lógica en una estructura de almacenamiento multicapa. Su propósito fundamental es mejorar progresivamente la estructura, la calidad y la utilidad de la información a medida que fluye por las diferentes etapas de procesamiento y transformación. 
+La Arquitectura Medallón (también conocida como **arquitectura multi-hop** o de múltiples saltos) es un patrón de diseño que organiza los datos de manera lógica en una estructura de almacenamiento multicapa. Su propósito fundamental es mejorar progresivamente la estructura, la calidad y la utilidad de la información a medida que fluye por las diferentes etapas de procesamiento y transformación. 
 
 Esta arquitectura se prefiere para cargas de trabajo analíticas (OLAP) debido a que garantiza transacciones **ACID** (atomicidad, consistencia, aislamiento y durabilidad) a lo largo del flujo y permite la coexistencia integrada de cargas de trabajo híbridas (tanto por lotes como en tiempo real en una misma canalización).
 
