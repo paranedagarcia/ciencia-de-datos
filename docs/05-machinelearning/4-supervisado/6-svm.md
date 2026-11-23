@@ -128,7 +128,7 @@ Gracias al teorema de representabilidad y las condiciones de Mercer, en lugar de
 
 
 
-### Usos y casos de cplicación
+### Usos y casos de aplicación
 
 La Máquina de Soporte Vectorial es extremadamente valiosa en situaciones donde la **precisión** es vital y cuando los datos son complejos (es decir, tienen muchas características).
 
@@ -173,11 +173,8 @@ En general, las SVM son muy útiles cuando:
 **Desventajas de SVM:**
 
 - El entrenamiento puede ser lento y costoso en memoria para conjuntos de datos muy grandes.
-
 - La elección del *kernel* y sus parámetros puede ser compleja y requiere ajuste cuidadoso. Elegir el kernel y ajustar sus configuraciones requiere experiencia.
-
 - Menor interpretabilidad del modelo en comparación con modelos lineales simples o árboles de decisión. A diferencia de un árbol de decisiones, es menos claro cómo toma las decisiones.
-
 - No proporciona directamente probabilidades de clase (aunque se pueden estimar con métodos adicionales).
 
 
@@ -298,7 +295,7 @@ Modela la similitud utilizando la función tangente hiperbólica. Su comportamie
 ### Matriz comparativa 
 **Criterio de Selección en Producción**
 
-| Kernel | Complejidad Matemática | Velocidad de Cómputo | Riesgo de Sobreajuste | ¿Cuándo elegirlo en Ingeniería de Datos? |
+| Kernel | Complejidad Matemática | Velocidad de Cómputo | Riesgo de Sobreajuste | ¿Cuándo elegirlo? |
 | :--- | :---: | :---: | :---: | :--- |
 | **Lineal** (`'linear'`) | Baja | **Muy Alta** (óptimo con muchas columnas) | Bajo (modelo parsimonioso) | Cuando $p \gg N$ (texto con TF-IDF, genómica, análisis financiero con miles de ratios). |
 | **RBF Gaussiano** (`'rbf'`) | Alta (dimensión infinita implícita) | Moderada | Moderado a Alto (si $\gamma$ es alto) | **Primera opción recomendada** ante problemas continuos no lineales tabulares o de sensores. |
@@ -307,7 +304,7 @@ Modela la similitud utilizando la función tangente hiperbólica. Su comportamie
 
 ---
 
-#### Comparativa Rápida en Scikit-Learn
+#### 🖥️ Comparativa Rápida en Scikit-Learn
 
 ```python showLineNumbers
 """
