@@ -294,3 +294,17 @@ Diseñemos una tabla de hechos para la capa Oro
 ¿Cómo se vincula Power BI con la capa Oro?
 
 Muéstrame un ejemplo de esquema en estrella
+
+## SVM
+
+¿Cómo funciona el truco del kernel en SVM?
+
+¿Cuáles son las diferencias entre SVM y Árboles de Decisión?
+
+Muestra un ejemplo de SVM con Python
+
+¿Cómo funciona el truco del kernel en SVM?
+
+Explícame las ventajas de Random Forest frente a árboles individuales
+
+¿Cuándo conviene usar regularización L1 frente a L2?
