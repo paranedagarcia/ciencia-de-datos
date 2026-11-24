@@ -86,7 +86,7 @@ const config = {
         },
         gtag: {
           trackingID: 'G-3V2QKLCVQR',
-          anonymizeIP: true,
+          anonymizeIP: true
         },
       }),
     ],

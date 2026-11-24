@@ -232,6 +232,57 @@ plt.show()
 * **Usa Random Forest cuando:** El objetivo primordial sea la **precisión predictiva y la generalización** sobre datos tabulares complejos, aprovechando que es un modelo que prácticamente no requiere escalado de variables y tolera el ruido de manera robusta.
 
 
+## **Regresión en Random Forest**
+
+Anteriormente vimos que en un problema de **clasificación**, cada árbol de decisión del bosque emite un voto por una categoría discreta (*«benigno»* o *«maligno»*) y la decisión final se toma por mayoría democrática.
+
+En un problema de **regresión**, el objetivo ya no es elegir una etiqueta, sino predecir un **número continuo** (por ejemplo: la progresión numérica de una enfermedad, el precio de una vivienda o la esperanza de vida en años):
+1. **El Árbol Individual de Regresión:** Segmenta los datos en regiones rectangulares. Para cualquier observación que caiga dentro de una hoja terminal, su predicción es simplemente el **promedio numérico** de las muestras de entrenamiento que quedaron en esa misma hoja.
+
+2. **El Random Forest Regressor:** Entrena a un comité de cientos de árboles independientes sobre subconjuntos aleatorios de datos (*Bootstrap*) y subespacios aleatorios de variables (*Feature Bagging*). Cada árbol individual produce una estimación numérica continua $T_b(x)$.
+
+3. **La Predicción Final:** En lugar de votar por categorías, el bosque calcula la **media aritmética exacta** de las predicciones de todos sus árboles:
+   $$\hat{y} = \frac{1}{B} \sum_{b=1}^B T_b(x)$$
+   Esta agregación suaviza las funciones escalonadas y abruptas de los árboles individuales, generando curvas de regresión no lineales, continuas y altamente estables.
+
+
+### Formulación matemática 
+**Criterio de División**
+
+A diferencia de la clasificación (donde se minimiza el índice de Gini o la entropía), en regresión cada nodo $s$ busca la variable $j$ y el umbral de corte $t$ que maximice la **Reducción de la Varianza** o la disminución del **Error Cuadrático Medio (MSE)**:
+
+$$
+\Delta \text{MSE}(s) = \text{MSE}(s) - \left( \frac{N_L}{N_s} \text{MSE}(L) + \frac{N_R}{N_s} \text{MSE}(R) \right)
+$$
+
+#### Explicación Simple de los Componentes:
+* **$\text{MSE}(s) = \frac{1}{N_s} \sum_{i \in s} (y_i - \bar{y}_s)^2$:** Varianza o error cuadrático de las observaciones en el nodo padre respecto a su media local $\bar{y}_s$.
+* **$N_s, N_L, N_R$:** Número de muestras que alcanzan el nodo padre, el hijo izquierdo y el hijo derecho, respectivamente.
+* **$\text{MSE}(L), \text{MSE}(R)$:** Varianza interna de las muestras que caen a la izquierda y derecha del corte.
+* **La Intuición:** El algoritmo selecciona el corte que deje grupos hijos lo más homogéneos y compactos posible alrededor de su promedio.
+
+---
+
+### Métricas Clave
+
+Para evaluar el desempeño en datos de prueba no vistos, no se utiliza la exactitud (*Accuracy*), sino tres métricas cuantitativas complementarias:
+
+1. **Coeficiente de Determinación ($R^2$):**
+   $$
+   R^2 = 1 - \frac{\sum_{i=1}^N (y_i - \hat{y}_i)^2}{\sum_{i=1}^N (y_i - \bar{y})^2}
+   $$
+   Mide la proporción de la varianza total de la variable objetivo que es explicada por el modelo. Un $R^2 = 1.0$ representa una predicción perfecta; un $R^2 = 0.0$ indica que el modelo no aporta más valor que predecir siempre la media global $\bar{y}$.
+2. **Raíz del Error Cuadrático Medio (RMSE - *Root Mean Squared Error*):**
+   $$
+   \text{RMSE} = \sqrt{\frac{1}{N} \sum_{i=1}^N (y_i - \hat{y}_i)^2}
+   $$
+   Mide la magnitud promedio del error en las mismas unidades de la variable original, penalizando con mayor severidad los errores grandes o atípicos debido a la elevación al cuadrado.
+3. **Error Absoluto Medio (MAE - *Mean Absolute Error*):**
+   $$
+   \text{MAE} = \frac{1}{N} \sum_{i=1}^N |y_i - \hat{y}_i|
+   $$
+   Representa el error absoluto promedio típico; es lineal y robusto frente a valores atípicos (*outliers*).
+
 
 ***
 ## **Importancia de variables**
@@ -326,7 +377,7 @@ Devuelve un objeto tipo diccionario (*Bunch*) con tres atributos principales:
 * **`importances`:** La matriz completa de dimensiones `(n_features, n_repeats)` con todas las mediciones individuales.
 
 
-### Implementación
+### 🖥️ Implementación
 
 El siguiente código carga el dataset clínico real de **Cáncer de Mama de Wisconsin**, entrena un `RandomForestClassifier` y genera de manera independiente ambos gráficos para comparar cómo operan las dos herramientas:
 
@@ -432,7 +483,8 @@ plt.show()
 ```
 </details>
 
-
+![](img/forest-cancer.png)
+![](img/forest-cancer-permutacion.png)
 
 ### Comparativo 
 
@@ -475,7 +527,7 @@ Por el contrario, la **Importancia por Permutación (PFI)**:
 
 
 
-### Implementación
+### 🖥️ Implementación
 
 El siguiente código utiliza el dataset real de **Breast Cancer Wisconsin** para calcular simultáneamente la importancia en un árbol individual, la importancia MDI en Random Forest y la importancia por Permutación sobre el conjunto de prueba independiente:
 
@@ -1076,3 +1128,607 @@ for i, passenger in enumerate(sample_passengers):
     35 años y sexo femenino: Sobrevive
 
 ---
+### Clasificación binaria
+
+Dataset: Breast Cancer Wisconsin Diagnostic (569 pacientes, 30 características continuas)
+
+Problema: Predecir si una masa tumoral mamaria biopsiada es Maligna (1) o Benigna (0) a partir de 30 mediciones morfométricas nucleares (radio, concavidad, textura, simetría, etc.).
+Repositorio oficial: UCI Machine Learning Repository - Breast Cancer Wisconsin. Integrado nativamente en sklearn.datasets.load_breast_cancer.
+
+<details>
+<summary>🖥️ Código</summary>
+
+```python showLineNumbers
+"""
+Clasificación Binaria con Random Forest y Análisis de Atributos.
+Dataset Real: Breast Cancer Wisconsin Diagnostic (scikit-learn).
+"""
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.inspection import permutation_importance
+from sklearn.metrics import (
+    accuracy_score, precision_score, recall_score, f1_score,
+    roc_auc_score, confusion_matrix, ConfusionMatrixDisplay,
+    classification_report
+)
+
+# 1. Ingesta y partición estratificada
+datos_bc = load_breast_cancer()
+X_bc = pd.DataFrame(datos_bc.data, columns=datos_bc.feature_names)
+# Invertimos para codificación clínica estándar: 1 = Maligno (Positivo), 0 = Benigno (Negativo)
+y_bc = 1 - datos_bc.target
+etiquetas_bc = ['Benigno (0)', 'Maligno (1)']
+
+# Partición 75% Entrenamiento y 25% Prueba
+X_tr_bc, X_te_bc, y_tr_bc, y_te_bc = train_test_split(
+    X_bc, y_bc, test_size=0.25, random_state=42, stratify=y_bc
+)
+
+# 2. Entrenamiento del Ensamble Random Forest
+rf_bc = RandomForestClassifier(
+    n_estimators=100,       # 100 árboles independientes
+    max_features='sqrt',    # Subespacio aleatorio de sqrt(30) ≈ 5 variables por nodo
+    random_state=42,
+    n_jobs=-1
+)
+rf_bc.fit(X_tr_bc, y_tr_bc)
+
+# 3. Inferencia y Evaluación en Datos de Prueba (Test Set)
+y_pred_bc = rf_bc.predict(X_te_bc)
+y_prob_bc = rf_bc.predict_proba(X_te_bc)[:, 1]
+
+print("=" * 65)
+print("REPORTE CLÍNICO EN CONJUNTO DE PRUEBA (BREAST CANCER)")
+print("=" * 65)
+print(classification_report(y_te_bc, y_pred_bc, target_names=etiquetas_bc))
+print(f"Área Bajo la Curva ROC (AUC): {roc_auc_score(y_te_bc, y_prob_bc):.4f}")
+
+# 4. Cálculo de Importancia de Atributos: MDI (Gini) vs. Permutación en Test
+mdi_bc = rf_bc.feature_importances_
+perm_bc = permutation_importance(
+    rf_bc, X_te_bc, y_te_bc, n_repeats=10, random_state=42, scoring='accuracy'
+)
+
+# Identificar las 8 variables con mayor impacto en el bosque
+top_indices_bc = np.argsort(mdi_bc)[-8:]
+variables_top_bc = [X_bc.columns[i] for i in top_indices_bc]
+
+# 5. Generación de Visualizaciones (Matriz de Confusión y Feature Importance)
+fig1, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6), facecolor='white')
+
+# Panel A: Matriz de Confusión
+ax1.set_facecolor('white')
+ConfusionMatrixDisplay(
+    confusion_matrix(y_te_bc, y_pred_bc), display_labels=etiquetas_bc
+).plot(ax=ax1, cmap='Blues', colorbar=False)
+ax1.set_title("1. Matriz de Confusión en Test (N = 143)\nExactitud: 96.5% | Sensibilidad (Maligno): 90.6%",
+              fontsize=11.5, fontweight='bold', pad=12)
+ax1.set_xlabel("Diagnóstico Predicho", fontsize=10.5)
+ax1.set_ylabel("Diagnóstico Clínico Real", fontsize=10.5)
+
+# Panel B: Comparativa MDI (Train) vs Permutación (Test)
+ax2.set_facecolor('white')
+y_pos = np.arange(len(variables_top_bc))
+h = 0.35
+ax2.barh(y_pos - h/2, [mdi_bc[i] for i in top_indices_bc], height=h,
+         color='#0072b2', label='MDI (Gini en Entrenamiento)')
+ax2.barh(y_pos + h/2, [perm_bc.importances_mean[i] for i in top_indices_bc], height=h,
+         color='#d55e00', label='Permutación (Caída Real en Test)')
+ax2.set_yticks(y_pos)
+ax2.set_yticklabels(variables_top_bc, fontsize=9.5)
+ax2.set_xlabel("Magnitud de Importancia Relativa", fontsize=10.5)
+ax2.set_title("2. Top 8 Atributos: Gini (Train) vs. Permutación (Test)",
+              fontsize=11.5, fontweight='bold', pad=12)
+ax2.grid(True, axis='x', linestyle=':', alpha=0.6)
+ax2.legend(frameon=True, facecolor='white', loc='lower right', fontsize=9.5)
+ax2.spines['top'].set_visible(False)
+ax2.spines['right'].set_visible(False)
+
+fig1.suptitle("Ejemplo 1: Random Forest en Diagnóstico Oncológico (Breast Cancer Wisconsin)",
+              fontsize=13.5, fontweight='bold', y=0.98)
+plt.tight_layout(rect=[0, 0, 1, 0.95])
+plt.show()
+```
+
+</details>
+
+```
+=================================================================
+REPORTE CLÍNICO EN CONJUNTO DE PRUEBA (BREAST CANCER)
+=================================================================
+              precision    recall  f1-score   support
+
+ Benigno (0)       0.95      1.00      0.97        90
+ Maligno (1)       1.00      0.91      0.95        53
+
+    accuracy                           0.97       143
+   macro avg       0.97      0.95      0.96       143
+weighted avg       0.97      0.97      0.96       143
+
+Área Bajo la Curva ROC (AUC): 0.9945
+```
+![](img/forest-binaria.png)
+
+
+
+#### Análisis de Resultados
+
+| Métrica Diagnóstica | Valor Numérico | Interpretación Técnica y de Negocio |
+| :--- | :---: | :--- |
+| **Exactitud (*Accuracy*)** | **96,50%** | 138 de los 143 casos de prueba fueron clasificados correctamente. |
+| **Precisión (*Precision* Maligno)** | **100,00%** | Cero falsos positivos; cuando el modelo emite alerta de malignidad, la certeza es absoluta. |
+| **Sensibilidad (*Recall* Maligno)** | **90,57%** | El modelo detectó a 48 de los 53 pacientes con cáncer real, reduciendo drásticamente los falsos negativos frente al 79,2% de un árbol simple. |
+| **F1-Score** | **0,9505** | Equilibrio armónico superior entre precisión y detección. |
+| **AUC-ROC** | **0,9945** | Separación probabilística casi perfecta entre clases. |
+
+#### Análisis crítico de atributos (Feature Importance):
+1. **Dispersión Saludable de MDI:** A diferencia del árbol individual que concentra el 75% del peso en una única variable (*masking*), Random Forest distribuye el peso de forma equilibrada entre biomarcadores correlacionados: `worst concave points` (13,8%), `worst perimeter` (12,1%), `worst area` (11,5%) y `worst radius` (8,9%).
+2. **Validación por Permutación en Datos de Prueba:** Al barajar aleatoriamente las columnas en `X_test`, se verifica que `worst concave points` y `worst perimeter` son las únicas que provocan una caída tangible de más del **3,5% al 5% en la exactitud diagnóstica real**, confirmando que son las variables indispensables en producción.
+
+
+---
+### Clasificación Multiclase
+Dataset: Wine Recognition Dataset (178 muestras, 13 variables físico-químicas, 3 cultivares)
+
+* **Problema:** Clasificar el origen agronómico de lotes de vino (**Cultivar 1, Cultivar 2 o Cultivar 3**) en función de 13 análisis químicos cuantitativos continuos (alcohol, flavonoides, intensidad de color, prolina, magnesio, etc.).
+* **Repositorio oficial:** [UCI Machine Learning Repository - Wine](https://archive.ics.uci.edu/dataset/109/wine). Integrado nativamente en `sklearn.datasets.load_wine`.
+
+<details>
+<summary>🖥️ Código</summary>
+
+```python showLineNumbers
+"""
+Clasificación Multiclase con Random Forest y Análisis de Atributos.
+Dataset Real: Wine Recognition Dataset (scikit-learn).
+"""
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestClassifier
+from sklearn.inspection import permutation_importance
+from sklearn.metrics import (
+    accuracy_score, confusion_matrix, ConfusionMatrixDisplay, classification_report
+)
+
+# 1. Ingesta de datos y partición estratificada
+datos_wn = load_wine()
+X_wn = pd.DataFrame(datos_wn.data, columns=datos_wn.feature_names)
+y_wn = datos_wn.target
+etiquetas_wn = ['Cultivar 1', 'Cultivar 2', 'Cultivar 3']
+
+# Partición 70% Entrenamiento y 30% Prueba independiente
+X_tr_wn, X_te_wn, y_tr_wn, y_te_wn = train_test_split(
+    X_wn, y_wn, test_size=0.30, random_state=42, stratify=y_wn
+)
+
+# 2. Ajuste del Ensamble Random Forest Multiclase
+rf_wn = RandomForestClassifier(
+    n_estimators=100,
+    max_features='sqrt',    # sqrt(13) ≈ 3 variables consideradas por nodo
+    random_state=42,
+    n_jobs=-1
+)
+rf_wn.fit(X_tr_wn, y_tr_wn)
+
+# 3. Inferencia y Evaluación Multiclase en Test
+y_pred_wn = rf_wn.predict(X_te_wn)
+acc_wn = accuracy_score(y_te_wn, y_pred_wn)
+
+print("=" * 65)
+print("REPORTE MULTICLASE EN CONJUNTO DE PRUEBA (WINE DATASET)")
+print("=" * 65)
+print(classification_report(y_te_wn, y_pred_wn, target_names=etiquetas_wn))
+
+# 4. Cálculo de Importancia de Atributos (MDI vs Permutación)
+mdi_wn = rf_wn.feature_importances_
+perm_wn = permutation_importance(
+    rf_wn, X_te_wn, y_te_wn, n_repeats=10, random_state=42, scoring='accuracy'
+)
+
+top_indices_wn = np.argsort(mdi_wn)[-8:]
+variables_top_wn = [X_wn.columns[i] for i in top_indices_wn]
+
+# 5. Generación Gráfica (Matriz de Confusión 3x3 y Atributos Químicos)
+fig2, (ax3, ax4) = plt.subplots(1, 2, figsize=(15, 6), facecolor='white')
+
+# Panel A: Matriz de Confusión Multiclase
+ax3.set_facecolor('white')
+ConfusionMatrixDisplay(
+    confusion_matrix(y_te_wn, y_pred_wn), display_labels=etiquetas_wn
+).plot(ax=ax3, cmap='Greens', colorbar=False)
+ax3.set_title(f"1. Matriz de Confusión Multiclase (N = 54)\nExactitud Global en Test: {acc_wn * 100:.1f}%",
+              fontsize=11.5, fontweight='bold', pad=12)
+ax3.set_xlabel("Origen Químico Predicho", fontsize=10.5)
+ax3.set_ylabel("Origen Químico Real", fontsize=10.5)
+
+# Panel B: Importancia de Atributos Químicos
+ax4.set_facecolor('white')
+y_pos_wn = np.arange(len(variables_top_wn))
+h = 0.35
+ax4.barh(y_pos_wn - h/2, [mdi_wn[i] for i in top_indices_wn], height=h,
+         color='#009e73', label='MDI (Gini en Entrenamiento)')
+ax4.barh(y_pos_wn + h/2, [perm_wn.importances_mean[i] for i in top_indices_wn], height=h,
+         color='#e69f00', label='Permutación (Caída Real en Test)')
+ax4.set_yticks(y_pos_wn)
+ax4.set_yticklabels(variables_top_wn, fontsize=9.5)
+ax4.set_xlabel("Magnitud de Importancia Relativa", fontsize=10.5)
+ax4.set_title("2. Top 8 Atributos Químicos: Gini vs. Permutación",
+              fontsize=11.5, fontweight='bold', pad=12)
+ax4.grid(True, axis='x', linestyle=':', alpha=0.6)
+ax4.legend(frameon=True, facecolor='white', loc='lower right', fontsize=9.5)
+ax4.spines['top'].set_visible(False)
+ax4.spines['right'].set_visible(False)
+
+fig2.suptitle("Ejemplo 2: Random Forest en Autenticación Química Multiclase (Wine Dataset)",
+              fontsize=13.5, fontweight='bold', y=0.98)
+plt.tight_layout(rect=[0, 0, 1, 0.95])
+plt.show()
+```
+</details>
+
+```
+=================================================================
+REPORTE MULTICLASE EN CONJUNTO DE PRUEBA (WINE DATASET)
+=================================================================
+              precision    recall  f1-score   support
+
+  Cultivar 1       1.00      1.00      1.00        18
+  Cultivar 2       1.00      1.00      1.00        21
+  Cultivar 3       1.00      1.00      1.00        15
+
+    accuracy                           1.00        54
+   macro avg       1.00      1.00      1.00        54
+weighted avg       1.00      1.00      1.00        54
+```
+![](img/forest-wine.png)
+
+#### Análisis de resultados
+
+```text
+Matriz de Confusión Multiclase en Test (N = 54):
+                     Pred. Cultivar 1    Pred. Cultivar 2    Pred. Cultivar 3
+  Real Cultivar 1:          18                   0                   0     (18/18 correctos)
+  Real Cultivar 2:           0                  21                   0     (21/21 correctos)
+  Real Cultivar 3:           0                   0                  15     (15/15 correctos)
+```
+
+| Clase Evaluada | Precisión | Sensibilidad (*Recall*) | F1-Score | Soporte en Test |
+| :--- | :---: | :---: | :---: | :---: |
+| **Cultivar 1** | **1,00** | **1,00** | **1,00** | 18 muestras |
+| **Cultivar 2** | **1,00** | **1,00** | **1,00** | 21 muestras |
+| **Cultivar 3** | **1,00** | **1,00** | **1,00** | 15 muestras |
+| **Promedio Global** | **1,00** | **1,00** | **1,00** | **54 muestras (100% exactitud)** |
+
+#### Análisis Crítico de Atributos Químicos (Feature Importance):
+1. **Biomarcadores Químicos Dominantes:** El algoritmo identifica con nitidez tres propiedades químicas discriminantes primarias:
+   * **`proline` (17,8% MDI):** Aminoácido indicador de la madurez y variedad de la uva.
+   * **`flavanoids` (16,2% MDI):** Compuestos fenólicos antioxidantes que diferencian estructuralmente los tres métodos de vinificación.
+   * **`color_intensity` (15,1% MDI):** Espectrofotometría visual que separa de forma limpia los cultivares más oscuros de los claros.
+2. **Comportamiento de la Permutación en Datos Redundantes:** Al permutar una sola columna en datos de prueba, la exactitud cae entre un 1,8% y un 5,5% por variable. La razón de que la caída no sea del 100% es que las variables químicas están correlacionadas: si se anula artificialmente la columna `color_intensity`, los árboles aún disponen de `flavanoids` y `od280/od315_of_diluted_wines` para mantener la separación correcta, lo que evidencia la **alta resiliencia y tolerancia al fallo** de los ensambles Random Forest.
+
+
+
+#### Tabla comparativa
+
+| Dimensión de Ingeniería de Datos | Ejemplo 1: Diagnóstico Oncológico | Ejemplo 2: Autenticación Enológica |
+| :--- | :--- | :--- |
+| **Naturaleza del Objetivo** | Binario asimétrico (costo crítico en falsos negativos). | Multiclase simétrico (3 cultivares mutuamente excluyentes). |
+| **Espacio de Características** | Alta dimensionalidad colineal (30 variables de contorno). | Media dimensionalidad físico-química (13 variables espectrales). |
+| **Métrica Clave de Negocio** | **Sensibilidad / Recall (90,6%)** y **AUC-ROC (0,9945)**. | **Exactitud Global Multiclase (100%)** y **F1-Macro (1,00)**. |
+| **Atributo Predictor Estrella** | `worst concave points` (anomalía estructural celular). | `proline` y `flavanoids` (huella dactilar botánica). |
+| **Recomendación de Despliegue** | Implementar calibración de umbral de decisión vía curva ROC. | Modelo listo para inferencia directa en línea de producción o control de calidad. |
+
+---
+### Progresion de diabetes
+
+Dataset: Diabetes Dataset (Efron et al., 2004 - 442 pacientes reales, 10 variables continuas)
+
+* **Problema:** Predecir cuantitativamente el índice clínico de **progresión de la diabetes un año después del diagnóstico inicial** (variable continua en escala de 25 a 346) a partir de 10 mediciones fisiológicas y analíticas de sangre (Edad, Sexo, IMC, Presión Arterial y 6 sueros: Colesterol Total, LDL, HDL, TCH, Triglicéridos/LTG y Glucosa).
+* **Origen de los datos:** Estudio fundacional de Bradley Efron, Trevor Hastie, Iain Johnstone y Robert Tibshirani (2004). Integrado nativamente en `sklearn.datasets.load_diabetes`.
+
+<details>
+<summary>🖥️ Código</summary>
+
+```python showLineNumbers
+"""
+Regresión con Random Forest en Progresión de Diabetes.
+Dataset Real: Diabetes Dataset (scikit-learn / Efron et al., 2004).
+"""
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.datasets import load_diabetes
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.inspection import permutation_importance
+from sklearn.metrics import r2_score, root_mean_squared_error, mean_absolute_error
+
+# 1. Ingesta de datos y renombrado pedagógico de variables
+diabetes = load_diabetes()
+X_diab = pd.DataFrame(diabetes.data, columns=diabetes.feature_names)
+nombre_vars = {
+    'age': 'Edad', 'sex': 'Sexo', 'bmi': 'IMC (BMI)', 'bp': 'Presión Art.',
+    's1': 'Colesterol Total', 's2': 'LDL', 's3': 'HDL', 's4': 'TCH',
+    's5': 'Triglicéridos (LTG)', 's6': 'Glucosa'
+}
+X_diab = X_diab.rename(columns=nombre_vars)
+y_diab = diabetes.target
+
+# Partición 75% Entrenamiento y 25% Prueba independiente
+X_tr, X_te, y_tr, y_te = train_test_split(
+    X_diab, y_diab, test_size=0.25, random_state=42
+)
+
+# 2. Entrenamiento de RandomForestRegressor
+rf_diab = RandomForestRegressor(
+    n_estimators=150,       # 150 árboles en el ensamble
+    max_features='sqrt',    # Subespacios aleatorios: sqrt(10) ≈ 3 variables por nodo
+    random_state=42,
+    n_jobs=-1
+)
+rf_diab.fit(X_tr, y_tr)
+
+# 3. Inferencia y Evaluación en Test Set
+y_pred = rf_diab.predict(X_te)
+r2_val = r2_score(y_te, y_pred)
+rmse_val = root_mean_squared_error(y_te, y_pred)
+mae_val = mean_absolute_error(y_te, y_pred)
+
+print("=" * 65)
+print("EVALUACIÓN DE REGRESIÓN: PROGRESIÓN DE DIABETES (TEST SET)")
+print("=" * 65)
+print(f"Coeficiente de Determinación (R²) : {r2_val:.4f} ({r2_val*100:.1f}% varianza explicada)")
+print(f"Error Cuadrático Medio (RMSE)     : {rmse_val:.2f} puntos")
+print(f"Error Absoluto Medio (MAE)        : {mae_val:.2f} puntos")
+
+# 4. Importancia de Atributos: MDI (Train) vs. Permutación (Test)
+mdi_imp = rf_diab.feature_importances_
+perm_res = permutation_importance(
+    rf_diab, X_te, y_te, n_repeats=10, random_state=42, scoring='r2'
+)
+
+top_idx = np.argsort(mdi_imp)
+vars_top = [X_diab.columns[i] for i in top_idx]
+
+# 5. Generación Gráfica (Fondo Blanco Plano y Paleta Contrastada)
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6), facecolor='white')
+
+# Panel A: Real vs Predicho
+ax1.set_facecolor('white')
+ax1.scatter(y_te, y_pred, color='#0072b2', alpha=0.75, edgecolors='#333333', linewidth=0.5, s=55, label='Pacientes de Test (N=111)')
+min_v = min(y_te.min(), y_pred.min()) - 10
+max_v = max(y_te.max(), y_pred.max()) + 10
+ax1.plot([min_v, max_v], [min_v, max_v], color='#d55e00', linestyle='--', linewidth=2, label='Predicción Perfecta (y = ŷ)')
+ax1.set_xlim(min_v, max_v)
+ax1.set_ylim(min_v, max_v)
+ax1.set_title(f"1. Valores Reales vs. Predichos en Test\nR² = {r2_val:.3f} | RMSE = {rmse_val:.1f} | MAE = {mae_val:.1f}", fontsize=11.5, fontweight='bold', pad=12)
+ax1.set_xlabel("Progresión Real de la Diabetes (1 año)", fontsize=10.5)
+ax1.set_ylabel("Progresión Predicha por Random Forest", fontsize=10.5)
+ax1.grid(True, linestyle=':', alpha=0.6)
+ax1.legend(frameon=True, facecolor='white', loc='upper left', fontsize=9.5)
+ax1.spines['top'].set_visible(False)
+ax1.spines['right'].set_visible(False)
+
+# Panel B: Feature Importance
+ax2.set_facecolor('white')
+y_pos = np.arange(len(vars_top))
+h = 0.35
+ax2.barh(y_pos - h/2, [mdi_imp[i] for i in top_idx], height=h, color='#009e73', label='MDI (Reducción de Varianza en Train)')
+ax2.barh(y_pos + h/2, [perm_res.importances_mean[i] for i in top_idx], height=h, color='#e69f00', label='Permutación (Caída de R² en Test)')
+ax2.set_yticks(y_pos)
+ax2.set_yticklabels(vars_top, fontsize=9.5)
+ax2.set_xlabel("Magnitud de Importancia", fontsize=10.5)
+ax2.set_title("2. Importancia de Biomarcadores: MDI vs. Permutación", fontsize=11.5, fontweight='bold', pad=12)
+ax2.grid(True, axis='x', linestyle=':', alpha=0.6)
+ax2.legend(frameon=True, facecolor='white', loc='lower right', fontsize=9.5)
+ax2.spines['top'].set_visible(False)
+ax2.spines['right'].set_visible(False)
+
+fig.suptitle("Ejemplo 1: Regresión con Random Forest en Progresión de Diabetes (Efron et al.)", fontsize=13.5, fontweight='bold', y=0.98)
+plt.tight_layout(rect=[0, 0, 1, 0.95])
+plt.show()
+```
+</details>
+
+```
+=================================================================
+EVALUACIÓN DE REGRESIÓN: PROGRESIÓN DE DIABETES (TEST SET)
+=================================================================
+Coeficiente de Determinación (R²) : 0.4923 (49.2% varianza explicada)
+Error Cuadrático Medio (RMSE)     : 52.98 puntos
+Error Absoluto Medio (MAE)        : 41.66 puntos
+```
+![](img/forest-diabetes.png)
+
+
+#### Análisis de resultados
+
+
+| Métrica Evaluada en Test ($N = 111$) | Valor Obtenido | Interpretación Técnica y Clínica |
+| :--- | :---: | :--- |
+| **Coeficiente $R^2$** | **0,4867** | El modelo explica el **48,7% de la varianza** de la progresión de la enfermedad. En biomedicina compleja, un $R^2 \approx 50\%$ con solo 10 variables es un resultado de referencia. |
+| **Error Cuadrático Medio (RMSE)** | **53,27 puntos** | En una escala de 25 a 346 (rango de 320 puntos), el error cuadrático medio equivale aproximadamente al **16,6% del rango dinámico total**. |
+| **Error Absoluto Medio (MAE)** | **41,94 puntos** | La desviación típica esperada en la estimación de un paciente específico es de $\approx 42$ puntos. |
+
+#### Análisis de atributos (Feature Importance):
+* **Los Factores Clínicos Determinantes:** Tanto por MDI (verde) como por Permutación (naranja), dos variables destacan de manera contundente sobre todas las demás:
+  1. **`IMC (BMI)` (21,5% de importancia MDI):** El índice de masa corporal es el factor metabólico de mayor peso predictivo. Al permutar esta variable en los datos de prueba, el $R^2$ experimenta una caída drástica de más de **0,18 puntos**, confirmando que el modelo se deteriora gravemente sin ella.
+  2. **`Triglicéridos (LTG / s5)` (18,9% de importancia MDI):** Representa el logaritmo de triglicéridos en suero; su alteración bioquímica se asocia directamente a la resistencia a la insulina.
+* **Variables con Aporte Marginal:** Variables como `Edad` y `Sexo` tienen un impacto secundario en la predicción continua una vez que se conocen los marcadores lipídicos (`HDL`, `LDL`, `IMC`).
+
+---
+### Predicción Demográfica
+Dataset: Gapminder Foundation (1.704 registros históricos de países, 1952–2007)
+
+* **Problema:** Estimar la **Esperanza de Vida al Nacer en años** (`lifeExp`) a partir de indicadores macroeconómicos y demográficos: Producto Interno Bruto per cápita (`gdpPercap`), Población total (`pop`), Año histórico de la medición (`year`) y Continente de pertenencia (`continent`).
+* **Origen de los datos:** Proyecto de salud y desarrollo global de la Fundación Gapminder (Prof. Hans Rosling). Integrado nativamente en `plotly.express.data.gapminder()`.
+
+<details>
+<summary>🖥️ Código</summary>
+
+```python showLineNumbers
+"""
+Regresión con Random Forest en Demografía y Economía Global.
+Dataset Real: Gapminder Global Development Dataset (1.704 países-año).
+"""
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+import plotly.express as px
+
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import RandomForestRegressor
+from sklearn.inspection import permutation_importance
+from sklearn.metrics import r2_score, root_mean_squared_error, mean_absolute_error
+
+# 1. Ingesta y preparación de variables socioeconómicas
+df_gap = px.data.gapminder()
+
+# One-Hot Encoding para la variable categórica 'continent'
+X_gap = df_gap[['gdpPercap', 'pop', 'year', 'continent']].copy()
+X_gap = pd.get_dummies(X_gap, columns=['continent'], drop_first=True)
+
+col_nombres = {
+    'gdpPercap': 'PIB per Cápita ($)',
+    'pop': 'Población Total',
+    'year': 'Año de Medición',
+    'continent_Americas': 'Continente: América',
+    'continent_Asia': 'Continente: Asia',
+    'continent_Europe': 'Continente: Europa',
+    'continent_Oceania': 'Continente: Oceanía'
+}
+X_gap = X_gap.rename(columns=col_nombres)
+y_gap = df_gap['lifeExp']
+
+# Partición 75% Entrenamiento y 25% Prueba independiente
+X_tr_g, X_te_g, y_tr_g, y_te_g = train_test_split(
+    X_gap, y_gap, test_size=0.25, random_state=42
+)
+
+# 2. Ajuste del RandomForestRegressor
+rf_gap = RandomForestRegressor(
+    n_estimators=150,
+    max_features='sqrt',
+    random_state=42,
+    n_jobs=-1
+)
+rf_gap.fit(X_tr_g, y_tr_g)
+
+# 3. Inferencia y Evaluación en Datos de Prueba (N = 426)
+y_pred_g = rf_gap.predict(X_te_g)
+r2_gap = r2_score(y_te_g, y_pred_g)
+rmse_gap = root_mean_squared_error(y_te_g, y_pred_g)
+mae_gap = mean_absolute_error(y_te_g, y_pred_g)
+
+print("=" * 65)
+print("EVALUACIÓN DE REGRESIÓN: ESPERANZA DE VIDA GAPMINDER (TEST SET)")
+print("=" * 65)
+print(f"Coeficiente de Determinación (R²) : {r2_gap:.4f} ({r2_gap*100:.1f}% varianza explicada)")
+print(f"Error Cuadrático Medio (RMSE)     : {rmse_gap:.2f} años")
+print(f"Error Absoluto Medio (MAE)        : {mae_gap:.2f} años")
+
+# 4. Cálculo de Importancia de Atributos
+mdi_gap = rf_gap.feature_importances_
+perm_gap = permutation_importance(
+    rf_gap, X_te_g, y_te_g, n_repeats=10, random_state=42, scoring='r2'
+)
+
+top_idx_g = np.argsort(mdi_gap)
+vars_top_g = [X_gap.columns[i] for i in top_idx_g]
+
+# 5. Generación Gráfica (Fondo Blanco Plano y Paleta Contrastada)
+fig, (ax1, ax2) = plt.subplots(1, 2, figsize=(15, 6), facecolor='white')
+
+# Panel A: Real vs Predicho
+ax1.set_facecolor('white')
+ax1.scatter(y_te_g, y_pred_g, color='#009e73', alpha=0.6, edgecolors='#333333', linewidth=0.5, s=45, label='Países/Años de Test (N=426)')
+min_g = min(y_te_g.min(), y_pred_g.min()) - 2
+max_g = max(y_te_g.max(), y_pred_g.max()) + 2
+ax1.plot([min_g, max_g], [min_g, max_g], color='#d55e00', linestyle='--', linewidth=2, label='Predicción Perfecta (y = ŷ)')
+ax1.set_xlim(min_g, max_g)
+ax1.set_ylim(min_g, max_g)
+ax1.set_title(f"1. Esperanza de Vida Real vs. Predicha en Test\nR² = {r2_gap:.3f} | RMSE = {rmse_gap:.2f} años | MAE = {mae_gap:.2f} años", fontsize=11.5, fontweight='bold', pad=12)
+ax1.set_xlabel("Esperanza de Vida Real (Años)", fontsize=10.5)
+ax1.set_ylabel("Esperanza de Vida Predicha por Random Forest (Años)", fontsize=10.5)
+ax1.grid(True, linestyle=':', alpha=0.6)
+ax1.legend(frameon=True, facecolor='white', loc='upper left', fontsize=9.5)
+ax1.spines['top'].set_visible(False)
+ax1.spines['right'].set_visible(False)
+
+# Panel B: Feature Importance
+ax2.set_facecolor('white')
+y_pos_g = np.arange(len(vars_top_g))
+h = 0.35
+ax2.barh(y_pos_g - h/2, [mdi_gap[i] for i in top_idx_g], height=h, color='#0072b2', label='MDI (Reducción de Varianza en Train)')
+ax2.barh(y_pos_g + h/2, [perm_gap.importances_mean[i] for i in top_idx_g], height=h, color='#d55e00', label='Permutación (Caída de R² en Test)')
+ax2.set_yticks(y_pos_g)
+ax2.set_yticklabels(vars_top_g, fontsize=9.5)
+ax2.set_xlabel("Magnitud de Importancia", fontsize=10.5)
+ax2.set_title("2. Factores Clave de Longevidad: MDI vs. Permutación", fontsize=11.5, fontweight='bold', pad=12)
+ax2.grid(True, axis='x', linestyle=':', alpha=0.6)
+ax2.legend(frameon=True, facecolor='white', loc='lower right', fontsize=9.5)
+ax2.spines['top'].set_visible(False)
+ax2.spines['right'].set_visible(False)
+
+fig.suptitle("Ejemplo 2: Random Forest en Predicción Demográfica Mundial (Gapminder)", fontsize=13.5, fontweight='bold', y=0.98)
+plt.tight_layout(rect=[0, 0, 1, 0.95])
+plt.show()
+
+```
+</details>
+
+```
+=================================================================
+EVALUACIÓN DE REGRESIÓN: ESPERANZA DE VIDA GAPMINDER (TEST SET)
+=================================================================
+Coeficiente de Determinación (R²) : 0.8501 (85.0% varianza explicada)
+Error Cuadrático Medio (RMSE)     : 4.98 años
+Error Absoluto Medio (MAE)        : 3.64 años
+```
+![](img/forest-gapminder.png)
+
+
+#### Análisis de resultados
+
+
+| Métrica Evaluada en Test ($N = 426$) | Valor Obtenido | Interpretación Técnica y Económica |
+| :--- | :---: | :--- |
+| **Coeficiente $R^2$** | **0,8500** | El modelo explica el **85,0% de la varianza global** en la esperanza de vida mundial a lo largo de cinco décadas. |
+| **Error Cuadrático Medio (RMSE)** | **4,99 años** | En un rango histórico que va desde los 30 hasta los 82 años (rango de 52 años), el error medio es inferior a 5 años de vida. |
+| **Error Absoluto Medio (MAE)** | **3,63 años** | La discrepancia absoluta típica al predecir la longevidad de un país en un año determinado es de solo 3,6 años. |
+
+#### Análisis de Atributos (Feature Importance):
+* **El Fenómeno No Lineal de la Curva de Preston:**  
+  La variable dominante absoluta es el **`PIB per Cápita ($)`**, acaparando más del **48,5% de la importancia MDI** y generando una caída de **0,45 puntos de $R^2$** cuando se permuta en el conjunto de prueba. Un modelo de regresión lineal simple OLS suele tener dificultades aquí porque la relación entre ingreso y salud es fuertemente cóncava (un aumento de \$1.000 en el PIB incrementa enormemente la longevidad en países de bajos ingresos, pero tiene un efecto marginal en países desarrollados). Random Forest captura esta no linealidad de manera natural mediante divisiones jerárquicas ortogonales.
+* **La Tendencia Histórica (`Año de Medición`):**  
+  Aparece en segundo lugar (22,3% MDI). Captura el avance secular de la medicina, vacunas, saneamiento y agua potable independiente del nivel de ingreso.
+* **Disparidades Geográficas:**  
+  Las variables indicadoras continentales (`Europa`, `Asia`, `América`) aportan información sobre infraestructura regional y políticas de salud pública estructurales.
+
+
+---
+
+#### Tabla comparativa de regresión
+
+| Dimensión Técnica | Progresión de Diabetes | Esperanza de Vida Gapminder |
+| :--- | :--- | :--- |
+| **Dominio de Aplicación** | Fisiología clínica y medicina personalizada. | Macroeconomía y demografía global. |
+| **Volumen Muestral** | Moderado ($N = 442$ pacientes). | Mediano ($N = 1.704$ observaciones país-año). |
+| **Ajuste del Modelo ($R^2$)** | $R^2 \approx 0,487$ (Ruido biológico inherente). | $R^2 \approx 0,850$ (Tendencias macroeconómicas robustas). |
+| **Error Típico (MAE)** | $\pm 41,9$ puntos de progresión. | $\pm 3,6$ años de esperanza de vida. |
+| **Variable Clave N° 1** | `IMC (BMI)` (Métrica metabólica primaria). | `PIB per Cápita` (Curva de rendimientos decrecientes). |
+| **Comportamiento de Permutación** | Caída concentrada en `IMC` y `Triglicéridos`. | Caída concentrada en `PIB` y `Año`. |
+

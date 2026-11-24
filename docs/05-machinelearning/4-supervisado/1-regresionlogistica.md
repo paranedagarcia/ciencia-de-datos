@@ -936,7 +936,7 @@ He generado y publicado en tu panel de **Studio** el artefacto visual **`regular
 
 ```python showLineNumbers
 """
-Módulo Académico: Decisión de Regularización en Regresión Logística.
+Decisión de Regularización en Regresión Logística.
 Compara la selección de características (L1 vs L2) y el ajuste de C vía 5-Fold CV.
 Librerías: numpy, scikit-learn y matplotlib.
 """

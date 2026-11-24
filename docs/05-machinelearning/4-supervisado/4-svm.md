@@ -84,6 +84,13 @@ $$
 
 El objetivo de la SVM es encontrar el hiperplano **óptimo**. Este no es solo cualquier hiperplano, sino el que tiene el **margen** más grande.
 
+<center>
+<figure>
+![](img/svm-hiperplano.jpg)
+<figcaption>Muchas líneas separan. Solo una es perfecta.</figcaption>
+</figure>
+</center>
+
 El margen se define por dos hiperplanos paralelos, uno para cada clase, que "tocan" a los puntos más cercanos. Estos puntos que definen el margen son los cruciales **Vectores de Soporte**.
 
 Para los vectores de soporte, se cumple:
@@ -103,6 +110,19 @@ El vector de pesos $w$ en la ecuación $w \cdot x + b = 0$ en realidad define la
 El término de sesgo $b$, por otro lado, es el que define la **posición** del hiperplano, moviéndolo en el espacio para encontrar el mejor lugar de separación.
 
 #### C. El Truco del Kernel (*Kernel Trick*)
+
+En términos sencillos, el truco del kernel (kernel trick) es un atajo matemático inteligente que permite a un modelo lineal (como una Máquina de Vectores de Soporte) resolver problemas complejos y no lineales sin pagar el costo computacional ni de memoria de transformar los datos a dimensiones superiores.
+
+Imagina que tienes dos grupos de canicas sobre una mesa: un círculo de canicas rojas en el centro, rodeado por un anillo de canicas azules. Si intentas colocar una regla recta sobre la mesa para separar ambos grupos, verás que es imposible: cualquier línea recta tocará o mezclará ambos colores.
+
+Sin embargo, si pudieras empujar el centro de la mesa hacia arriba (elevando las canicas rojas a una tercera dimensión), las rojas quedarían en la cima de una colina y las azules abajo en la base. En ese momento, podrías pasar una hoja de papel plana y horizontal entre ambas alturas, separándolas perfectamente con un corte plano.
+
+![](img/svm-kernels.png)
+
+**El dilema de la ingeniería de datos:** Elevar manualmente millones de registros a 3D, 10D o infinitas dimensiones requeriría calcular y almacenar coordenadas gigantescas, lo que saturaría la memoria del servidor y congelaría el procesamiento.
+
+**El "truco":** Consiste en descubrir que el algoritmo no necesita saber dónde queda cada punto en esa tercera dimensión; únicamente necesita saber qué tan parecidos o cercanos son dos puntos entre sí. El kernel es una fórmula matemática directa que calcula esa distancia en el espacio superior usando únicamente los números originales en dos dimensiones, como si hubieras hecho el viaje dimensional, pero sin moverte de tu mesa.
+
 Si las clases no son linealmente separables en el espacio original $\mathbb{R}^p$, se proyectan de forma implícita a un espacio de Hilbert de dimensión superior $\mathcal{H}$ mediante una transformación no lineal $\phi(x)$. 
 
 Gracias al teorema de representabilidad y las condiciones de Mercer, en lugar de calcular las coordenadas transformadas $\phi(x_i)$ explícitamente (lo que sería prohibitivo computacionalmente), se utiliza una **función kernel** $K(x_i, x_j) = \langle \phi(x_i), \phi(x_j) \rangle$ que evalúa el producto interno directamente en el espacio original:
@@ -227,6 +247,7 @@ graph TD
     class K1,K2,K3,K4 branch;
 ```
 
+![](img/svm-kernel-tipos.jpg)
 
 #### A. Kernel Lineal (`kernel='linear'`)
 
@@ -368,44 +389,6 @@ Para comprender cómo difieren las **Máquinas de Vectores de Soporte (SVM)** y 
 
 
 
-### Formulación matemática
-
-#### A. Mecánica del Árbol de Decisión (CART)
-Un árbol de decisión particiona recursivamente el espacio de características $\mathcal{X} \subset \mathbb{R}^p$ en $M$ regiones hiperrectangulares disjuntas $R_1, R_2, \dots, R_M$. En cada nodo, un algoritmo voraz (*greedy*) selecciona la característica $j$ y el umbral de corte $t$ que maximice la **Ganancia de Información** o la reducción de impureza:
-
-$$
-\Delta I(s) = I(s) - \left( \frac{N_{\text{izq}}}{N_s} I(\text{izq}) + \frac{N_{\text{der}}}{N_s} I(\text{der}) \right)
-$$
-
-* **Componentes:**
-  * $I(s)$: Impureza del nodo padre (medida por el **Índice de Gini** $1 - \sum p_k^2$ o por **Entropía**).
-  * $N_s, N_{\text{izq}}, N_{\text{der}}$: Cantidad de muestras en el nodo padre y en los nodos hijos izquierdo y derecho.
-  * **Fronteras de decisión:** Están restringidas a la forma ortogonal $x_j \le t$ o $x_j > t$. La salida es una **función escalonada a trozos (*piecewise constant*)**.
-
-#### B. Mecánica de Support Vector Machines (SVM)
-La SVM formula la clasificación como un problema de **optimización cuadrática convexa con restricciones**. Busca un hiperplano global definido por:
-
-$$
-f(x) = w^T x + b = 0
-$$
-
-* **Componentes:**
-  * $w \in \mathbb{R}^p$: Vector de pesos ortogonal al hiperplano separador (determina la orientación de la frontera).
-  * $b \in \mathbb{R}$: Término de sesgo o intercepto.
-  * El margen geométrico entre las bandas frontera $w^T x + b = \pm 1$ es igual a $\frac{2}{\|w\|}$.
-
-Para tolerar solapamientos y datos reales con ruido (*Soft-Margin SVM*), se introducen las variables de holgura $\xi_i \ge 0$ y el hiperparámetro de regularización $C$:
-
-$$
-\min_{w, b, \xi} \quad \frac{1}{2} \|w\|^2 + C \sum_{i=1}^N \xi_i \quad \text{sujeto a} \quad y_i(w^T x_i + b) \ge 1 - \xi_i, \quad \xi_i \ge 0
-$$
-
-* **Componentes:**
-  * $\xi_i$: Magnitud de la penalización por cruzar el margen o frontera.
-  * $C$: Factor de compromiso entre maximizar el ancho del margen y minimizar los errores de clasificación.
-  * **Solución dual y Vectores de Soporte:** El vector óptimo se reduce a $\hat{w} = \sum_{i \in \text{SV}} \lambda_i y_i x_i$, donde $\lambda_i > 0$ **solo para los vectores de soporte**. Los puntos alejados de la frontera tienen $\lambda_i = 0$ y no influyen en el modelo.
-  * **Truco del Kernel (*Kernel Trick*):** Evalúa productos internos mediante una función kernel $K(x_i, x_j) = \langle \phi(x_i), \phi(x_j) \rangle$ (como el kernel Gaussiano RBF: $\exp(-\gamma \|x_i - x_j\|^2)$), proyectando implícitamente a espacios de dimensión infinita o superior sin computar las coordenadas transformadas.
-
 
 
 ### Cuadro comparativo multidimensional
@@ -488,8 +471,9 @@ En resumen, el SVM es sensible a la selección de parámetros, y la sintonizaci�
 Es fundamental tener en cuenta que el rendimiento de SVM es muy sensible a la **escala de los datos**. Por esta razón, antes de ejecutar la búsqueda de parámetros, es una práctica común **normalizar o estandarizar** los datos de entrada para que todas las características varíen en un rango similar, lo cual se realiza utilizando métodos como `MinMaxScaler` o `StandardScaler`.
 
 ---
-## 🖥️ **Implementación**
+## 🖥️ **Ejemplos**
 
+### Clasificación de frutos
 Supongamos que queremos clasificar si una fruta es un limón o una naranja basándonos en su peso y su radio. Esto es un problema de clasificación binaria.
 
 1. **Preparación de Datos**: Se recopilan datos de entrenamiento etiquetados (peso, radio, y la etiqueta: Limón o Naranja).

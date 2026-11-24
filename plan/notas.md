@@ -24,6 +24,9 @@ config:
 <details>
 <summary>🖥️ Código</summary>
 
+```python showLineNumbers
+
+```
 </details>
 
 --- columnas

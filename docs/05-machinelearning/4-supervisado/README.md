@@ -115,7 +115,7 @@ El siguiente ejemplo académico ilustra el flujo de trabajo estándar en Python 
 
 ```python showLineNumbers
 """
-Módulo Universitario: Implementación de Aprendizaje Supervisado (Clasificación).
+Implementación de Aprendizaje Supervisado (Clasificación).
 Dataset: Diagnóstico clínico de cáncer de mama (Wisconsin Breast Cancer).
 """
 
