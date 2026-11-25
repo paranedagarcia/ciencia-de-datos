@@ -58,7 +58,7 @@ El nuevo modelo $h_m(x)$ se entrena para predecir estos residuos.
 
 ## **Tecnicas de ensemble**
 
-Una **técnica de ensamblado** (*ensemble learning* o método de ensamble) es un paradigma donde **se combinan estratégicamente las predicciones de múltiples modelos de aprendizaje (denominados estimadores base o *base learners*) para construir un meta-modelo o predictor consolidado con un rendimiento y capacidad de generalización superiores a los de cualquiera de sus modelos individuales por separado**.
+Una **técnica de ensamblado** (*ensemble learning* o método de ensamble) es un paradigma donde se combinan estratégicamente las predicciones de múltiples modelos de aprendizaje (denominados estimadores base o *base learners*) para construir un meta-modelo o predictor consolidado con un rendimiento y capacidad de generalización superiores a los de cualquiera de sus modelos individuales por separado.
 
 
 El principio fundamental detrás del ensamble descansa en la analogía de la **sabiduría de las masas** (*wisdom of the crowd*: *el juicio colectivo de un comité diverso e independiente suele cometer menos errores que un único experto aislado*.
@@ -283,27 +283,14 @@ Formalmente, el **Boosting** es un metaalgoritmo de aprendizaje supervisado por 
 
 El procedimiento secuencial se ejecuta mediante el siguiente ciclo determinista:
 
-```
-  ┌─────────────────────────────────────────────────────────────────────────────┐
-  │ Paso 0: Predicción Base Constante F₀(x) (ej. promedio numérico de los datos)│
-  └──────────────────────────────────────┬──────────────────────────────────────┘
-                                         ▼
-  ┌─────────────────────────────────────────────────────────────────────────────┐
-  │ Paso 1: Calcular los residuos o pendientes de error: rᵢ = yᵢ - F_{m-1}(xᵢ)   │
-  └──────────────────────────────────────┬──────────────────────────────────────┘
-                                         ▼
-  ┌─────────────────────────────────────────────────────────────────────────────┐
-  │ Paso 2: Entrenar un árbol nuevo hₘ(x) para que prediga los residuos rᵢ      │
-  └──────────────────────────────────────┬──────────────────────────────────────┘
-                                         ▼
-  ┌─────────────────────────────────────────────────────────────────────────────┐
-  │ Paso 3: Actualizar el ensamble sumando el árbol frenado por shrinkage (η):  │
-  │                     Fₘ(x) = F_{m-1}(x) + η · hₘ(x)                          │
-  └──────────────────────────────────────┬──────────────────────────────────────┘
-                                         ▼
-                 ¿Se alcanzó M iteraciones o parada temprana?
-                                ├── No ──> [Volver al Paso 1 con nuevos residuos]
-                                └── Sí ──> [Modelo Final F_M(x) Listo]
+```mermaid
+flowchart TD
+        A["Paso 0: Predicción base constante F₀(x)<br/>Ejemplo: promedio de los datos"] --> B["Paso 1: Calcular residuos o pendientes de error<br/>rᵢ = yᵢ − Fₘ₋₁(xᵢ)"]
+        B --> C["Paso 2: Entrenar un árbol nuevo hₘ(x)<br/>para predecir los residuos rᵢ"]
+        C --> D["Paso 3: Actualizar el ensamble con shrinkage η<br/>Fₘ(x) = Fₘ₋₁(x) + η · hₘ(x)"]
+        D --> E("¿Se alcanzó M iteraciones<br/>o se activó la parada temprana?")
+        E -- "No" --> B
+        E -- "Sí" --> F["Modelo final Fₘ(x) listo"]
 ```
 
 1. **Paso 0 — Inicialización:**  
@@ -1798,4 +1785,306 @@ INFERENCIA SOBRE NUEVAS MUESTRAS OBSERVADAS EN CAMPO
 * **Espécimen A (*Adelie* — Certeza 99,99%):** Su pico corto (38,5 mm) y grueso (18,2 mm), junto con una aleta pequeña (185 mm), activan las reglas de los primeros árboles correctores dedicados a la clase *Adelie*.
 * **Espécimen B (*Gentoo* — Certeza 99,99%):** El peso de 5,2 kg y una aleta de 218 mm son biológicamente exclusivos de la especie *Gentoo*, generando una salida exponencial abrumadora en $F_{\text{Gentoo}}$.
 * **Espécimen C (*Chinstrap* — Certeza 99,99%):** Este caso demuestra el valor del Boosting: tiene un peso moderado similar al *Adelie* (3,8 kg), pero su pico es largo (51,0 mm) y profundo (19,5 mm). Los árboles construidos en etapas avanzadas para resolver este residuo específico desvían con precisión el 99,99% de la probabilidad hacia *Chinstrap*.
+
+<br/>
+
+### Supervivencia
+
+
+El objetivo de esta práctica es predecir si un pasajero sobrevivió o no al naufragio del Titanic a partir de sus características personales y de viaje:
+* En qué clase de billete viajaba (`Pclass`: 1ª, 2ª o 3ª clase).
+* Su género (`Sex`: hombre o mujer).
+* Su edad en años (`Age`).
+* El número de familiares a bordo: hermanos o cónyuges (`SibSp`) y padres o hijos (`Parch`).
+* La tarifa pagada por el billete en libras esterlinas (`Fare`).
+
+
+1. **La primera aproximación:** El modelo comienza con una estimación global para todos los pasajeros. Naturalmente, este primer intento clasifica bien a los perfiles más evidentes (por ejemplo, mujeres de primera clase que tuvieron prioridad de evacuación), pero comete fallos notables en pasajeros de perfiles intermedios.
+2. **La corrección secuencial:** Cada nuevo árbol que se añade al ensamble examina exclusivamente los casos donde el modelo anterior se equivocó o mostró dudas. Así, los árboles posteriores descubren patrones más sutiles (como el hecho de que niños varones en 2ª clase tuvieron tasas de supervivencia muy altas en comparación con adultos en 3ª clase).
+3. **El ajuste gradual:** Cada nuevo árbol aporta solo una pequeña corrección controlada (mediante la tasa de aprendizaje o *learning rate*), logrando que la frontera de decisión se vuelva robusta sin memorizar casos aislados o ruidosos.
+
+
+
+El siguiente script realiza el preprocesamiento reproducible, entrena el modelo de *Gradient Boosting*, genera la figura gráfica de cuatro paneles y efectúa la inferencia probabilística sobre tres nuevos perfiles de pasajeros no vistos durante el entrenamiento:
+
+<details>
+<summary>🖥️ Código</summary>
+
+```python showLineNumbers
+"""
+Gradient Boosting sobre el Dataset titanic5_price_clean.csv.
+Incluye entrenamiento, evaluación en test set, generación gráfica y predicción en nuevos perfiles.
+"""
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.impute import SimpleImputer
+from sklearn.metrics import (
+    accuracy_score, roc_auc_score, log_loss, confusion_matrix,
+    ConfusionMatrixDisplay, classification_report
+)
+from sklearn.inspection import permutation_importance
+
+# ==============================================================================
+# 1. Carga y Preparación de Datos desde titanic5_price_clean.csv
+# ==============================================================================
+# Lectura del archivo curado
+df_titanic5 = pd.read_csv('https://patricioaraneda.cl/public/titanic5_price_clean.csv')
+
+features = ['Class', 'Sex', 'Age', 'sibsp', 'parch', 'Price']
+nombres_variables = {
+    'Class': 'Clase Billete',
+    'Sex': 'Sexo (1=Hombre, 0=Mujer)',
+    'Age': 'Edad (años)',
+    'sibsp': 'Hnos / Cónyuges',
+    'parch': 'Padres / Hijos',
+    'Price': 'Precio Billete (£)'
+}
+X = df_titanic5[features].rename(columns=nombres_variables)
+y = df_titanic5['Survived']
+etiquetas = ['No Sobrevivió (0)', 'Sobrevivió (1)']
+
+# Codificar las categorías de clase, incluidas las alfabéticas como 'V' y 'E'
+columna_clase = nombres_variables['Class']
+
+def normalizar_clase(valor):
+    if pd.isna(valor):
+        return np.nan
+    try:
+        return str(int(float(valor)))
+    except (ValueError, TypeError):
+        return str(valor).strip()
+
+clases_normalizadas = X[columna_clase].map(normalizar_clase)
+mapa_clases = {
+    clase: indice
+    for indice, clase in enumerate(sorted(clases_normalizadas.dropna().unique()))
+}
+X[columna_clase] = clases_normalizadas.map(mapa_clases)
+
+# Partición Estratificada: 80% Entrenamiento y 20% Prueba
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.20, random_state=42, stratify=y
+)
+
+# Imputar valores faltantes usando estadísticas del conjunto de entrenamiento
+imputador = SimpleImputer(strategy='median')
+X_train = pd.DataFrame(
+    imputador.fit_transform(X_train), columns=X.columns, index=X_train.index
+)
+X_test = pd.DataFrame(
+    imputador.transform(X_test), columns=X.columns, index=X_test.index
+)
+
+
+# ==============================================================================
+# 2. Configuración y Entrenamiento del Clasificador Gradient Boosting
+# ==============================================================================
+modelo_gb = GradientBoostingClassifier(
+    n_estimators=100,      # 100 rondas de ajuste secuencial
+    learning_rate=0.08,    # Contracción del 8% por árbol para generalización robusta
+    max_depth=3,           # Árboles base con un máximo de 8 hojas
+    subsample=0.85,        # 85% de submuestreo estocástico por iteración
+    random_state=42
+)
+modelo_gb.fit(X_train, y_train)
+
+# Inferencia en el conjunto de prueba independiente
+y_pred_test = modelo_gb.predict(X_test)
+y_prob_test = modelo_gb.predict_proba(X_test)[:, 1]
+
+acc_test = accuracy_score(y_test, y_pred_test)
+auc_test = roc_auc_score(y_test, y_prob_test)
+loss_test = log_loss(y_test, y_prob_test)
+
+print("=" * 68)
+print(f"Exactitud Global (Accuracy) : {acc_test * 100:.2f}% ({(y_test == y_pred_test).sum()} de {len(y_test)} aciertos)")
+print(f"Área Bajo la Curva (ROC-AUC): {auc_test:.4f}")
+print(f"Pérdida Logarítmica (LogLoss): {loss_test:.4f}")
+print("=" * 68)
+print("\nReporte Detallado por Clase:")
+print(classification_report(y_test, y_pred_test, target_names=etiquetas))
+
+# ==============================================================================
+# 3. Predicción e Inferencia sobre Nuevos Pasajeros
+# ==============================================================================
+nuevos_pasajeros = pd.DataFrame([
+    {
+        'Clase Billete': 1, 'Sexo (1=Hombre, 0=Mujer)': 0, 'Edad (años)': 21.0,
+        'Hnos / Cónyuges': 0.0, 'Padres / Hijos': 0.0, 'Precio Billete (£)': 110.88
+    },  # Caso A: Mujer de 1ª clase, camarote exclusivo
+    {
+        'Clase Billete': 3, 'Sexo (1=Hombre, 0=Mujer)': 1, 'Edad (años)': 22.0,
+        'Hnos / Cónyuges': 0.0, 'Padres / Hijos': 0.0, 'Precio Billete (£)': 8.05
+    },  # Caso B: Hombre joven de 3ª clase viajando solo
+    {
+        'Clase Billete': 2, 'Sexo (1=Hombre, 0=Mujer)': 1, 'Edad (años)': 3.0,
+        'Hnos / Cónyuges': 1.0, 'Padres / Hijos': 1.0, 'Precio Billete (£)': 26.0
+    }   # Caso C: Niño varón de 2ª clase viajando con su familia
+])
+
+predicciones_nuevas = modelo_gb.predict(nuevos_pasajeros)
+probabilidades_nuevas = modelo_gb.predict_proba(nuevos_pasajeros)[:, 1]
+
+print("\n" + "=" * 68)
+print("PREDICCIONES SOBRE NUEVAS MUESTRAS NO VISTAS")
+print("=" * 68)
+for i, (pred, prob) in enumerate(zip(predicciones_nuevas, probabilidades_nuevas)):
+    diagnostico = "Sobrevive (1)" if pred == 1 else "No Sobrevive (0)"
+
+
+nuevos_pasajeros[columna_clase] = nuevos_pasajeros[columna_clase].map(
+    lambda valor: mapa_clases.get(normalizar_clase(valor), np.nan)
+)
+nuevos_pasajeros = pd.DataFrame(
+    imputador.transform(nuevos_pasajeros),
+    columns=X.columns,
+    index=nuevos_pasajeros.index
+)
+
+predicciones_nuevas = modelo_gb.predict(nuevos_pasajeros)
+probabilidades_nuevas = modelo_gb.predict_proba(nuevos_pasajeros)[:, 1]
+fig, axes = plt.subplots(2, 2, figsize=(15, 11), facecolor='white')
+
+# --- Panel 1: Matriz de Confusión ---
+ax1 = axes[0, 0]
+ax1.set_facecolor('white')
+cm = confusion_matrix(y_test, y_pred_test)
+disp = ConfusionMatrixDisplay(confusion_matrix=cm, display_labels=['No Sobrevivió', 'Sobrevivió'])
+disp.plot(ax=ax1, cmap='Blues', colorbar=False)
+
+ax1.set_title(
+    f"1. Matriz de Confusión en Test (N = {len(y_test)})\nExactitud: {acc_test*100:.1f}% | ROC-AUC: {auc_test:.3f}",
+    fontsize=11.5, fontweight='bold', pad=10
+)
+
+# --- Panel 2: Convergencia de Pérdida por Ronda ---
+ax2 = axes[0, 1]
+ax2.set_facecolor('white')
+loss_tr_staged = [log_loss(y_train, p[:, 1]) for p in modelo_gb.staged_predict_proba(X_train)]
+loss_te_staged = [log_loss(y_test, p[:, 1]) for p in modelo_gb.staged_predict_proba(X_test)]
+rondas = range(1, len(loss_tr_staged) + 1)
+
+ax2.plot(rondas, loss_tr_staged, color='#0072b2', linewidth=2, label='Log-Loss Entrenamiento (Train)')
+ax2.plot(rondas, loss_te_staged, color='#d55e00', linewidth=2.2, label='Log-Loss Prueba (Test)')
+min_ronda = np.argmin(loss_te_staged) + 1
+ax2.axvline(min_ronda, color='#009e73', linestyle='--', linewidth=1.5,
+            label=f'Mínimo Test: Ronda {min_ronda} ({min(loss_te_staged):.3f})')
+ax2.set_title("2. Curva de Aprendizaje y Pérdida\nEvolución del Error a través de 100 Rondas",
+              fontsize=11.5, fontweight='bold', pad=10)
+ax2.set_xlabel("Rondas de Boosting (Árboles acumulados)", fontsize=10)
+ax2.set_ylabel("Pérdida Logarítmica (Log-Loss)", fontsize=10)
+ax2.grid(True, linestyle=':', alpha=0.6)
+ax2.legend(frameon=True, facecolor='white', loc='upper right', fontsize=9)
+ax2.spines['top'].set_visible(False)
+ax2.spines['right'].set_visible(False)
+
+# --- Panel 3: Jerarquía de Factores Determinantes ---
+ax3 = axes[1, 0]
+ax3.set_facecolor('white')
+imp_mdi = modelo_gb.feature_importances_
+perm = permutation_importance(modelo_gb, X_test, y_test, n_repeats=10, random_state=42, scoring='accuracy')
+
+orden = np.argsort(imp_mdi)
+vars_ordenadas = [X.columns[i] for i in orden]
+y_pos = np.arange(len(vars_ordenadas))
+h = 0.35
+
+ax3.barh(y_pos - h/2, [imp_mdi[i] for i in orden], height=h, color='#0072b2', label='MDI (Ganancia en Train)')
+ax3.barh(y_pos + h/2, [perm.importances_mean[i] for i in orden], height=h, color='#e69f00', label='Permutación (Impacto en Test)')
+ax3.set_yticks(y_pos)
+ax3.set_yticklabels(vars_ordenadas, fontsize=9.5)
+ax3.set_xlabel("Importancia Relativa", fontsize=10)
+ax3.set_title("3. Jerarquía de Factores Determinantes\nImportancia en Train vs. Permutación en Test",
+              fontsize=11.5, fontweight='bold', pad=10)
+ax3.grid(True, axis='x', linestyle=':', alpha=0.6)
+ax3.legend(frameon=True, facecolor='white', loc='lower right', fontsize=9)
+ax3.spines['top'].set_visible(False)
+ax3.spines['right'].set_visible(False)
+
+# --- Panel 4: Inferencia en Nuevos Pasajeros ---
+ax4 = axes[1, 1]
+ax4.set_facecolor('white')
+nombres_casos = [
+    'Caso A: Mujer 1ª Clase\n(21 años, precio £110.9)',
+    'Caso B: Hombre 3ª Clase\n(22 años, precio £8.1)',
+    'Caso C: Niño 2ª Clase\n(3 años, con familia)'
+]
+colores_casos = ['#009e73' if p >= 0.5 else '#d55e00' for p in probabilidades_nuevas]
+
+barras = ax4.bar(range(len(nombres_casos)), probabilidades_nuevas * 100, color=colores_casos, width=0.45, edgecolor='#222222', linewidth=0.5)
+ax4.axhline(50, color='#8a8a8a', linestyle='--', linewidth=1.5, label='Umbral de Decisión (50%)')
+ax4.set_xticks(range(len(nombres_casos)))
+ax4.set_xticklabels(nombres_casos, fontsize=9)
+ax4.set_ylabel("Probabilidad de Supervivencia (%)", fontsize=10)
+ax4.set_ylim(0, 115)
+ax4.set_title("4. Inferencia sobre Nuevos Pasajeros\nProbabilidad Estimada por Gradient Boosting",
+              fontsize=11.5, fontweight='bold', pad=10)
+ax4.grid(True, axis='y', linestyle=':', alpha=0.6)
+ax4.legend(frameon=True, facecolor='white', loc='upper right', fontsize=9)
+ax4.spines['top'].set_visible(False)
+ax4.spines['right'].set_visible(False)
+
+for b, p in zip(barras, probabilidades_nuevas):
+    ax4.text(
+        b.get_x() + b.get_width() / 2, b.get_height() + 3,
+        f"{p*100:.1f}%\n({'Sobrevive' if p >= 0.5 else 'No Sobrevive'})",
+        ha='center', va='bottom', fontsize=9, fontweight='bold', color='#222222'
+    )
+
+fig.suptitle("Análisis Predictivo de Supervivencia con Gradient Boosting (Dataset: titanic5_price_clean.csv)",
+             fontsize=13.5, fontweight='bold', y=0.98)
+plt.tight_layout(rect=[0, 0, 1, 0.95])
+plt.savefig('titanic5_gradient_boosting.png', dpi=200, bbox_inches='tight')
+plt.tight_layout(rect=[0, 0, 1, 0.95])
+plt.savefig('titanic5_gradient_boosting.png', dpi=200, bbox_inches='tight')
+plt.show()
+```
+</details>
+
+```
+====================================================================
+Exactitud Global (Accuracy) : 80.32% (355 de 442 aciertos)
+Área Bajo la Curva (ROC-AUC): 0.8334
+Pérdida Logarítmica (LogLoss): 0.4412
+====================================================================
+
+Reporte Detallado por Clase:
+                   precision    recall  f1-score   support
+
+No Sobrevivió (0)       0.82      0.91      0.86       299
+   Sobrevivió (1)       0.76      0.57      0.65       143
+
+         accuracy                           0.80       442
+        macro avg       0.79      0.74      0.76       442
+     weighted avg       0.80      0.80      0.79       442
+
+
+====================================================================
+PREDICCIONES SOBRE NUEVAS MUESTRAS NO VISTAS
+====================================================================
+Caso A: Mujer 1ª Clase
+(21 años, precio £110.9): Sobrevive (Probabilidad: 96.3%)
+Caso B: Hombre 3ª Clase
+(22 años, precio £8.1): No Sobrevive (Probabilidad: 15.0%)
+Caso C: Niño 2ª Clase
+(3 años, con familia): Sobrevive (Probabilidad: 84.7%)
+```
+![](img/gradient-titanic.png)
+
+Al evaluar el modelo sobre las 442 observaciones de prueba independientes (273 no supervivientes y 82 supervivientes), se obtienen las siguientes métricas exactas:
+
+```text
+Matriz de Confusión en Test (N = 442):
+                         Predicho No Sobrevivió    Predicho Sobrevivió
+  Real No Sobrevivió:             273                      26          (Especificidad: 82,0%)
+  Real Sobrevivió:                 61                      82          (Sensibilidad: 57,0%)
+```
+
+
+
 
