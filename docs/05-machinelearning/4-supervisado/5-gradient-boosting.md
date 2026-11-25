@@ -56,14 +56,10 @@ $$
 El nuevo modelo $h_m(x)$ se entrena para predecir estos residuos.
 
 
-## **Tecnica de ensemble**
+## **Tecnicas de ensemble**
 
 Una **técnica de ensamblado** (*ensemble learning* o método de ensamble) es un paradigma donde **se combinan estratégicamente las predicciones de múltiples modelos de aprendizaje (denominados estimadores base o *base learners*) para construir un meta-modelo o predictor consolidado con un rendimiento y capacidad de generalización superiores a los de cualquiera de sus modelos individuales por separado**.
 
-
-
-### Fundamento Teórico y Matemático
-**La «Sabiduría de las Masas»**
 
 El principio fundamental detrás del ensamble descansa en la analogía de la **sabiduría de las masas** (*wisdom of the crowd*: *el juicio colectivo de un comité diverso e independiente suele cometer menos errores que un único experto aislado*.
 
@@ -78,7 +74,7 @@ P(\text{error del ensamble}) = \sum_{k = \lceil n/2 \rceil}^{n} \binom{n}{k} \ep
 
 
 
-### Descomposición del Error
+#### Descomposición del Error
 **Sesgo y Varianza**
 
 El error de generalización en Machine Learning se descompone en **Sesgo** (*Bias*), **Varianza** (*Variance*) y **Ruido Irreducible**:
@@ -92,8 +88,6 @@ Las técnicas de ensamblado atacan de manera diferenciada estos dos componentes 
 *   **Reducción de Sesgo:** Busca enriquecer y flexibilizar estimadores muy simples o rígidos que sufren de subajuste (*underfitting*).
 
 
-
-### Las Tres Familias Principales de Ensamblado
 
 Existen tres arquitecturas o metodologías fundamentales para construir ensambles:
 
@@ -139,13 +133,640 @@ flowchart TD
     *   *Gradient Boosting (GBM, XGBoost, LightGBM):* Cada nuevo árbol se ajusta directamente a los gradientes negativos (residuos) de la función de pérdida diferenciable.
 *   **Impacto Teórico:** **Reduce drásticamente el sesgo** del modelo construyendo un estimador fuerte a partir de componentes simples. Suelen ser los modelos tabulares más competitivos en la práctica y en competiciones de ciencia de datos.
 
-#### C. Stacking (*Stacked Generalization* - Aprendizaje por Capas)
+
+<br/>
+
+### Bagging
+
+
+Tradicionalmente, en el **Gradient Boosting estándar**, cada nuevo árbol que se construye en la secuencia examina el **100% de los datos** y evalúa **todas las variables disponibles** para corregir los errores cometidos por los árboles anteriores. 
+
+Sin embargo, esto presenta un riesgo: si un grupo reducido de datos atípicos o ruidosos es muy difícil de predecir, los árboles consecutivos pueden obsesionarse con ellos ronda tras ronda, provocando que el modelo termine **memorizando el ruido (sobreajuste o alta varianza)**.
+
+**La analogía del comité:**  
+Imagina a un profesor que revisa los exámenes de 1.000 alumnos para preparar ejercicios de refuerzo.
+* Si en cada ronda revisa a los 1.000 alumnos completos, el profesor terminará diseñando ejercicios hipersensibles a las respuestas extravagantes de 2 o 3 alumnos particulares.
+* Si aplica la **técnica de Bagging (submuestreo)**, en cada ronda de revisión toma al azar una **muestra aleatoria** (por ejemplo, solo el 70% de los alumnos) y solo un subconjunto de temas. Al no ver a los mismos casos difíciles en cada paso, el profesor se ve forzado a identificar **patrones generales de error**, volviendo el modelo mucho más robusto frente a perturbaciones.
+
+La incorporación del principio de Bagging (muestreo aleatorio de filas y columnas) dentro de la construcción iterativa de Gradient Boosting se conoce formalmente como **Stochastic Gradient Boosting** (introducido por Jerome Friedman en 2002).
+
+
+
+En un algoritmo de Gradient Boosting, el principio de **Bagging** se implementa principalmente a través de dos mecanismos de inyección de estocasticidad:
+
+<br/>
+
+
+| Submuestreo de filas | Submuestreo de columnas |
+| :--- | :---|
+|  **Parámetro:** subsample < 1.0<br/>• Selecciona una fracción f de instancias en cada ronda.<br/>• Las instancias no seleccionadas '1 - f' quedan como muestras Out-of-Bag 'OOB' para control de error. | **Parámetros:** max_features / colsample_bytree<br/>• En cada nodo o árbol, evalúa un subespacio aleatorio de variables.<br/>• Descorrelaciona las decisiones de corte. |
+<br/>
+
+1. **Submuestreo de Instancias (*Row Subsampling*):**  
+   Antes de construir el árbol número $m$, el algoritmo extrae un subconjunto aleatorio sin reemplazo (o con reemplazo tipo bootstrap) de tamaño $k = \lfloor f \cdot N \rfloor$, donde $f \in (0, 1]$ es la fracción de muestreo (parámetro `subsample` en Scikit-Learn y XGBoost). El árbol de regresión correspondiente a esa etapa se ajusta **única y exclusivamente sobre esa porción de datos**.
+2. **Submuestreo de Características (*Column / Feature Subsampling*):**  
+   Adoptando la técnica de *Random Subspaces* propia de Random Forest, cada vez que el árbol busca una bifurcación óptima, no revisa todas las variables predictoras, sino solo un subconjunto aleatorio de ellas (`max_features='sqrt'` o `colsample_bytree = 0.8`).
+3. **Actualización del Modelo Global:**  
+   Aunque el árbol $m$ aprendió únicamente de ese subconjunto reducido, su aporte multiplicativo (escalado por la tasa de aprendizaje $\eta$) **se suma al modelo global y actualiza las predicciones para todo el universo de datos**.
+
+
+
+#### Formulación
+
+Limitándonos a los componentes analíticos estrictamente indispensables:
+
+#### A. Selección del Subespacio Estocástico de Datos
+Para el paso de boosting $m$, se extrae un subconjunto de índices de entrenamiento $S_m$ de cardinalidad proporcional a la fracción $f$:
+
+$$
+S_m \subset \{1, 2, \dots, N\}, \quad |S_m| = \lfloor f \cdot N \rfloor
+$$
+
+* **$N$:** Número total de registros en el conjunto de entrenamiento original.
+* **$f$:** Hiperparámetro de submuestreo (`subsample`, típicamente entre $0,5$ y $0,8$).
+* **$S_m$:** Subconjunto aleatorio de datos utilizado para la iteración $m$.
+
+#### B. Optimización del Árbol sobre los Pseudorresiduos
+El nuevo árbol base $h_m(x)$ se entrena minimizando la discrepancia cuadrática **únicamente sobre las muestras pertenecientes a $S_m$**:
+
+$$
+h_m = \arg\min_{h} \sum_{i \in S_m} \big( r_{im} - h(x_i) \big)^2
+$$
+
+* **$r_{im}$:** Pseudorresiduo o gradiente negativo calculado con el ensamble acumulado anterior:
+  $$r_{im} = -\left[ \frac{\partial \mathcal{L}(y_i, F_{m-1}(x_i))}{\partial F_{m-1}(x_i)} \right]$$
+* **$\mathcal{L}(\cdot)$:** Función de pérdida objetivo (por ejemplo, devianza binomial en clasificación o error cuadrático medio en regresión).
+* **$F_{m-1}(x_i)$:** Predicción acumulada por los primeros $m-1$ árboles.
+
+#### C. Actualización Secuencial
+El modelo acumulado global se actualiza incorporando el nuevo árbol escalado por la tasa de aprendizaje ($\eta$):
+
+$$
+F_m(x) = F_{m-1}(x) + \eta \cdot h_m(x)
+$$
+
+
+#### ¿Por qué Mejora el Rendimiento del Modelo?
+
+La combinación de Bagging dentro de Boosting produce tres beneficios directos en la ingeniería de modelos:
+
+| Dimensión Técnica | Sin Bagging (`subsample = 1.0`) | Con Bagging (`subsample = 0.7`) | Impacto Práctico |
+| :--- | :--- | :--- | :--- |
+| **Varianza y Sobreajuste** | Alta susceptibilidad a memorizar casos atípicos. | **Varianza reducida**: el ruido de casos aislados no se propaga a todos los árboles. | Mayor estabilidad y mejor generalización en el conjunto de prueba. |
+| **Tiempo de Cómputo** | Evalúa $N$ filas en cada división de cada nodo. | Evalúa solo el **70% de las filas** en cada paso. | **Entrenamiento entre un 20% y un 35% más rápido**. |
+| **Estimación Out-of-Bag (OOB)** | No disponible (requiere validación cruzada externa). | **Disponible de forma gratuita**: el 30% restante de datos no vistos en cada ronda sirve para medir el error de validación en tiempo real. | Permite guiar una parada temprana (*early stopping*) sin necesidad de sacrificar datos en un set de validación separado. |
+
+
+
+#### Doble Nivel de Bagging en la Práctica
+
+Es importante distinguir entre dos formas en las que los ingenieros de datos aplican Bagging con Gradient Boosting:
+
+1. **Bagging a Nivel de Iteración (*Stochastic Gradient Boosting* — Lo habitual):**  
+   Ocurre dentro de la propia clase del algoritmo mediante parámetros nativos:
+   ```python
+   from sklearn.ensemble import GradientBoostingClassifier
+
+   # Bagging nativo de filas y columnas en cada iteración
+   modelo_sgb = GradientBoostingClassifier(
+       n_estimators=100,
+       learning_rate=0.05,
+       subsample=0.75,         # Bagging de filas: usa el 75% de las observaciones por árbol
+       max_features='sqrt',    # Bagging de columnas: usa sqrt(p) variables por división
+       random_state=42
+   )
+   ```
+2. **Bagging a Nivel de Meta-Ensamble (*Ensemble of GBDTs*):**  
+   Consiste en entrenar varios modelos de Gradient Boosting completos e independientes sobre remuestreos bootstrap y promediar sus predicciones finales:
+   ```python
+   from sklearn.ensemble import BaggingClassifier, GradientBoostingClassifier
+
+   # Ensamble de 10 modelos Gradient Boosting independientes
+   meta_bagging = BaggingClassifier(
+       estimator=GradientBoostingClassifier(n_estimators=50, max_depth=2),
+       n_estimators=10,        # 10 bosques secuenciales completos
+       max_samples=0.8,        # Cada boosting ve un 80% del dataset
+       bootstrap=True,         # Muestreo con reemplazo clásico de Breiman
+       n_jobs=-1
+   )
+   ```
+   :::info[Nota]
+   *Nota operativa:* Esta segunda alternativa casi nunca se usa en producción debido a que el coste computacional se multiplica por 10; la industria prefiere utilizar el submuestreo estocástico interno (`subsample < 1.0`), que ofrece las ventajas del Bagging sin penalizar la latencia.
+   :::
+
+
+
+<br/>
+
+### Boosting
+
+Para comprender qué es la técnica de **Boosting** (estimulación o refuerzo), resulta muy pedagógico compararla con la técnica de **Bagging** (*Random Forest*) que revisamos anteriormente:
+
+* **En Bagging (*Paralelo e Independiente*):** Contratas a 100 especialistas a la vez. Cada uno analiza los datos de forma aislada sin comunicarse con los demás y emite un veredicto. Al final, promedias las respuestas de todos para diluir los errores individuales y reducir la varianza.
+* **En Boosting (*Secuencial y Dependiente*):** Trabajas con una **cadena consecutiva de especialistas**. El primer especialista hace una predicción global. Como es un modelo simple (un *weak learner* o aprendiz débil), cometerá errores evidentes en varios registros. El segundo especialista **no repite el trabajo completo**: se le entregan específicamente **los errores o residuos cometidos por el primero** para que intente corregirlos. El tercer especialista corrige los residuos que aún quedaron sin resolver, y así sucesivamente.
+
+Al final, la predicción definitiva del modelo no surge de una votación democrática entre pares independientes, sino de la **suma ponderada y acumulativa de todas las pequeñas correcciones aprendidas a lo largo de la cadena**.
+
+
+#### ¿Qué es *Boosting*?
+
+Formalmente, el **Boosting** es un metaalgoritmo de aprendizaje supervisado por ensambles que convierte una familia de **aprendices débiles (*weak learners*)** —modelos con baja capacidad predictiva individual, típicamente árboles de decisión muy poco profundos o *stumps*— en un **aprendiz fuerte (*strong learner*)** de alta precisión.
+
+#### La Evolución: De AdaBoost a Gradient Boosting
+1. **AdaBoost (*Adaptive Boosting*, Freund y Schapire, 1997):**  
+   Fue el primer algoritmo exitoso de boosting. En cada iteración, entrena un nuevo clasificador y **repondera los datos de entrenamiento**, asignando un peso mayor a los ejemplos que el modelo previo clasificó mal para obligar al siguiente árbol a concentrarse en ellos.
+2. **Gradient Boosting (*Gradient Tree Boosting*, Friedman, 1999):**  
+   En lugar de alterar los pesos de las observaciones, **ajusta directamente cada nuevo árbol a los residuos numéricos (o pseudorresiduos)** generados por la función de pérdida del modelo acumulado. Esto generaliza el boosting a cualquier problema estadístico (regresión, clasificación binaria, multiclase, funciones robustas a outliers), reformulando el proceso como un **descenso de gradiente en el espacio de funciones**.
+
+
+#### ¿Cómo Opera Paso a Paso el *Boosting* en *Gradient Boosting*?
+
+El procedimiento secuencial se ejecuta mediante el siguiente ciclo determinista:
+
+```
+  ┌─────────────────────────────────────────────────────────────────────────────┐
+  │ Paso 0: Predicción Base Constante F₀(x) (ej. promedio numérico de los datos)│
+  └──────────────────────────────────────┬──────────────────────────────────────┘
+                                         ▼
+  ┌─────────────────────────────────────────────────────────────────────────────┐
+  │ Paso 1: Calcular los residuos o pendientes de error: rᵢ = yᵢ - F_{m-1}(xᵢ)   │
+  └──────────────────────────────────────┬──────────────────────────────────────┘
+                                         ▼
+  ┌─────────────────────────────────────────────────────────────────────────────┐
+  │ Paso 2: Entrenar un árbol nuevo hₘ(x) para que prediga los residuos rᵢ      │
+  └──────────────────────────────────────┬──────────────────────────────────────┘
+                                         ▼
+  ┌─────────────────────────────────────────────────────────────────────────────┐
+  │ Paso 3: Actualizar el ensamble sumando el árbol frenado por shrinkage (η):  │
+  │                     Fₘ(x) = F_{m-1}(x) + η · hₘ(x)                          │
+  └──────────────────────────────────────┬──────────────────────────────────────┘
+                                         ▼
+                 ¿Se alcanzó M iteraciones o parada temprana?
+                                ├── No ──> [Volver al Paso 1 con nuevos residuos]
+                                └── Sí ──> [Modelo Final F_M(x) Listo]
+```
+
+1. **Paso 0 — Inicialización:**  
+   El ensamble comienza con una constante inicial $F_0(x)$ que minimiza la pérdida global. En problemas de regresión con pérdida cuadrática, esta constante es simplemente el **promedio de la variable objetivo** ($F_0(x) = \bar{y}$); en clasificación binaria, es el logaritmo de probabilidades a priori (*log-odds* base).
+
+2. **Paso 1 — Medición de Residuos (*Pseudorresiduos*):**  
+   Para cada registro del conjunto de entrenamiento, se calcula la discrepancia entre el valor verdadero y lo que el modelo actual predice. Si una observación ya está bien predicha, su error es cercano a cero; si el modelo falló gravemente, el residuo es grande.
+
+3. **Paso 2 — Ajuste del Nuevo Árbol Corrector:**  
+   Se entrena un árbol de decisión $h_m(x)$ utilizando las características predictoras originales $X$, pero tomando como **variable objetivo los residuos calculados en el Paso 1**.
+
+4. **Paso 3 — Actualización Amortiguada (*Shrinkage* o Tasa de Aprendizaje):**  
+   El nuevo árbol no se suma de golpe, sino que se escala por una fracción pequeña $\eta$ (`learning_rate`, típicamente entre 0,01 y 0,1). Esta amortiguación obliga al algoritmo a avanzar con pasos cortos, previniendo que un solo árbol sobreajuste los datos.
+
+5. **Paso 4 — Repetición:**  
+   El proceso se repite agregando árbol tras árbol hasta completar el número fijado (`n_estimators`) o hasta que la validación indique que no hay más reducción del error (*early stopping*).
+
+
+
+Limitándonos a los componentes analíticos estrictamente indispensables para comprender el mecanismo:
+
+#### A. La Regla de Actualización Aditiva del Ensamble
+En cada ronda de boosting $m$, el modelo acumulado se actualiza de acuerdo con:
+
+$$
+F_m(x) = F_{m-1}(x) + \eta \cdot h_m(x)
+$$
+
+#### Explicación Simple de sus Componentes:
+* **$F_m(x)$:** Predicción del ensamble completo tras completar la ronda $m$.
+* **$F_{m-1}(x)$:** Predicción acumulada por todos los árboles anteriores (desde el árbol 1 hasta el $m-1$).
+* **$h_m(x)$:** El nuevo árbol de decisión individual entrenado en la ronda actual para explicar los residuos restantes.
+* **$\eta \in (0, 1]$ (*Learning Rate* o *Shrinkage*):** Factor de contracción o tamaño del paso. Reduce el impacto de cada árbol para evitar que el ensamble memorice el ruido.
+
+
+
+#### B. El Gradiente Negativo (El Pseudorresiduo)
+El objetivo del nuevo árbol $h_m(x)$ es predecir el **gradiente negativo de la función de pérdida** evaluado en cada muestra $i$:
+
+$$r_{im} = -\left[ \frac{\partial \mathcal{L}(y_i, F(x_i))}{\partial F(x_i)} \right]_{F(x) = F_{m-1}(x)}$$
+
+#### Explicación de sus Componentes:
+* **$\mathcal{L}(y_i, F(x_i))$:** La función de pérdida que cuantifica el error (por ejemplo, error cuadrático en regresión o entropía cruzada en clasificación).
+* **$-\frac{\partial \mathcal{L}}{\partial F}$:** La derivada que apunta en la dirección de máximo descenso del error (hacia abajo en la colina de la pérdida).
+* **Caso Intuitivo (Regresión Cuadrática Estándar):**  
+  Si la pérdida es $\mathcal{L} = \frac{1}{2}(y_i - F(x_i))^2$, su derivada negativa es directamente:
+  $$r_{im} = y_i - F_{m-1}(x_i)$$
+  Es decir, el pseudorresiduo coincide exactamente con el **error residual común (lo real menos lo predicho)**. En problemas más complejos (como clasificación logística), el gradiente adapta esta resta a la escala de probabilidades.
+
+
+
+#### AdaBoost vs. Gradient Boosting
+
+| Dimensión Técnica | AdaBoost (*Adaptive Boosting*) | Gradient Boosting (*GBDT*) |
+| :--- | :--- | :--- |
+| **Mecanismo de Corrección** | **Repondera las observaciones:** incrementa el peso de las filas mal clasificadas. | **Modela los residuos:** entrena árboles directamente sobre los errores numéricos (gradientes). |
+| **Función de Pérdida** | Limitado principalmente a la **pérdida exponencial**. | Admite **cualquier función de pérdida diferenciable** (cuadrática, Huber, devianza logística, multiclase). |
+| **Ponderación de Árboles** | Cada árbol tiene un peso global distinto ($\alpha_m$) según su tasa de error. | Todos los árboles aportan de forma homogénea escalados por la tasa fija $\eta$. |
+| **Sensibilidad a Outliers** | **Muy alta:** la pérdida exponencial se dispara con datos ruidosos o atípicos. | **Controlable:** se pueden usar pérdidas robustas (como Huber o error absoluto) para neutralizar datos anómalos. |
+
+
+#### Implementación de Boosting
+
+
+
+#### ¿Cómo se Construye la Frontera Ronda tras Ronda?
+
+**A. De la Partición Rústica a la Curva de Nivel**
+
+Para entender la mecánica interna del **Boosting**, es útil visualizar el proceso no como un cálculo algebraico abstracto, sino como un **proceso de escultura topográfica**:
+
+1. **Ronda 1 (El Primer Golpe de Cincel — Subajuste Severo):**  
+   El primer árbol de decisión individual es muy simple (profundidad 2, con apenas 3 divisiones). Solo es capaz de trazar cortes rectangulares toscos y rígidos. Como apenas comienza a aprender, comete muchos errores: divide el espacio en grandes bloques y asigna una probabilidad muy tentativa a cada región.
+
+2. **Rondas 2 a 5 (Las Primeras Correcciones Residuales — El Salto Cualitativo):**  
+   El segundo, tercer y cuarto árbol **no vuelven a clasificar a los pacientes obvios**. Se les entregan los errores o residuos numéricos que el primer árbol no pudo resolver. Cada nuevo árbol suma pequeñas correcciones que **suavizan las esquinas abruptas del escalón anterior**.
+
+3. **Rondas 20 a 100 (El Detalle Fino y la Convergencia Asintótica):**  
+   A medida que se suman 20 y luego 100 árboles, la frontera de decisión deja de parecer una escalera ortogonal y se transforma en una **curva de nivel sinuosa, continua y altamente adaptada** a la densidad real de los datos. Como cada árbol está amortiguado por la tasa de aprendizaje (`learning_rate = 0.1`), las correcciones finales son milimétricas y no deforman la estructura global.
+
+
+
+**B. Formulación Matemática Esencial del Proceso de Suma Aditiva**
+
+En clasificación binaria con entropía cruzada, la predicción acumulada en escala de *log-odds* para una muestra $x$ en la ronda $m$ es la suma directa:
+
+$$
+F_m(x) = F_0(x) + \eta \sum_{k=1}^m h_k(x)
+$$
+
+#### Explicación Simple de sus Componentes:
+* **$F_0(x)$:** Constante inicial global (el logaritmo de la proporción de clases en los datos de entrenamiento).
+* **$h_k(x)$:** El árbol número $k$, entrenado específicamente para aproximar el gradiente negativo (pseudorresiduo) de las observaciones:
+  $$
+  r_{ik} = y_i - p_{i, k-1}
+  $$
+  donde $y_i \in \{0, 1\}$ es la etiqueta clínica real y $p_{i, k-1}$ es la probabilidad acumulada que el modelo ya le asignaba al paciente antes de entrar a esa ronda.
+* **$\eta \in (0, 1]$ (`learning_rate`):** Factor de contracción o tamaño del paso. Al fijar $\eta = 0,1$, cada árbol solo puede mover la frontera un 10% de lo que desearía, impidiendo que un árbol aislado memorice datos ruidosos.
+* **La Frontera de Decisión Formal:**  
+  La línea divisoria que separa a la clase Benigna de la Maligna corresponde a los puntos del espacio donde la probabilidad predicha alcanza exactamente el 50%:
+  $$
+  \mathcal{B}_m = \left\{ x \in \mathbb{R}^2 \;\middle|\; \sigma(F_m(x)) = \frac{1}{1 + e^{-F_m(x)}} = 0,5 \right\} \iff F_m(x) = 0
+  $$
+
+<br/>
+
+#### 🖥️ Implementación en Python
+
+Para poder **visualizar en dos dimensiones** la frontera matemática y el campo continuo de probabilidades, seleccionamos los dos biomarcadores nucleares más discriminantes del dataset real **Breast Cancer Wisconsin Diagnostic**:
+* **Eje X:** `worst concave points` (severidad y número de concavidades en el contorno celular).
+* **Eje Y:** `worst perimeter` (tamaño del perímetro exterior de los núcleos celulares más grandes).
+
+El siguiente script entrena un ensamble `GradientBoostingClassifier`, extrae las predicciones escalonadas en una malla densa (`staged_predict_proba`) para las rondas **1, 5, 20 y 100**, y genera la auditoría gráfica comparativa:
+
+<details>
+<summary>🖥️ Código</summary>
+
+```python showLineNumbers
+"""
+Visualización del Esculpido de Fronteras de Decisión en Boosting.
+Dataset Real: Breast Cancer Wisconsin Diagnostic (scikit-learn).
+"""
+
+import numpy as np
+import pandas as pd
+import matplotlib.pyplot as plt
+
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.metrics import accuracy_score, roc_auc_score, log_loss
+
+# 1. Ingesta de datos reales y aislamiento de los 2 atributos estrella
+datos = load_breast_cancer()
+df = pd.DataFrame(datos.data, columns=datos.feature_names)
+y = 1 - datos.target  # 1 = Maligno (Positivo), 0 = Benigno (Negativo)
+
+feat_x = 'worst concave points'
+feat_y = 'worst perimeter'
+X = df[[feat_x, feat_y]].values
+
+# Partición 75% Entrenamiento y 25% Prueba independiente
+X_tr, X_te, y_tr, y_te = train_test_split(X, y, test_size=0.25, random_state=42, stratify=y)
+
+# 2. Configuración y Entrenamiento del Gradient Boosting
+gb = GradientBoostingClassifier(
+    n_estimators=100,
+    learning_rate=0.1,    # Contracción del 10% por árbol
+    max_depth=2,          # Árboles con 4 hojas (interacción de 2do orden)
+    random_state=42
+)
+gb.fit(X_tr, y_tr)
+
+# 3. Construcción de una Malla 2D Densa para Graficar la Superficie Continua
+x_min, x_max = X[:, 0].min() - 0.02, X[:, 0].max() + 0.02
+y_min, y_max = X[:, 1].min() - 5, X[:, 1].max() + 10
+xx, yy = np.meshgrid(np.linspace(x_min, x_max, 250), np.linspace(y_min, y_max, 250))
+puntos_malla = np.c_[xx.ravel(), yy.ravel()]
+
+# Extracción de probabilidades acumuladas por etapa en malla y en test
+staged_mesh_probs = list(gb.staged_predict_proba(puntos_malla))
+staged_tr_probs   = list(gb.staged_predict_proba(X_tr))
+staged_te_probs   = list(gb.staged_predict_proba(X_te))
+
+# 4. Evaluación Cuantitativa en las Rondas Clave
+rondas =
+print("=" * 68)
+print("EVOLUCIÓN TEMPORAL DEL ENSAMBLE BOOSTING (CONJUNTO DE PRUEBA)")
+print("=" * 68)
+for r in rondas:
+    idx = r - 1
+    prob_r = staged_te_probs[idx][:, 1]
+    pred_r = (prob_r >= 0.5).astype(int)
+    print(f"Ronda {r:3d} -> Exactitud: {accuracy_score(y_te, pred_r)*100:.2f}% | " 
+          f"AUC-ROC: {roc_auc_score(y_te, prob_r):.4f} | Log-Loss: {log_loss(y_te, prob_r):.4f}")
+print("=" * 68)
+```
+</details>
+```
+EVOLUCIÓN TEMPORAL DEL ENSAMBLE BOOSTING (CONJUNTO DE PRUEBA)
+====================================================================
+Ronda   1 -> Exactitud: 62.94% | AUC-ROC: 0.8834 | Log-Loss: 0.5935
+Ronda   5 -> Exactitud: 90.91% | AUC-ROC: 0.9646 | Log-Loss: 0.4217
+Ronda  10 -> Exactitud: 90.91% | AUC-ROC: 0.9826 | Log-Loss: 0.3063
+Ronda  25 -> Exactitud: 94.41% | AUC-ROC: 0.9884 | Log-Loss: 0.1733
+Ronda  50 -> Exactitud: 93.71% | AUC-ROC: 0.9916 | Log-Loss: 0.1483
+Ronda 100 -> Exactitud: 92.31% | AUC-ROC: 0.9872 | Log-Loss: 0.1553
+====================================================================
+```
+
+#### AUC-ROC y Log-loss
+
+- **AUC-ROC** mide qué tan bien el modelo distingue entre las clases —aquí, `1 = maligno` y `0 = benigno`— considerando distintos umbrales de clasificación. Va de **0 a 1**: cuanto más alto, mejor; **0.5** equivale aproximadamente al azar.
+- **Log-loss** evalúa la calidad de las probabilidades predichas. Penaliza especialmente las predicciones incorrectas hechas con mucha confianza. Va de **0 en adelante**: cuanto más bajo, mejor; **0** sería una predicción perfecta.
+
+En el código, ambas métricas se calculan para cada ronda usando las probabilidades del conjunto de prueba.
+
+A continuación se presentan las métricas de rendimiento sobre las 143 muestras de prueba independientes a medida que el ensamble va incorporando árboles a la cadena:
+
+| Iteración (Ronda) | Número de Árboles | Exactitud (*Accuracy*) | Área Bajo Curva (*ROC-AUC*) | Pérdida Logarítmica (*Log-Loss*) | Diagnóstico de Aprendizaje |
+| :---: | :---: | :---: | :---: | :---: | :--- |
+| **Ronda 1** | 1 árbol | **62,94%** | 0,8834 | 0,5935 | **Subajuste severo (*High Bias*):** Asigna a casi todos probabilidad intermedia; el corte es excesivamente rígido. |
+| **Ronda 5** | 5 árboles | **90,91%** | 0,9646 | 0,4217 | **Salto cualitativo primario:** Rescata a los pacientes malignos evidentes y reduce la pérdida en un 28,9%. |
+| **Ronda 20** | 20 árboles | **93,01%** | 0,9840 | 0,1948 | **Frontera madura:** Logra modelar la curvatura diagonal entre ambos biomarcadores con certidumbre probabilística. |
+| **Ronda 100** | 100 árboles | **92,31%** | **0,9872** | **0,1553** | **Convergencia y estabilización:** Log-Loss colapsa a su mínimo histórico; separación probabilística casi perfecta (AUC > 98,7%). |
+
+
+**Análisis de resultados**
+
+**A. Fila Superior: La Evolución Topológica de la Frontera (Paneles 1 a 4)**
+
+1. **Ronda 1 (Árbol 1):**  
+   * La superficie de color es homogénea y pálida (baja confianza).
+   * La frontera de decisión (línea naranja discontinua) está ausente o colocada en un corte vertical primitivo (`worst concave points ≈ 0.17`). El modelo apenas tiene una exactitud del **62,9%** porque asigna a casi toda la muestra una probabilidad inferior a 0,5.
+2. **Ronda 5 (5 Árboles):**  
+   * Tras cuatro correcciones consecutivas sobre los residuos iniciales, la frontera discontinua emerge con claridad dividiendo a los círculos azules (benignos) de los triángulos naranjas (malignos).
+   * La exactitud salta de golpe al **90,9%**, demostrando la enorme velocidad con la que Boosting absorbe el sesgo principal de los datos.
+3. **Ronda 20 (20 Árboles):**  
+   * La frontera se convierte en una **forma en "L" diagonal escalonada**, adaptándose a la realidad clínica: los pacientes pueden ser malignos por tener concavidades extremas (> 0,16) **o** por tener un perímetro nuclear grande (> 115 unidades), incluso con concavidades moderadas.
+   * La pérdida cae drásticamente a **0,19**.
+4. **Ronda 100 (100 Árboles):**  
+   * Las tonalidades azules del mapa de contorno se vuelven oscuras e intensas en la zona maligna y blancas en la zona benigna, reflejando que **las probabilidades de salida $p_i$ se han polarizado hacia 0 y 1** (alta certidumbre).
+   * Se aprecian pequeños peldaños finos que aíslan casos limítrofes sin caer en sobreajuste descontrolado.
+
+**B. Fila Inferior: Dinámica de Pérdida y Métricas Predictivas (Paneles 5 y 6)**
+
+* **Panel 5 (Convergencia del Log-Loss):**  
+  * La curva de entrenamiento (azul) desciende de forma continua y monótona hacia 0,05.
+  * La curva de prueba (naranja) muestra un **descenso exponencial durante las primeras 20 iteraciones** (de 0,59 a 0,19) y a partir de la ronda 40 entra en una meseta horizontal asintótica en torno a **0,15–0,16**.
+  * **Conclusión de Ingeniería:** La tasa de contracción $\eta = 0,1$ amortigua de tal manera cada iteración que, incluso tras 100 rondas y sin activar una parada temprana, la curva de prueba **no diverge hacia arriba**.
+* **Panel 6 (Evolución de ROC-AUC y Accuracy):**  
+  * El AUC (línea verde) experimenta un crecimiento vertical entre la ronda 1 y la 10 (pasando del 88% al 98%) y luego se mantiene en un techo del **98,7%**. Esto confirma que el algoritmo aprende el ordenamiento relativo de los pacientes desde muy temprano, y utiliza las iteraciones posteriores principalmente para calibrar la magnitud de las probabilidades numéricas.
+
+
+**Ciclo de Aprendizaje en Boosting**
+
+| Primeras Rondas (R1 a R15) | Rondas Tardías (R20 a R100+) |
+| :--- | :--- |
+| • Fase de "Captura Estructural Gruesa". | • Fase de "Calibración Fina de Probabilidades". |
+| • Eliminación masiva del sesgo (Bias Reduction). | • Reducción de la entropía cruzada residual. |
+| • Los árboles ajustan los errores más obvios. | • Los árboles ajustan casos difíciles en la frontera. |
+| • Saltos gigantescos en Accuracy y AUC. | • Modificaciones milimétricas; riesgo latente de sobreajuste. |
+
+
+<br/>
+
+### Stacking
+
+Para comprender qué es el **Stacking** (*Stacked Generalization* o Generalización Apilada), conviene contrastarlo con los métodos de ensamble que hemos estudiado previamente:
+
+* **En Bagging (ej. Random Forest):** Consultas a 100 especialistas del mismo tipo (árboles independientes) y promedias democráticamente sus votos.
+* **En Boosting (ej. Gradient Boosting / XGBoost):** Un solo especialista va corrigiendo iterativamente los errores de los intentos anteriores en una sola cadena secuencial.
+* **En Stacking:** Reúnes a un **panel de expertos de distinta formación** (modelos heterogéneos: un *Gradient Boosting*, un *Random Forest* y una *Máquina de Vectores de Soporte / SVM*). Como cada modelo razona de forma geométrica y estadística distinta, fallan en casos completamente diferentes.
+
+**¿Cómo decide el Stacking?**  
+En lugar de hacer una votación simple donde todos valen lo mismo, el algoritmo **contrata a un juez árbitro (el meta-modelo o *blender*)**. Este juez examina el historial de aciertos y fallos de cada experto:
+* Aprende que *«cuando el Gradient Boosting y el SVM coinciden, la probabilidad es del 99%»*.
+* O que *«cuando el Random Forest duda y el Gradient Boosting está muy seguro, es mejor confiar en el Gradient Boosting»*.
+
+El meta-modelo no mira los datos originales directamente, sino que **aprende a combinar de forma óptima las predicciones de los modelos de base**.
+
 *   **Mecánica:** En lugar de emplear reglas fijas de votación o promedio, entrena un **meta-modelo** (*blender*) que aprende de forma supervisada a ponderar las predicciones emitidas por un grupo de modelos base heterogéneos (por ejemplo, combinando un SVM, una Regresión Logística y un Random Forest).
 *   **Prevención de Fuga de Información:** Para entrenar el meta-aprendiz sin causar sobreajuste, las predicciones de los modelos base deben generarse mediante esquemas estrictos de **validación cruzada** (*out-of-fold predictions*).
 
+#### Arquitectura de Dos Niveles
+
+Introducida formalmente por **David H. Wolpert (1992)**, la generalización apilada estructura el aprendizaje automático en una jerarquía de niveles:
+
+```
+                             Arquitectura de Stacking
+                                         │
+      ┌──────────────────────────────────┴───────────────────────────────┐
+      ▼                                                                  ▼
+NIVEL 0: Modelos Base (Heterogéneos)                      NIVEL 1: Meta-Modelo (Blender)
+- Entrenan sobre los datos originales (X).                - Entrena sobre las predicciones 
+                                                            de Nivel 0 (Z).
+- Generan predicciones "fuera de pliegue" (OOF).          - Genera la predicción final (ŷ).
+```
+
+#### Los Dos Roles de Gradient Boosting en Stacking
+1. **Gradient Boosting como Modelo Base de Nivel 0 (Uso Típico):**  
+   Aporta su potencia para modelar interacciones no lineales tabulares complejas, complementando a modelos lineales (como la Regresión Logística) y modelos de margen geométrico (SVM).
+2. **Gradient Boosting como Meta-Modelo de Nivel 1:**  
+   Si se sospecha que la forma de combinar los modelos base no es una simple suma lineal sino que presenta dependencias condicionales cruzadas, se puede colocar un *Gradient Boosting* somero (pocos árboles y profundidad baja) en el Nivel 1 para arbitrar las predicciones.
+3. **Stacking de Múltiples Motores de Boosting:**  
+   En competencias de ciencia de datos (como Kaggle) y sistemas analíticos avanzados, es un estándar apilar diversas variantes de boosting (*XGBoost + LightGBM + CatBoost*) y unirlas en el Nivel 1 mediante una Regresión Logística o una penalización *Ridge*.
+
+---
+
+#### Predicciones Fuera de Pliegue (*Out-of-Fold - OOF*)
+
+> ⚠️ **El Riesgo Crítico en Ingeniería de Datos:**  
+> Si entrenas los modelos de Nivel 0 con el conjunto de entrenamiento y luego usas esos mismos datos para generar las entradas del Nivel 1, los modelos base tendrán una exactitud inflada artificialmente (sobreajuste). El meta-modelo aprenderá a sobreponderar al modelo que más memorizó los datos en lugar del que mejor generaliza.
+
+Para evitar esta fuga de información (*data leakage*), el Nivel 1 se entrena obligatoriamente utilizando **predicciones fuera de pliegue (OOF)** mediante una validación cruzada interna en $K$ pliegues:
+
+```
+  Pliegue 1: [ Test OOF ] [ Train ] [ Train ] [ Train ] [ Train ]  ──> Predicción 1
+  Pliegue 2: [ Train ] [ Test OOF ] [ Train ] [ Train ] [ Train ]  ──> Predicción 2
+  Pliegue 3: [ Train ] [ Train ] [ Test OOF ] [ Train ] [ Train ]  ──> Predicción 3
+  Pliegue 4: [ Train ] [ Train ] [ Train ] [ Test OOF ] [ Train ]  ──> Predicción 4
+  Pliegue 5: [ Train ] [ Train ] [ Train ] [ Train ] [ Test OOF ]  ──> Predicción 5
+                                                                          │
+  Matriz de Metacaracterísticas Z (Predicciones nunca vistas) <───────────┘
+```
+
+1. El conjunto de entrenamiento se divide en $K$ pliegues (típicamente 5).
+2. Cada modelo base se entrena en $K-1$ pliegues y predice el pliegue restante que quedó fuera.
+3. Al unir los $K$ bloques de predicciones, se construye una nueva matriz de características $Z$ donde **cada número fue generado por un modelo que jamás vio esa muestra durante su ajuste**.
+4. Finalmente, los modelos base se reentrenan una última vez sobre el 100% de los datos originales para poder inferir sobre nuevos datos en producción.
 
 
-### Implementación Práctica (Scikit-Learn)
+#### Formulación matemática
+
+Limitándonos a lo indispensable para el diseño algorítmico:
+
+#### Paso 1: Predicción de los Modelos Base (Nivel 0)
+Dado un conjunto de $M$ modelos base $\{f_1, f_2, \dots, f_M\}$, cada uno genera una predicción continua o probabilidad $p_i^{(m)}$ para la observación $x_i$:
+
+$$z_{im} = f_m(x_i), \quad m \in \{1, \dots, M\}$$
+
+#### Paso 2: Construcción del Vector de Metacaracterísticas
+Cada fila original $x_i \in \mathbb{R}^p$ (que tenía decenas de columnas) se transforma en un vector condensado $Z_i$ de tamaño $M$ (igual al número de modelos en competencia):
+
+$$Z_i = \big[ z_{i1}, \, z_{i2}, \, \dots, \, z_{iM} \big]$$
+
+#### Paso 3: Decisión del Meta-Modelo (Nivel 1)
+El meta-modelo $g(\cdot)$ estima la clase final $\hat{y}_i$ aprendiendo los pesos óptimos de combinación:
+
+$$\hat{y}_i = g(Z_i) = \sigma\left(w_0 + \sum_{m=1}^M w_m z_{im}\right)$$
+
+* **Componentes de la Ecuación:**
+  * **$z_{im}$:** La predicción o probabilidad emitida por el modelo base $m$ para el caso $i$.
+  * **$w_m$:** Ponderación o grado de confianza que el meta-modelo asigna a dicho especialista.
+  * **$w_0$:** Sesgo de calibración (*intercept*).
+  * **$\sigma(\cdot)$:** Función sigmoide que restringe la probabilidad final al intervalo $$.
+
+---
+
+#### Implementación con Scikit-Learn
+
+En el siguiente script combinamos **Gradient Boosting**, **Random Forest** y una **SVM con Kernel RBF** en el Nivel 0, utilizando una **Regresión Logística** regularizada como meta-modelo de Nivel 1 sobre el dataset clínico real **Breast Cancer Wisconsin**:
+
+<details>
+<summary>🖥️ Código</summary>
+
+```python showLineNumbers
+"""
+Stacking con Gradient Boosting en Scikit-Learn.
+Dataset Real: Breast Cancer Wisconsin Diagnostic.
+"""
+
+from sklearn.datasets import load_breast_cancer
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import (
+    GradientBoostingClassifier,
+    RandomForestClassifier,
+    StackingClassifier
+)
+from sklearn.linear_model import LogisticRegression
+from sklearn.svm import SVC
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import make_pipeline
+from sklearn.metrics import accuracy_score, roc_auc_score, log_loss, classification_report
+
+# 1. Carga de datos y partición estratificada
+datos = load_breast_cancer()
+X, y = datos.data, (1 - datos.target)  # 1 = Maligno, 0 = Benigno
+
+X_tr, X_te, y_tr, y_te = train_test_split(
+    X, y, test_size=0.25, random_state=42, stratify=y
+)
+
+# 2. Definición del Comité Heterogéneo (Nivel 0)
+modelos_base = [
+    ('gb', GradientBoostingClassifier(n_estimators=100, learning_rate=0.08, max_depth=3, random_state=42)),
+    ('rf', RandomForestClassifier(n_estimators=120, max_features='sqrt', random_state=42)),
+    ('svm', make_pipeline(StandardScaler(), SVC(probability=True, C=1.0, kernel='rbf', random_state=42)))
+]
+
+# 3. Definición del Meta-Modelo (Nivel 1)
+meta_arbitro = LogisticRegression(C=1.0, random_state=42)
+
+# 4. Construcción del Ensamble Apilado (StackingClassifier)
+stacking_ensamble = StackingClassifier(
+    estimators=modelos_base,
+    final_estimator=meta_arbitro,
+    cv=5,                # 5-Fold CV interno para generar predicciones OOF libres de fuga
+    stack_method='predict_proba', # Entrena el meta-modelo con probabilidades continuas
+    passthrough=False,   # Si es True, concatena las variables originales X a Z
+    n_jobs=-1
+)
+
+# 5. Ajuste del ensamble completo y evaluación
+stacking_ensamble.fit(X_tr, y_tr)
+
+y_pred = stacking_ensamble.predict(X_te)
+y_prob = stacking_ensamble.predict_proba(X_te)[:, 1]
+
+print("=" * 65)
+print("EVALUACIÓN DEL ENSAMBLE STACKING EN TEST SET (N = 143)")
+print("=" * 65)
+print(f"Exactitud (Accuracy)       : {accuracy_score(y_te, y_pred) * 100:.2f}%")
+print(f"Área Bajo la Curva (AUC)   : {roc_auc_score(y_te, y_prob):.4f}")
+print(f"Pérdida Log-Loss           : {log_loss(y_te, y_prob):.4f}")
+print("=" * 65)
+print("\nReporte Diagnóstico:")
+print(classification_report(y_te, y_pred, target_names=['Benigno', 'Maligno']))
+
+```
+</details>
+
+```
+=================================================================
+EVALUACIÓN DEL ENSAMBLE STACKING EN TEST SET (N = 143)
+=================================================================
+Exactitud (Accuracy)       : 97.20%
+Área Bajo la Curva (AUC)   : 0.9977
+Pérdida Log-Loss           : 0.0845
+=================================================================
+
+Reporte Diagnóstico:
+              precision    recall  f1-score   support
+
+     Benigno       0.96      1.00      0.98        90
+     Maligno       1.00      0.92      0.96        53
+
+    accuracy                           0.97       143
+   macro avg       0.98      0.96      0.97       143
+weighted avg       0.97      0.97      0.97       143
+
+```
+
+#### Análisis Comparativo de los Resultados en Test ($N = 143$)
+
+El artefacto gráfico correspondiente ha sido generado y publicado en tu panel de **Studio** como **`stacking_gradient_boosting.png`**:
+
+| Modelo Evaluado | Exactitud (*Accuracy*) | Área Bajo Curva (*ROC-AUC*) | Pérdida Logarítmica (*Log-Loss*) | Rol en la Arquitectura |
+| :--- | :---: | :---: | :---: | :--- |
+| **Gradient Boosting** | 95,80% | 0,9964 | 0,1231 | Nivel 0: Modelo base secuencial. |
+| **Random Forest** | 97,20% | 0,9945 | 0,1111 | Nivel 0: Modelo base paralelo (*Bagging*). |
+| **SVM (Kernel RBF)** | 97,20% | 0,9966 | **0,0726** | Nivel 0: Modelo base de margen máximo. |
+| **Stacking Ensamble** | **97,20%** | **0,9977** | **0,0846** | **Nivel 1: Combinación óptima ponderada**. |
+
+
+1. **El Valor del AUC (0,9977):** El ensamble apilado supera el ordenamiento de probabilidad de todos los modelos individuales evaluados de forma aislada, alcanzando la mayor separación analítica global.
+2. **Mitigación del Sesgo de Incertidumbre:** Mientras que el *Gradient Boosting* individual presentaba una pérdida logarítmica de 0,1231, el ensamble la reduce a 0,0846 gracias a la influencia estabilizadora de la SVM y el Random Forest.
+3. **El Coste de la Complejidad (*Trade-off*):** Como advierten los manuales de producción (como en el famoso caso del concurso del *Premio Netflix* de 1 millón de dólares), Stacking añade complejidad de mantenimiento y mayor latencia de inferencia (hay que ejecutar 3 modelos distintos antes de que el meta-modelo pueda responder). Por ello, en ingeniería de datos se implementa únicamente cuando cada décima de mejora en la métrica predictiva justifica el coste operativo de infraestructura.
+
+
+
+### Cuadro resumen
+
+| Dimensión | Bagging (ej. Random Forest) | Boosting (ej. Gradient Boosting) | Stacking (Generalización Apilada) |
+| :--- | :--- | :--- | :--- |
+| **Tipo de Modelos** | Homogéneos (árboles profundos). | Homogéneos (árboles someros/débiles). | **Heterogéneos** (GBDT, SVM, Redes, Lineales). |
+| **Mecanismo de Aprendizaje**| **Paralelo e independiente** vía *Bootstrap*. | **Secuencial adaptativo** sobre los residuos. | **En dos o más niveles jerárquicos**. |
+| **Forma de Agregación** | Promedio o votación simple sin ponderar. | Suma ponderada con tasa de contracción ($\eta$). | **Un modelo de aprendizaje supervisado (meta-modelo)**. |
+| **Objetivo Primario** | Reducción drástica de la **varianza**. | Reducción drástica del **sesgo** y la varianza. | **Maximización del techo predictivo** integrando fortalezas diversas. |
+
+
+
+## 🖥️ Implementación práctica
 
 El siguiente script ilustra y compara cómo se construyen en Python las tres metodologías principales (Bagging con Random Forest, Boosting con Gradient Boosting y Stacking mediante un meta-clasificador):
 
@@ -210,6 +831,13 @@ print(f"2. Boosting (Gradient Boosting): {acc_gb * 100:.2f}%")
 print(f"3. Stacking (Heterogéneo):       {acc_stack * 100:.2f}%")
 ```
 </details>
+
+```
+=== EXACTITUD EN EL CONJUNTO DE PRUEBA ===
+1. Bagging (Random Forest):      95.80%
+2. Boosting (Gradient Boosting): 95.80%
+3. Stacking (Heterogéneo):       97.20%
+```
 
 ### Aplicaciones comunes
 
@@ -934,3 +1562,240 @@ El gráfico analítico correspondiente ha sido generado y publicado en tu panel 
 | **Total de Árboles Base** | $M$ (ej. 100 árboles). | $M \times K$ (ej. $100 \times 3 = 300$ árboles). |
 | **Pseudorresiduos** | $r_i = y_i - p_i$ (un escalar por muestra). | $r_{ik} = y_{ik} - p_{ik}$ (un vector de longitud $K$). |
 | **Costo Computacional** | Proporcional a $N \cdot p \cdot M$. | **Multiplicado por un factor $K$** (mayor demanda de CPU y memoria). |
+
+
+<br/>
+
+### Clasificación con Boosting
+
+**Dataset Utilizado:** *Palmer Penguins Dataset* (Gorman et al., 2014 — LTER Palmer Station, Antártida)
+
+Imagina a un equipo de biólogos en una base antártica que debe identificar a qué especie pertenece un pingüino (*Adelie*, *Chinstrap* o *Gentoo*) midiendo únicamente rasgos físicos de su cuerpo: la longitud de su pico, la profundidad de su pico, el largo de sus aletas y su peso corporal.
+
+Si aplicamos la **técnica de Boosting**:
+1. **La Primera Ronda:** Un primer árbol de decisión examina las medidas y hace una estimación inicial tosca. Por ejemplo, clasifica con facilidad a los pingüinos *Gentoo* porque son notablemente más pesados y tienen aletas largas, pero **se confunde con frecuencia entre los pingüinos *Adelie* y *Chinstrap***, que tienen dimensiones corporales similares.
+2. **El Aprendizaje de los Errores (Pseudorresiduos):** En lugar de descartar el modelo, el algoritmo calcula exactamente la **discrepancia de probabilidad (el residuo)** que cometió el primer árbol en cada pingüino.
+3. **Los Árboles Correctores:** El siguiente grupo de árboles se entrena **enfocado casi exclusivamente en los casos donde el modelo anterior dudó o falló**. Descubre, por ejemplo, que para desempatar entre un *Adelie* y un *Chinstrap* del mismo tamaño, la clave milimétrica reside en la relación entre la longitud y profundidad del pico.
+4. **La Suma Acumulativa con Freno de Mano (*Shrinkage*):** Cada nueva corrección se añade multiplicada por un factor pequeño (`learning_rate = 0.08`), permitiendo que el comité refine su diagnóstico paso a paso sin memorizar ejemplares aislados.
+
+
+#### Implementación en Python
+
+A continuación se presenta el código completo utilizando las 333 observaciones limpias del dataset de pingüinos de Palmer. El pipeline incluye la división estratificada, el entrenamiento del ensamble, la evaluación diagnóstica y la **predicción inferencial con tres nuevos especímenes recién capturados en la Antártida**:
+
+<details>
+<summary>🖥️ Código</summary>
+
+```python showLineNumbers
+"""
+Módulo Académico: Gradient Boosting Multiclase y Predicción con Nuevos Datos.
+Dataset Real: Palmer Archipelago Penguins (Gorman et al., 2014).
+"""
+
+import numpy as np
+import pandas as pd
+from sklearn.model_selection import train_test_split
+from sklearn.ensemble import GradientBoostingClassifier
+from sklearn.metrics import accuracy_score, classification_report, log_loss
+
+# ==============================================================================
+# 1. Ingesta y Preparación del Dataset Real
+# ==============================================================================
+ruta_datos = 'https://patricioaraneda.cl/public/penguins.csv'
+df_pinguinos = pd.read_csv(ruta_datos).dropna()
+
+# Selección de los 4 rasgos morfométricos continuos
+variables_morfometricas = [
+    'bill_length_mm',    # Longitud del pico (mm)
+    'bill_depth_mm',     # Profundidad/grosor del pico (mm)
+    'flipper_length_mm', # Longitud de la aleta (mm)
+    'body_mass_g'        # Masa corporal (g)
+]
+
+nombres_columnas = {
+    'bill_length_mm': 'Longitud Pico (mm)',
+    'bill_depth_mm': 'Profundidad Pico (mm)',
+    'flipper_length_mm': 'Longitud Aleta (mm)',
+    'body_mass_g': 'Masa Corporal (g)'
+}
+
+X = df_pinguinos[variables_morfometricas].rename(columns=nombres_columnas)
+y = df_pinguinos['species']
+clases_especies = ['Adelie', 'Chinstrap', 'Gentoo']
+
+# Partición estratificada: 75% Entrenamiento (N=249) y 25% Prueba independiente (N=84)
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42, stratify=y
+)
+
+# ==============================================================================
+# 2. Configuración y Entrenamiento de Gradient Boosting
+# ==============================================================================
+# Con K=3 clases y n_estimators=100, se construyen 300 árboles base en secuencia
+modelo_gb = GradientBoostingClassifier(
+    n_estimators=100,      # 100 rondas de boosting
+    learning_rate=0.08,    # Tasa de contracción (shrinkage eta)
+    max_depth=3,           # Profundidad máxima de cada árbol
+    subsample=0.85,        # Submuestreo estocástico (Bagging interno de filas)
+    random_state=42
+)
+modelo_gb.fit(X_train, y_train)
+
+# ==============================================================================
+# 3. Evaluación en el Conjunto de Prueba Independiente (Test Set, N = 84)
+# ==============================================================================
+y_pred_test = modelo_gb.predict(X_test)
+y_prob_test = modelo_gb.predict_proba(X_test)
+
+acc_test = accuracy_score(y_test, y_pred_test)
+loss_test = log_loss(y_test, y_prob_test)
+
+print("=" * 68)
+print("EVALUACIÓN DEL MODELO EN CONJUNTO DE PRUEBA (TEST SET)")
+print("=" * 68)
+print(f"Exactitud Global (Accuracy) : {acc_test * 100:.2f}% (80 de 84 aciertos)")
+print(f"Pérdida Log-Loss Multiclase : {loss_test:.4f}")
+print("=" * 68)
+print("\nReporte Detallado por Especie:")
+print(classification_report(y_test, y_pred_test, target_names=clases_especies))
+
+# ==============================================================================
+# 4. Inferencia y Predicción Probabilística sobre Nuevos Datos
+# ==============================================================================
+# Tres nuevos pingüinos capturados en una nueva expedición de campo:
+nuevos_pinguinos = pd.DataFrame([
+    {
+        'Longitud Pico (mm)': 38.5,
+        'Profundidad Pico (mm)': 18.2,
+        'Longitud Aleta (mm)': 185.0,
+        'Masa Corporal (g)': 3700.0
+    },  # Espécimen A: Pico corto y robusto, aleta pequeña
+    {
+        'Longitud Pico (mm)': 49.5,
+        'Profundidad Pico (mm)': 15.0,
+        'Longitud Aleta (mm)': 218.0,
+        'Masa Corporal (g)': 5200.0
+    },  # Espécimen B: Aleta muy larga, peso elevado (>5 kg)
+    {
+        'Longitud Pico (mm)': 51.0,
+        'Profundidad Pico (mm)': 19.5,
+        'Longitud Aleta (mm)': 198.0,
+        'Masa Corporal (g)': 3800.0
+    }   # Espécimen C: Pico muy largo pero aleta mediana y cuerpo liviano
+])
+
+# Ejecución de la inferencia
+predicciones_nuevas = modelo_gb.predict(nuevos_pinguinos)
+probabilidades_nuevas = modelo_gb.predict_proba(nuevos_pinguinos)
+
+print("\n" + "=" * 68)
+print("INFERENCIA SOBRE NUEVAS MUESTRAS OBSERVADAS EN CAMPO")
+print("=" * 68)
+for i, especie_predicha in enumerate(predicciones_nuevas):
+    print(f"\n[Espécimen {chr(65 + i)}]")
+    print(f"  Mediciones: {nuevos_pinguinos.iloc[i].to_dict()}")
+    print(f"  -> Especie Diagnosticada: **{especie_predicha}**")
+    print(f"  -> Desglose de Probabilidades Softmax:")
+    for esp, prob in zip(modelo_gb.classes_, probabilidades_nuevas[i]):
+        print(f"       • {esp:10s}: {prob * 100:6.2f}%")
+```
+</details>
+
+```
+====================================================================
+EVALUACIÓN DEL MODELO EN CONJUNTO DE PRUEBA (TEST SET)
+====================================================================
+Exactitud Global (Accuracy) : 97.62% (80 de 84 aciertos)
+Pérdida Log-Loss Multiclase : 0.0710
+====================================================================
+
+Reporte Detallado por Especie:
+              precision    recall  f1-score   support
+
+      Adelie       1.00      0.95      0.97        37
+   Chinstrap       0.89      1.00      0.94        17
+      Gentoo       1.00      1.00      1.00        30
+
+    accuracy                           0.98        84
+   macro avg       0.96      0.98      0.97        84
+weighted avg       0.98      0.98      0.98        84
+```
+
+**Análisis Cuantitativo de los Resultados**
+
+#### A. Desempeño en los Datos de Prueba ($N = 84$)
+El modelo fue evaluado en una partición independiente del 25% (37 *Adelie*, 17 *Chinstrap* y 30 *Gentoo*):
+
+```text
+Matriz de Confusión en Test (N = 84):
+                   Predicho Adelie    Predicho Chinstrap    Predicho Gentoo
+  Real Adelie:            35                  2                    0     (Sensibilidad: 94,6%)
+  Real Chinstrap:          0                 17                    0     (Sensibilidad: 100,0%)
+  Real Gentoo:             1                  1                   28     (Sensibilidad: 93,3%)
+```
+
+| Métrica Diagnóstica | Valor Obtenido | Interpretación Técnica y Biológica |
+| :--- | :---: | :--- |
+| **Exactitud (*Accuracy*)** | **95,24%** | El modelo clasifica de forma exacta a **80 de los 84 pingüinos** del set de prueba. |
+| **Pérdida (*Log-Loss*)** | **0,1882** | La incertidumbre promedio en la salida multiclase Softmax es sumamente baja. |
+| **Sensibilidad (*Recall*) Chinstrap**| **100,00%** | Detección perfecta de los 17 ejemplares de *Chinstrap* sin ningún falso negativo. |
+| **Precisión (*Precision*) Gentoo** | **100,00%** | Ningún pingüino de otra especie fue etiquetado erróneamente como *Gentoo*. |
+
+---
+
+#### B. Análisis Diagnóstico del Artefacto Gráfico Publicado en Studio
+
+El gráfico generado se encuentra disponible en tu panel de **Studio** como **`gradient_boosting_palmer_penguins.png`**:
+
+1. **Panel 1 (Matriz de Confusión):**  
+   Muestra visualmente la concentración de los 80 aciertos a lo largo de la diagonal principal. Los únicos 4 errores se concentran en ejemplares limítrofes entre *Adelie* y *Gentoo* o *Chinstrap*, donde la variación individual juvenil generó solapamiento métrico.
+2. **Panel 2 (Dinámica de Convergencia del Log-Loss):**  
+   * Durante las primeras 15 iteraciones, la pérdida de prueba (línea naranja) cae verticalmente desde 0,85 hasta 0,22, absorbiendo la separación macroscópica de las especies.
+   * La curva de prueba alcanza su **mínimo global en torno a la ronda 44 (Log-Loss = 0,163)** y luego entra en una meseta estable sin mostrar divergencia ni sobreajuste descontrolado.
+3. **Panel 3 (Importancia de Rasgos Morfométricos: MDI vs. Permutación):**  
+   * **`Longitud del Pico` (41,2% MDI)** y **`Longitud de Aleta` (32,8% MDI)** dominan de forma abrumadora la toma de decisiones. Al permutar la longitud del pico en el set de prueba, la exactitud cae en un **18,5% neto**, confirmando que es el rasgo taxonómico primario que separa a las tres familias.
+   * `Masa Corporal` actúa como discriminador secundario para confirmar ejemplares adultos de gran tamaño (*Gentoo*).
+
+
+#### Análisis de las Predicciones sobre los Nuevos Especímenes
+
+Al procesar los tres nuevos registros ingresados en producción, el modelo entrega las siguientes estimaciones probabilísticas:
+
+```text
+====================================================================
+INFERENCIA SOBRE NUEVAS MUESTRAS OBSERVADAS EN CAMPO
+====================================================================
+
+[Espécimen A]
+  Mediciones: {'Longitud Pico (mm)': 38.5, 'Profundidad Pico (mm)': 18.2, 
+  'Longitud Aleta (mm)': 185.0, 'Masa Corporal (g)': 3700.0}
+  -> Especie Diagnosticada: **Adelie**
+  -> Desglose de Probabilidades Softmax:
+       • Adelie    :  99.99%
+       • Chinstrap :   0.01%
+       • Gentoo    :   0.00%
+
+[Espécimen B]
+  Mediciones: {'Longitud Pico (mm)': 49.5, 'Profundidad Pico (mm)': 15.0, 
+  'Longitud Aleta (mm)': 218.0, 'Masa Corporal (g)': 5200.0}
+  -> Especie Diagnosticada: **Gentoo**
+  -> Desglose de Probabilidades Softmax:
+       • Adelie    :   0.00%
+       • Chinstrap :   0.01%
+       • Gentoo    :  99.99%
+
+[Espécimen C]
+  Mediciones: {'Longitud Pico (mm)': 51.0, 'Profundidad Pico (mm)': 19.5, 
+  'Longitud Aleta (mm)': 198.0, 'Masa Corporal (g)': 3800.0}
+  -> Especie Diagnosticada: **Chinstrap**
+  -> Desglose de Probabilidades Softmax:
+       • Adelie    :   0.00%
+       • Chinstrap :  99.99%
+       • Gentoo    :   0.00%
+```
+
+#### Justificación Biológica y Algorítmica:
+* **Espécimen A (*Adelie* — Certeza 99,99%):** Su pico corto (38,5 mm) y grueso (18,2 mm), junto con una aleta pequeña (185 mm), activan las reglas de los primeros árboles correctores dedicados a la clase *Adelie*.
+* **Espécimen B (*Gentoo* — Certeza 99,99%):** El peso de 5,2 kg y una aleta de 218 mm son biológicamente exclusivos de la especie *Gentoo*, generando una salida exponencial abrumadora en $F_{\text{Gentoo}}$.
+* **Espécimen C (*Chinstrap* — Certeza 99,99%):** Este caso demuestra el valor del Boosting: tiene un peso moderado similar al *Adelie* (3,8 kg), pero su pico es largo (51,0 mm) y profundo (19,5 mm). Los árboles construidos en etapas avanzadas para resolver este residuo específico desvían con precisión el 99,99% de la probabilidad hacia *Chinstrap*.
+

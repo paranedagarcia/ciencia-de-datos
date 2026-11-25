@@ -5,6 +5,7 @@ sidebar_label: "📄 Support Vector Machine"
 description: ""
 hide_title: true
 ---
+import YouTubeVideo from '@site/src/components/YouTubeVideo';
 
 ## **Support Vector Machine**
 
@@ -34,6 +35,10 @@ Separación con margen: La SVM busca la línea (o plano, en 3D) que mejor separa
 Ejemplo: Si tienes manzanas (rojas) y naranjas (naranjas) en una mesa, la SVM dibuja una línea que las separa, pero alejada lo más posible de ambas para evitar confusiones.
 
 Kernel Trick (Truco del núcleo): Si los datos no se pueden separar con una línea recta (como un ovillo de hilos mezclados), la SVM usa funciones matemáticas ("kernels") para transformarlos a un espacio donde sí sea posible separarlos.
+
+<br/>
+<YouTubeVideo id="5N2YU2wu3kQ" title="Generación de hiperplano en SVM" />
+<br/>
 
 Una SVM es un algoritmo de aprendizaje automático supervisado diseñado para encontrar **la frontera divisoria óptima**. 
 * **Frontera (Hiperplano):** La línea divisoria que separa las clases.

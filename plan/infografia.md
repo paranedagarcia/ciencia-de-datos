@@ -17,6 +17,8 @@ crea una presentación educativa horizontal 16:9 sobre "TEMA", dirigida a estudi
 Utiliza un fondo de color blanco y plano, sin líneas o patrones.
 Utiliza la paleta de colores "educativa".
 
+qué es y como funciona la tecnica de boosting en gradient boosting?
+
 ## guia
 
 Prepara una breve guía visual complementaria sobre cómo el orden del MRO previene que una clase base se inicialice doblemente (el clásico "problema del diamante"), para que la muestres como apoyo gráfico en tus diapositivas?
