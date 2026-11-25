@@ -3,9 +3,10 @@ id: gradient-boosting
 title: "Gradient Boosting"
 sidebar_label: "📄 Gradient Boosting"
 description: ""
+hide_title: true
 ---
 
-
+## **Gradient Boosting**
 
 El **Gradient Boosting** (Impulso de Gradiente) es una técnica de ensamblado (*ensemble*) utilizada en machine learning para construir modelos predictivos potentes a partir de la combinación secuencial de modelos débiles, generalmente árboles de decisión poco profundos. El objetivo es mejorar la precisión corrigiendo los errores cometidos por los modelos anteriores en cada iteración.
 
@@ -151,7 +152,7 @@ El siguiente script ilustra y compara cómo se construyen en Python las tres met
 
 ```python showLineNumbers
 """
-Módulo Universitario: Implementación Comparativa de Técnicas de Ensamblado.
+Implementación Comparativa de Técnicas de Ensamblado.
 """
 
 from sklearn.datasets import load_breast_cancer
@@ -259,6 +260,8 @@ print("Predicciones:", y_pred)
 
 ### Clasificacion (breast cancer)
 
+<details>
+<summary>🖥️ Código</summary>
 
 ```python showLineNumbers
 from sklearn.datasets import load_breast_cancer
@@ -332,7 +335,9 @@ plt.title('Top 10 características - Gradient Boosting')
 plt.tight_layout()
 plt.show()
 ```
+</details>
 
+```
     Accuracy: 0.958
     ROC AUC: 0.995
     
@@ -349,16 +354,12 @@ plt.show()
     Confusion Matrix:
      [[48  5]
      [ 1 89]]
-
-
+```
 
     
 ![png](img/Arboles_20_1.png)
     
 
-
-
-    
 ![png](img/Arboles_20_2.png)
     
 
@@ -366,6 +367,9 @@ plt.show()
 
 Ejemplo de regresion con gradient boosting (diabetes)
 
+
+<details>
+<summary>🖥️ Código</summary>
 
 ```python showLineNumbers
 from sklearn.datasets import load_diabetes
@@ -432,24 +436,27 @@ plt.xlabel("Importancia")
 plt.tight_layout()
 plt.show()
 ```
+</details>
 
+```
     MSE: 3243.543    RMSE: 56.952    R2: 0.413
+```
 
-
-
+<div class="container">
+  <div class="row">
+    <div class="col col--6">
+    ![png](img/Arboles_22_1.png)
+    </div>
+    <div class="col col--6">
+    ![png](img/Arboles_22_2.png)
+    </div>
+  </div>
+</div>
     
-![png](img/Arboles_22_1.png)
-    
 
-
-
-    
-![png](img/Arboles_22_2.png)
-    
-
-
-
-    
 ![png](img/Arboles_22_3.png)
     
+
+
+
 

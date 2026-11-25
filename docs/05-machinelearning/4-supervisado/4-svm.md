@@ -123,6 +123,13 @@ Sin embargo, si pudieras empujar el centro de la mesa hacia arriba (elevando las
 
 **El "truco":** Consiste en descubrir que el algoritmo no necesita saber dónde queda cada punto en esa tercera dimensión; únicamente necesita saber qué tan parecidos o cercanos son dos puntos entre sí. El kernel es una fórmula matemática directa que calcula esa distancia en el espacio superior usando únicamente los números originales en dos dimensiones, como si hubieras hecho el viaje dimensional, pero sin moverte de tu mesa.
 
+<center>
+<figure>
+![](img/svm-truco.jpg)
+<figcaption>**El truco**. Computa la separación usando productos punto sin calcular explicitamente las nuevsa coordenadas masivas.</figcaption>
+</figure>
+</center>
+
 Si las clases no son linealmente separables en el espacio original $\mathbb{R}^p$, se proyectan de forma implícita a un espacio de Hilbert de dimensión superior $\mathcal{H}$ mediante una transformación no lineal $\phi(x)$. 
 
 Gracias al teorema de representabilidad y las condiciones de Mercer, en lugar de calcular las coordenadas transformadas $\phi(x_i)$ explícitamente (lo que sería prohibitivo computacionalmente), se utiliza una **función kernel** $K(x_i, x_j) = \langle \phi(x_i), \phi(x_j) \rangle$ que evalúa el producto interno directamente en el espacio original:
@@ -420,7 +427,7 @@ Para comprender cómo difieren las **Máquinas de Vectores de Soporte (SVM)** y 
 
 
 :::info
-* **Nota arquitectónica en producción:** En la práctica moderna de la ciencia de datos, los árboles individuales suelen reemplazarse por ensambles como **Random Forest** o **Gradient Boosting** para mitigar su alta varianza, mientras que las SVM siguen siendo un referente de precisión cuando se trabaja con matrices dispersas de alta dimensionalidad o con datos clínicos y bioinformáticos continuos.
+* **Nota arquitectónica en producción:** Los árboles individuales suelen reemplazarse por ensambles como **Random Forest** o **Gradient Boosting** para mitigar su alta varianza, mientras que las SVM siguen siendo un referente de precisión cuando se trabaja con matrices dispersas de alta dimensionalidad o con datos clínicos y bioinformáticos continuos.
 :::
 
 ---
@@ -448,16 +455,264 @@ El proceso general de optimización implica:
 
 El parámetro `Kernel` es fundamental ya que selecciona el tipo de hiperplano utilizado para separar los datos.
 
+![](img/svm-kernels.jpg)
+
 *   **Valores a Probar:** Se deben incluir los diferentes tipos de kernels, como el kernel lineal (`'linear'`), el kernel de función de base radial (`'rbf'`), o el kernel polinomial (`'poly'`), dependiendo de si se requiere una frontera de decisión lineal o no lineal.
 
 *   **Combinación Condicional:** Dado que los kernels no lineales (como `'rbf'`) requieren el parámetro $\gamma$, y el kernel `'linear'` no lo requiere, la cuadrícula de parámetros a menudo se define como una **lista de diccionarios**, donde cada diccionario prueba un tipo de kernel y sus parámetros específicos (si aplica).
 
+<br/>
+
+---
 ### Parámetro C
 
-El parámetro $C$ es la **constante de regularización**, que penaliza el término de error en la función de coste y controla el compromiso entre tener un margen de decisión amplio y la correcta clasificación de los puntos de entrenamiento.
+El parámetro `C` controla el equilibrio entre dos objetivos en competencia:
+1. **Margen amplio entre clases**: Maximizar la distancia entre el hiperplano separador y los puntos más cercanos (vectores de soporte).
+2. **Penalización por errores de clasificación**: Evitar que existan muestras mal clasificadas o dentro del margen.
+
+Es la **constante de regularización**, que penaliza el término de error en la función de coste y controla el compromiso entre tener un margen de decisión amplio y la correcta clasificación de los puntos de entrenamiento.
+
+![](img/svm-c.jpg)
 
 *   **Rango de Búsqueda:** $C$ se utiliza para controlar la complejidad del modelo (donde un $C$ alto puede llevar a un sobreajuste). Por lo tanto, se recomienda buscar su valor en una **escala logarítmica** (por ejemplo, valores como 0.001, 0.01, 0.1, 1, 10, 100) para explorar adecuadamente cómo la magnitud de la restricción afecta el modelo.
 
+
+En **scikit-learn**, el parámetro **`C`** es el **hiperparámetro de regularización** de los modelos de Máquinas de Vectores de Soporte (*Support Vector Machines*, como `SVC` o `LinearSVC`).
+
+Matemáticamente, `C` actúa de manera **inversa a la regularización**:
+
+* **Valor pequeño de `C` (p. ej., `C = 0.01` o `C = 0.1`):**
+  * Prioriza un **margen más ancho y suave**, permitiendo más errores o violaciones de margen en el conjunto de entrenamiento.
+  * Reduce el riesgo de sobreajuste (*overfitting*), pero puede provocar subajuste (*underfitting*) si es demasiado bajo.
+* **Valor grande de `C` (p. ej., `C = 10` o `C = 100`):**
+  * Aplica una penalización estricta a los errores de clasificación, forzando un **margen más estrecho y ajustado** a los datos de entrenamiento.
+  * Puede clasificar mejor los datos de entrenamiento pero aumenta el riesgo de sobreajuste (*overfitting*), volviendo al modelo sensible al ruido.
+
+
+#### Ajuste Básico Directo
+
+Al instanciar el estimador (por ejemplo, `SVC` con kernel RBF o lineal), se pasa el argumento `C` como un número positivo (`float`):
+
+```python
+from sklearn.svm import SVC
+
+# Ajuste directo con un C específico (el valor predeterminado es C=1.0)
+modelo_svm = SVC(C=10.0, kernel='rbf', gamma='scale')
+modelo_svm.fit(X_train, y_train)
+```
+
+#### Ajuste óptimo con validación cruzada y búsqueda en rejilla
+
+La práctica recomendada para encontrar el mejor valor de `C` es explorar un rango en escala logarítmica (por ejemplo, `[0.01, 0.1, 1, 10, 100]`) utilizando **`GridSearchCV`** con un kernel RBF.
+
+<details>
+<summary>🖥️ Código</summary>
+
+```python showLineNumbers
+"""
+Ejemplo Práctico en Scikit-Learn:
+Efecto del Hiperparámetro C en Máquinas de Vectores de Soporte (SVM)
+
+Compara visualmente tres regímenes de regularización:
+- C = 0.01: Subajuste (Margen amplio, alta tolerancia a errores, muchos vectores de soporte).
+- C = 1.0 : Equilibrio (Frontera regularizada, balance sesgo-varianza).
+- C = 100 : Sobreajuste (Penalización severa a errores, frontera sinuosa, pocos vectores de soporte).
+"""
+
+import matplotlib.pyplot as plt
+import numpy as np
+from sklearn.datasets import make_moons
+from sklearn.preprocessing import StandardScaler
+from sklearn.svm import SVC
+
+# 1. Generación de datos sintéticos con solapamiento/ruido
+X, y = make_moons(n_samples=150, noise=0.25, random_state=42)
+
+# 2. Escalado de características (Paso crítico en SVM)
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# 3. Configuración del experimento
+valores_c = [0.01, 1.0, 100.0]
+titulos = [
+    "C = 0.01 (Alta Regularización)",
+    "C = 1.0 (Regularización Moderada)",
+    "C = 100.0 (Baja Regularización)"
+]
+
+fig, axes = plt.subplots(1, 3, figsize=(16, 5), sharey=True)
+
+# Malla de puntos para dibujar las regiones de decisión
+x_min, x_max = X_scaled[:, 0].min() - 0.5, X_scaled[:, 0].max() + 0.5
+y_min, y_max = X_scaled[:, 1].min() - 0.5, X_scaled[:, 1].max() + 0.5
+xx, yy = np.meshgrid(np.linspace(x_min, x_max, 400), np.linspace(y_min, y_max, 400))
+puntos_malla = np.c_[xx.ravel(), yy.ravel()]
+
+for ax, c_val, titulo in zip(axes, valores_c, titulos):
+    # Entrenar modelo SVM con kernel RBF
+    modelo = SVC(C=c_val, kernel='rbf', gamma=0.5, random_state=42)
+    modelo.fit(X_scaled, y)
+    
+    precision = modelo.score(X_scaled, y) * 100
+    n_vectores = len(modelo.support_vectors_)
+    
+    # Evaluar la función de decisión sobre la cuadrícula
+    Z = modelo.predict(puntos_malla).reshape(xx.shape)
+    decision = modelo.decision_function(puntos_malla).reshape(xx.shape)
+    
+    # Fondo coloreado según la predicción de clase
+    ax.contourf(xx, yy, Z, alpha=0.25, cmap=plt.cm.coolwarm)
+    
+    # Dibujar márgenes (-1, 1) y frontera de decisión (0)
+    ax.contour(xx, yy, decision, levels=[-1, 0, 1], linestyles=['--', '-', '--'],
+               colors=['gray', 'black', 'gray'], linewidths=[1.0, 2.0, 1.0])
+    
+    # Dibujar muestras de entrenamiento
+    for clase, color in zip([0, 1], ['#0072b2', '#d55e00']):
+        ax.scatter(X_scaled[y == clase, 0], X_scaled[y == clase, 1],
+                   c=color, label=f'Clase {clase}', edgecolors='white', s=50)
+        
+    # Resaltar los vectores de soporte (puntos que tocan o violan el margen)
+    sv = modelo.support_vectors_
+    ax.scatter(sv[:, 0], sv[:, 1], s=100, facecolors='none',
+               edgecolors='black', linewidths=1.2, label=f'Vectores Soporte ({n_vectores})')
+    
+    ax.set_title(f"{titulo}\nPrecisión: {precision:.1f}% | Soporte: {n_vectores} puntos", fontsize=11, fontweight='bold')
+    ax.set_xlabel("Característica 1")
+    if ax == axes[0]:
+        ax.set_ylabel("Característica 2")
+        ax.legend(loc="lower left", fontsize=8)
+
+plt.suptitle("Impacto del Hiperparámetro C en la Frontera de Decisión de SVM (Kernel RBF)", fontsize=13, fontweight='bold', y=1.02)
+plt.tight_layout()
+plt.show()
+
+```
+
+</details>
+
+![](img/svm-cs.png)
+
+Interpretación del gráfico:
+```
+┌─────────────────────────┬─────────────────────────┬─────────────────────────┐
+│       C = 0.01          │         C = 1.0         │        C = 100.0        │
+│   (Margen muy blando)   │   (Frontera equilibrada)│   (Margen muy estricto) │
+│                         │                         │                         │
+│  Frontera suave         │  Curva suave            │  Islas y bolsas         │
+│  Tolera muchos errores  │  Aísla clases bien      │  Sensible a cada punto  │
+│  148 vectores soporte   │  48 vectores soporte    │  23 vectores soporte    │
+└─────────────────────────┴─────────────────────────┴─────────────────────────┘
+```
+**Resumen comparativo de los tres regímenes de `C`**
+
+Al entrenar un modelo SVM sobre un conjunto no lineal con solapamiento y ruido (150 muestras), el comportamiento de `C` se traduce en las siguientes métricas concretas:
+
+| Valor de `C` | Régimen | Precisión en Entrenamiento | Vectores de Soporte | Comportamiento del Margen | Diagnóstico |
+| :---: | :---: | :---: | :---: | :--- | :--- |
+| **`C = 0.01`** | **Alta Regularización** | **77.3%** | **148 de 150 (98.7%)** | Margen muy ancho; casi todos los puntos actúan como soporte. | **Subajuste (*Underfitting*)**: Alto sesgo, frontera casi lineal que ignora la curvatura real. |
+| **`C = 1.0`** | **Equilibrio Óptimo** | **94.7%** | **48 de 150 (32.0%)** | Margen balanceado; penaliza violaciones sin memorizar el ruido. | **Generalización Óptima**: Buen compromiso sesgo-varianza, captura la forma natural de los datos. |
+| **`C = 100.0`** | **Baja Regularización** | **98.0%** | **23 de 150 (15.3%)** | Margen extremadamente estrecho; se deforma para encerrar anomalías. | **Sobreajuste (*Overfitting*)**: Alta varianza, sensible a puntos aislados y ruido. |
+
+#### Consejos prácticos para el ajuste
+
+1. **Escalado de características obligatorio:** Los modelos SVM calculan distancias geométricas euclidianas entre muestras. Si las variables no están en la misma escala (mediante `StandardScaler` o normalización), las variables con magnitudes mayores dominarán la penalización `C`.
+
+2. **Exploración en escala logarítmica:** Para una búsqueda inicial amplia, utiliza potencias de 10 como `np.logspace(-2, 3, 6)` (`0.01`, `0.1`, `1`, `10`, `100`, `1000`). Una vez identificado el mejor orden de magnitud, afina la búsqueda en un intervalo más estrecho.
+
+3. **Interacción con el kernel:** En kernels no lineales como RBF, el parámetro `C` debe ajustarse simultáneamente con **`gamma`**, ya que ambos controlan de manera conjunta la complejidad y flexibilidad de la frontera de decisión.
+
+
+El siguiente script muestra cómo extraer los vectores de soporte y graficar tanto la frontera como los márgenes en Scikit-Learn:
+<details>
+<summary>🖥️ Código</summary>
+
+```python showLineNumbers
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.svm import SVC
+from sklearn.preprocessing import StandardScaler
+from sklearn.datasets import make_moons
+
+# 1. Generar datos sintéticos de prueba (dos clases no lineales)
+X, y = make_moons(n_samples=150, noise=0.25, random_state=42)
+
+# 2. Escalar características (fundamental en SVM)
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# 3. Entrenar el clasificador SVM con kernel RBF
+modelo = SVC(C=1.0, kernel='rbf', gamma=0.5)
+modelo.fit(X_scaled, y)
+
+# =====================================================================
+# 4. DEFINICIÓN DE LA MALLA BIDIMENSIONAL (AQUÍ SE CREAN xx e yy)
+# =====================================================================
+# Determinamos los límites del gráfico con un margen extra (+/- 0.5)
+x_min, x_max = X_scaled[:, 0].min() - 0.5, X_scaled[:, 0].max() + 0.5
+y_min, y_max = X_scaled[:, 1].min() - 0.5, X_scaled[:, 1].max() + 0.5
+
+# Creamos una cuadrícula densa de 400x400 puntos en el plano
+xx, yy = np.meshgrid(
+    np.linspace(x_min, x_max, 400),
+    np.linspace(y_min, y_max, 400)
+)
+
+# 5. Evaluar la distancia de cada punto de la cuadrícula al hiperplano
+puntos_malla = np.c_[xx.ravel(), yy.ravel()]
+Z_distancia = modelo.decision_function(puntos_malla).reshape(xx.shape)
+
+# =====================================================================
+# 6. GRAFICAR RESULTADOS
+# =====================================================================
+fig, ax = plt.subplots(figsize=(8, 6))
+
+# Colorear las regiones predichas (fondo suave)
+ax.contourf(xx, yy, Z_distancia > 0, alpha=0.15, cmap='coolwarm')
+
+# Graficar la frontera (nivel 0) y los márgenes (niveles -1 y +1)
+contornos = ax.contour(
+    xx, yy, Z_distancia, 
+    levels=[-1.0, 0.0, 1.0],
+    linestyles=['--', '-', '--'],
+    colors=['gray', 'black', 'gray'],
+    linewidths=[1.5, 2.5, 1.5]
+)
+
+# Graficar los puntos de las dos clases
+ax.scatter(X_scaled[y == 0, 0], X_scaled[y == 0, 1], color='#0072b2', label='Clase 0', alpha=0.8, edgecolors='k')
+ax.scatter(X_scaled[y == 1, 0], X_scaled[y == 1, 1], color='#e69f00', label='Clase 1', alpha=0.8, edgecolors='k')
+
+# Resaltar los vectores de soporte con un anillo exterior
+vectores_soporte = modelo.support_vectors_
+ax.scatter(
+    vectores_soporte[:, 0], vectores_soporte[:, 1],
+    s=130, facecolors='none', edgecolors='k', linewidths=1.8,
+    label=f'Vectores Soporte ({len(vectores_soporte)})'
+)
+
+ax.set_title("Frontera de Decisión y Márgenes en SVM (C = 1.0)", fontsize=13, fontweight='bold')
+ax.set_xlabel("Característica 1 (estandarizada)")
+ax.set_ylabel("Característica 2 (estandarizada)")
+ax.legend(loc='upper right')
+plt.grid(True, linestyle=':', alpha=0.6)
+plt.tight_layout()
+plt.show()
+```
+</details>
+
+![](img/svm-frontera.png)
+
+
+#### Reglas prácticas para elegir C
+
+
+- Si tu conjunto de datos tiene mucho ruido o etiquetas dudosas, usa valores bajos de C (0.01 a 1.0) para evitar que el clasificador intente aprender las anomalías.
+- Si el conjunto de datos está muy limpio y las clases están nítidamente separadas, puedes permitir valores más altos de C (10 a 100).
+- Cuando uses el kernel RBF, recuerda que C y gamma interactúan: un gamma alto hace que cada punto tenga un radio de influencia muy pequeño, lo que amplifica el efecto de un C elevado.
+<br/>
+
+---
 ### Parámetro Gamma
 
 El parámetro $\gamma$ es específico de los kernels no lineales, y determina la influencia que tienen los puntos de entrenamiento en la definición del hiperplano.
@@ -465,6 +720,229 @@ El parámetro $\gamma$ es específico de los kernels no lineales, y determina la
 *   **Rango de Búsqueda:** Un valor de $\gamma$ alto hace que solo los puntos cercanos influyan, lo que **aumenta el riesgo de sobreajuste**. Al igual que $C$, el parámetro $\gamma$ debe ser sintonizado en una **escala logarítmica** como parte del diccionario de parámetros para los kernels no lineales.
 
 En resumen, el SVM es sensible a la selección de parámetros, y la sintonización adecuada, que combina la exploración sistemática (Grid Search) con la evaluación rigurosa (Cross-Validation), es esencial para obtener el mejor rendimiento de generalización.
+
+En **scikit-learn**, el hiperparámetro **`gamma`** define el **radio de influencia** de cada muestra individual de entrenamiento cuando se utilizan kernels no lineales (principalmente **RBF** (*Radial Basis Function* o gaussiano), **`poly`** y **`sigmoid`**).
+
+
+En el kernel RBF, la similitud entre dos muestras $x$ y $x'$ se calcula como:
+
+$$
+K(x, x') = \exp\left(-\gamma \|x - x'\|^2\right)
+$$
+
+Donde:
+* **$\gamma$ es inversamente proporcional a la varianza (ancho de la campana de Gauss)**: $\gamma = \frac{1}{2\sigma^2}$.
+
+#### **Comportamiento según el valor de `gamma`:**
+
+* **`gamma` bajo (p. ej., `0.01` o `0.001`):**
+  * La campana de Gauss es **muy ancha y plana**.
+  * Cada punto ejerce influencia a gran distancia sobre el espacio de características.
+  * La frontera de decisión resultante es **muy suave, casi lineal o plana**, lo que favorece la generalización pero puede provocar **subajuste (*underfitting*)**.
+* **`gamma` alto (p. ej., `10.0` o `100.0`):**
+  * La campana de Gauss es **muy estrecha y picuda**.
+  * Cada vector de soporte solo influye en su vecindario inmediato.
+  * La frontera de decisión crea "islas" estrechas alrededor de puntos individuales, memorizando el conjunto de entrenamiento y provocando **sobreajuste (*overfitting*)**.
+
+![](img/svm-gammas.jpg)
+
+#### Valores Predefinidos en Scikit-Learn: `'scale'` vs `'auto'`
+
+Al instanciar `SVC`, Scikit-Learn ofrece dos opciones calculadas automáticamente a partir de los datos:
+
+| Opción | Fórmula | Descripción |
+| :--- | :---: | :--- |
+| **`gamma='scale'`** *(Predeterminado)* | $$\frac{1}{n_{\text{características}} \times \text{Var}(X)}$$ | Toma en cuenta la varianza de las variables. Es la **opción recomendada** por defecto. |
+| **`gamma='auto'`** *(Heredado de versiones antiguas)* | $$\frac{1}{n_{\text{características}}}$$ | Solo divide entre el número de variables, ignorando la dispersión de los datos. |
+
+
+
+#### Ajuste conjunto de `C` y `gamma` con `GridSearchCV`
+
+`gamma` nunca debe ajustarse de forma aislada, ya que interactúa estrechamente con el parámetro de penalización `C`:
+* Un `gamma` alto combinado con un `C` alto prácticamente garantiza sobreajuste.
+* La forma estándar de encontrar la combinación óptima es mediante **validación cruzada** sobre una cuadrícula en escala logarítmica:
+
+```python showLineNumbers
+import numpy as np
+from sklearn.svm import SVC
+from sklearn.model_selection import GridSearchCV, train_test_split
+from sklearn.preprocessing import StandardScaler
+from sklearn.pipeline import Pipeline
+
+# 1. Pipeline obligatorio con escalado
+# Nota: Como gamma depende de distancias cuadráticas ||x - x'||^2, 
+# escalar con StandardScaler es crucial para que ninguna variable domine.
+pipeline_svm = Pipeline([
+    ('scaler', StandardScaler()),
+    ('svm', SVC(kernel='rbf'))
+])
+
+# 2. Espacio de búsqueda en escala logarítmica (potencias de 10)
+param_grid = {
+    'svm__C': [0.1, 1.0, 10.0, 100.0],
+    'svm__gamma': [0.001, 0.01, 0.1, 1.0, 'scale']
+}
+
+# 3. Búsqueda con validación cruzada de 5 pliegues
+grid_search = GridSearchCV(
+    estimator=pipeline_svm,
+    param_grid=param_grid,
+    cv=5,
+    scoring='accuracy',
+    n_jobs=-1
+)
+
+X_train, X_test, y_train, y_test = train_test_split(
+    X, y, test_size=0.25, random_state=42, stratify=y
+)
+grid_search.fit(X_train, y_train)
+
+print(f"Mejor combinación encontrada:")
+print(f"  C     : {grid_search.best_params_['svm__C']}")
+print(f"  gamma : {grid_search.best_params_['svm__gamma']}")
+print(f"  Score : {grid_search.best_score_:.4f}")
+```
+```
+Mejor combinación encontrada:
+  C     : 10.0
+  gamma : scale
+  Score : 0.8929
+```
+
+
+#### Guía práctica de diagnóstico
+
+1. **Si tu modelo tiene sobreajuste (*overfitting*):**
+   * Disminuye `gamma` (p. ej., baja de `1.0` a `0.1` o `0.01`) para ensanchar la influencia y suavizar la frontera.
+   * Alternativamente, reduce también el valor de `C`.
+2. **Si tu modelo tiene subajuste (*underfitting*):**
+   * Aumenta `gamma` para permitir que el modelo capture patrones y curvaturas no lineales más complejas.
+3. **Punto de partida recomendado:** Empieza siempre con `gamma='scale'` y ajusta `C`. Solo si la precisión en validación no es satisfactoria, abre la búsqueda a valores explícitos como `[1e-3, 1e-2, 1e-1, 1.0]`.
+
+
+<details>
+<summary>🖥️ Código</summary>
+
+```python showLineNumbers
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.svm import SVC
+from sklearn.preprocessing import StandardScaler
+from sklearn.datasets import make_moons
+
+# 1. Generación del conjunto de datos y estandarización
+X, y = make_moons(n_samples=150, noise=0.25, random_state=42)
+scaler = StandardScaler()
+X_scaled = scaler.fit_transform(X)
+
+# 2. Construcción explícita de la malla bidimensional (xx, yy)
+x_min, x_max = X_scaled[:, 0].min() - 0.6, X_scaled[:, 0].max() + 0.6
+y_min, y_max = X_scaled[:, 1].min() - 0.6, X_scaled[:, 1].max() + 0.6
+xx, yy = np.meshgrid(np.linspace(x_min, x_max, 400), np.linspace(y_min, y_max, 400))
+puntos_malla = np.c_[xx.ravel(), yy.ravel()]
+
+# 3. Comparación de los tres valores de gamma
+gammas = [0.05, 1.0, 10.0]
+titulos = [
+    "γ = 0.05 (Radio Muy Amplio)",
+    "γ = 1.0 (Balance Óptimo)",
+    "γ = 10.0 (Radio Muy Localizado)"
+]
+
+fig, axes = plt.subplots(1, 3, figsize=(15, 5))
+
+for i, gamma_val in enumerate(gammas):
+    ax = axes[i]
+    modelo = SVC(C=1.0, kernel='rbf', gamma=gamma_val)
+    modelo.fit(X_scaled, y)
+    
+    acc = modelo.score(X_scaled, y) * 100
+    n_soporte = len(modelo.support_vectors_)
+    pct_soporte = (n_soporte / len(X_scaled)) * 100
+    
+    # Evaluar función de decisión
+    Z = modelo.decision_function(puntos_malla).reshape(xx.shape)
+    
+    # Fondo coloreado por región
+    ax.contourf(xx, yy, Z > 0, alpha=0.18, cmap='coolwarm')
+    
+    # Frontera (nivel 0) y márgenes (niveles -1 y +1)
+    ax.contour(
+        xx, yy, Z, levels=[-1.0, 0.0, 1.0],
+        linestyles=['--', '-', '--'],
+        colors=['#555555', '#000000', '#555555'],
+        linewidths=[1.2, 2.2, 1.2]
+    )
+    
+    # Puntos de las dos clases
+    ax.scatter(X_scaled[y == 0, 0], X_scaled[y == 0, 1], color='#0072b2', s=35, alpha=0.85, label='Clase 0' if i==0 else "")
+    ax.scatter(X_scaled[y == 1, 0], X_scaled[y == 1, 1], color='#e69f00', s=35, alpha=0.85, label='Clase 1' if i==0 else "")
+    
+    # Vectores de soporte resaltados con anillo
+    sv = modelo.support_vectors_
+    ax.scatter(sv[:, 0], sv[:, 1], s=85, facecolors='none', edgecolors='#000000', linewidths=1.2, label='Vectores soporte' if i==0 else "")
+    
+    ax.set_title(f"{titulos[i]}\nAcc: {acc:.1f}% | Vectores: {n_soporte} ({pct_soporte:.1f}%)", fontsize=11, fontweight='bold')
+    ax.set_xlabel("Característica 1")
+    if i == 0:
+        ax.set_ylabel("Característica 2")
+        ax.legend(loc='upper right', fontsize=8.5)
+    ax.grid(True, linestyle=':', alpha=0.5)
+
+plt.suptitle("Impacto del Hiperparámetro Gamma (Kernel RBF, C=1.0)", fontsize=13, fontweight='bold', y=1.02)
+plt.tight_layout()
+plt.show()
+```
+</details>
+
+![](img/svm-gamma.png)
+
+
+#### Resumen comparativo de los tres regímenes de `gamma`
+
+Al evaluar el mismo conjunto de datos no lineal con solapamiento y ruido (150 muestras):
+
+| Valor de `gamma` | Radio de Influencia Gaussiana | Precisión (*Train*) | Vectores de Soporte | Geometría de la Frontera | Diagnóstico Clínico |
+| :---: | :---: | :---: | :---: | :--- | :--- |
+| **`γ = 0.05`** | **Muy Amplio** (Campana ancha) | **84.7%** | **78 de 150 (52.0%)** | Prácticamente una recta / plano liso. | **Subajuste (*Underfitting*)**: Alto sesgo, no logra adaptarse a las curvas naturales de las clases. |
+| **`γ = 1.0`** | **Equilibrado** (Medio) | **95.3%** | **42 de 150 (28.0%)** | Curva suave continua que sigue la forma de las lunas. | **Generalización Óptima**: Excelente balance sesgo-varianza, resistente al ruido. |
+| **`γ = 10.0`** | **Muy Estrecho** (Campana picuda) | **98.7%** | **83 de 150 (55.3%)** | Se fractura en **islas cerradas** alrededor de puntos individuales. | **Sobreajuste (*Overfitting*)**: Alta varianza, memoriza el conjunto de entrenamiento y fallará con datos nuevos. |
+
+
+#### Interpretación visual del gráfico
+
+```
+┌──────────────────────────────┬──────────────────────────────┬──────────────────────────────┐
+│          γ = 0.05            │           γ = 1.0            │           γ = 10.0           │
+│    (Radio muy amplio)        │     (Balance óptimo)         │     (Radio hiperlocalizado)  │
+│                              │                              │                              │
+│   Frontera casi recta        │   Curva armónica continua    │   Islas y bolsas aisladas    │
+│   Sesgo alto                 │   Generaliza bien            │   Varianza extrema (overfit) │
+│   Precisión: 84.7%           │   Precisión: 95.3%           │   Precisión: 98.7%           │
+└──────────────────────────────┴──────────────────────────────┴──────────────────────────────┘
+```
+
+1. **Panel Izquierdo (`γ = 0.05`):**
+   * Al ser \\(\gamma\\) muy bajo, la función exponencial \\(\exp(-\gamma \|x - x'\|^2)\\) decae muy lentamente. Cada muestra influye sobre casi todo el plano de coordenadas.
+   * La frontera no tiene flexibilidad suficiente para doblarse y se comporta de manera similar a un clasificador lineal, ignorando la concavidad de los datos.
+
+2. **Panel Central (`γ = 1.0`):**
+   * El radio de influencia se restringe a la escala espacial real del patrón de datos.
+   * Solo los puntos que se encuentran en el límite de contacto entre ambas clases definen la separación, alcanzando un 95.3% de precisión sin deformarse por valores atípicos.
+
+3. **Panel Derecho (`γ = 10.0`):**
+   * Al ser \\(\gamma\\) muy alto, el kernel cae a cero rápidamente a medida que nos alejamos de un punto.
+   * El clasificador genera pequeñas **"burbujas" o islas convexas** para encerrar muestras aisladas de ruido, perdiendo la noción de frontera global continua.
+
+
+
+#### Diferencia Clave entre `C` y `gamma`
+
+* **`C`** regula la **tolerancia a los errores de clasificación**: un `C` alto castiga severamente cada muestra mal clasificada, reduciendo el ancho del margen.
+* **`gamma`** regula el **alcance geométrico de cada muestra**: un `gamma` alto deforma la topología del espacio creando picos estrechos alrededor de los vectores de soporte.
+
+
 
 ### Preprocesamiento
 
