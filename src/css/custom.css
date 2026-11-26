@@ -35,3 +35,7 @@
 .hero--primary {
   background-color: #3b385d !important;
 }
+
+.table-of-contents, .table-of-contents ul {
+    line-height: 1.4 !important;
+}
