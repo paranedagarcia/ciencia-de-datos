@@ -311,3 +311,10 @@ Muestra un ejemplo de SVM con Python
 Explícame las ventajas de Random Forest frente a árboles individuales
 
 ¿Cuándo conviene usar regularización L1 frente a L2?
+
+## KNN
+
+¿Por qué es obligatorio escalar las variables en k-NN?
+¿Qué métricas de distancia existen además de la euclidiana?
+¿Cómo influye la ponderación por distancia en k-NN?
+¿Qué es la maldición de la dimensionalidad?
