@@ -104,6 +104,11 @@ const config = {
       ],
       // Replace with your project's social card
       image: 'img/ciencia-de-datos.jpg',
+      docs: {
+        sidebar: {
+          hideable: true,
+          },
+      },
       colorMode: {
         respectPrefersColorScheme: true,
       },
