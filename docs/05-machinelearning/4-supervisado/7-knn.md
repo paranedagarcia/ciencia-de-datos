@@ -18,7 +18,7 @@ El algoritmo **K-Nearest Neighbors** (abreviado **k-NN** o *k-Vecinos Más Cerca
 
 
 
-### Definición técnica
+### Definición
 
 Formalmente, **k-NN** es un algoritmo de **aprendizaje supervisado** que clasifica o predice el valor de una nueva observación en función de la proximidad geométrica respecto a los datos previamente etiquetados. Pertenece a tres categorías teóricas fundamentales:
 
@@ -64,7 +64,9 @@ $$
 #### B. Regla de Decisión para Clasificación (Votación por Mayoría)
 Una vez localizados los $k$ puntos más cercanos $\mathcal{N}_k(x)$, la clase predicha $\hat{y}$ se determina por la moda de las etiquetas observadas:
 
-$$\hat{y} = \arg\max_{c \in \{1, \dots, C\}} \sum_{i \in \mathcal{N}_k(x)} \mathbb{I}(y_i = c)$$
+$$
+\hat{y} = \arg\max_{c \in \{1, \dots, C\}} \sum_{i \in \mathcal{N}_k(x)} \mathbb{I}(y_i = c)
+$$
 
 **Componentes:**
 * **$\mathcal{N}_k(x)$:** Conjunto de índices de los $k$ vecinos más cercanos a la muestra de prueba $x$.
@@ -187,7 +189,7 @@ Imagina que te encuentras en un mapa topográfico donde conviven tres grupos dis
 
 En el algoritmo **k-NN**, el hiperparámetro $k$ controla de forma inversamente proporcional los **grados de libertad efectivos** del modelo. A diferencia de los modelos paramétricos (donde la complejidad aumenta con el número de parámetros), en k-NN:
 
-\\[\text{Grados de Libertad Efectivos} \approx \frac{N}{k}\\]
+$$\text{Grados de Libertad Efectivos} \approx \frac{N}{k}$$
 
 #### Explicación Simple de sus Componentes y Argumentos:
 * **$N$:** Número total de observaciones en el conjunto de entrenamiento.
@@ -199,7 +201,9 @@ En el algoritmo **k-NN**, el hiperparámetro $k$ controla de forma inversamente 
 #### 2. Estimación de Probabilidad a Posteriori:
 Dado un punto de consulta $x$ y su vecindario $\mathcal{N}_k(x)$, la probabilidad condicional de pertenecer a la clase $c$ es:
 
-\\[P(Y = c \mid X = x) = \frac{1}{k} \sum_{i \in \mathcal{N}_k(x)} \mathbb{I}(y_i = c)\\]
+$$
+P(Y = c \mid X = x) = \frac{1}{k} \sum_{i \in \mathcal{N}_k(x)} \mathbb{I}(y_i = c)
+$$
 
 #### Explicación Simple de sus Componentes y Argumentos:
 * **$x$:** Las coordenadas del punto que deseamos clasificar.
@@ -215,7 +219,7 @@ El siguiente código estandariza las variables, ajusta los clasificadores para $
 
 ```python
 """
-Módulo Académico: Visualización Comparativa de Fronteras de Decisión en k-NN.
+Visualización Comparativa de Fronteras de Decisión en k-NN.
 Dilema Sesgo-Varianza: Impacto de k (k=1, k=5, k=30) sobre el Wine Dataset.
 """
 
@@ -485,7 +489,7 @@ No existe un número mágico universal, ya que el $k$ ideal depende de la comple
 ### A. Regla Heurística Empírica de Referencia
 Una guía inicial clásica en la literatura estadística consiste en fijar el orden de magnitud inicial de $k$ en función del tamaño del conjunto de entrenamiento:
 
-\\[k \approx \sqrt{N}\\]
+$$k \approx \sqrt{N}$$
 
 * **Componentes:**  
   * $N$: Número total de observaciones en el conjunto de entrenamiento.  
@@ -520,7 +524,9 @@ El estándar en ingeniería de datos es aplicar **Validación Cruzada en $K$ Pli
 
 El proceso evalúa la puntuación media en los pliegues de validación para cada candidato $k$:
 
-\\[\text{CV}(k) = \frac{1}{F} \sum_{f=1}^{F} \mathcal{S}_f(k)\\]
+$$
+\text{CV}(k) = \frac{1}{F} \sum_{f=1}^{F} \mathcal{S}_f(k)
+$$
 
 * **Componentes de la Fórmula:**
   * $F$: Número de pliegues (*folds*, típicamente 5 o 10).
@@ -529,7 +535,9 @@ El proceso evalúa la puntuación media en los pliegues de validación para cada
 
 El valor seleccionado será:
 
-\\[k^* = \arg\max_{k \in \mathcal{K}} \text{CV}(k)\\]
+$$
+k^* = \arg\max_{k \in \mathcal{K}} \text{CV}(k)
+$$
 
 ---
 
@@ -539,7 +547,7 @@ El siguiente script aplica una canalización (*Pipeline*) con estandarización o
 
 ```python
 """
-Módulo Académico: Calibración y Selección del k Óptimo en k-NN.
+Calibración y Selección del k Óptimo en k-NN.
 Dataset Real: Wine Recognition (Scikit-Learn).
 """
 
